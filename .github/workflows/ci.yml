@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel superseded runs on the same branch/PR.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: lint → typecheck → test → bundle gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Per-route JavaScript budget (KB, raw uncompressed). Override per-project as it grows.
+      BUNDLE_BUDGET_KB: "500"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: Bundle-size gate
+        run: pnpm bundle:gate
+
+  eval-gate:
+    name: RAG eval gate (mocked)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run eval harness (mocked providers)
+        run: pnpm eval
+        env:
+          DEMO_MODE: "true"
+      # Gate thresholds: groundedness ≥ 0.90, precision@4 ≥ 0.80.
+      # Measured with mocks: groundedness=1.0, precision@4≈0.33.
+      # The precision gate is PROVISIONAL pending real embeddings —
+      # term-based mocks cannot bridge the vocabulary gap to 0.80.
+      # See README "Evaluation" for the full analysis.
