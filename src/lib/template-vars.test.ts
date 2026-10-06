@@ -24,26 +24,26 @@ describe("template-vars", () => {
   });
 
   it("substitutes variables", () => {
-    const vars = [{ name: "name", required: true }];
+    const vars = [{ name: "name", label: "Name", defaultValue: "", required: true }];
     const result = substituteVariables("Hello {{name}}!", vars, { name: "Alice" });
     expect(result.text).toBe("Hello Alice!");
   });
 
   it("tracks missing variables", () => {
-    const vars = [{ name: "name", required: true }];
+    const vars = [{ name: "name", label: "Name", defaultValue: "", required: true }];
     const result = substituteVariables("Hello {{name}}!", vars, {});
     expect(result.missing).toContain("name");
   });
 
   it("validates required variables", () => {
-    const vars = [{ name: "a", required: true }, { name: "b", required: true }];
+    const vars = [{ name: "a", label: "A", defaultValue: "", required: true }, { name: "b", label: "B", defaultValue: "", required: true }];
     const errors = validateTemplateVariables("Hi {{a}}", vars);
     // b is defined but not used in body
     expect(errors.length).toBeGreaterThan(0);
   });
 
   it("validates all present", () => {
-    const vars = [{ name: "a", required: true }];
+    const vars = [{ name: "a", label: "A", defaultValue: "", required: true }];
     const errors = validateTemplateVariables("Hi {{a}}", vars);
     expect(errors).toHaveLength(0);
   });
