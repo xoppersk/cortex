@@ -13,14 +13,14 @@ describe("chunking", () => {
 
   it("chunks markdown", () => {
     const md = `## Long\n${"word ".repeat(100)}`;
-    const chunks = chunkMarkdown(md, { targetTokens: 800, overlapTokens: 120 });
+    const chunks = chunkMarkdown(md, { chunkSizeTokens: 800, overlapPct: 0.15 });
     expect(chunks.length).toBeGreaterThanOrEqual(1);
     expect(chunks[0]!.content.length).toBeGreaterThan(0);
   });
 
   it("keeps short docs as single chunk", () => {
     const md = "## Short\nJust a little content.";
-    const chunks = chunkMarkdown(md, { targetTokens: 800, overlapTokens: 120 });
+    const chunks = chunkMarkdown(md, { chunkSizeTokens: 800, overlapPct: 0.15 });
     expect(chunks.length).toBe(1);
   });
 });
