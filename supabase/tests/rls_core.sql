@@ -96,11 +96,13 @@ begin
   perform tests.assert_eq('conversations: admin sees member convo', v_n, 1);
 
   -- user_a cannot see anything from team_b (not a member there).
+  reset role;
   insert into public.conversations (id, team_id, user_id, title, model_id)
   values ('c0000000-0000-0000-0000-000000000002',
           'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
           '22222222-2222-2222-2222-222222222222', 'B team-b convo', 'cortex-flash')
   on conflict (id) do nothing;
+  set role authenticated;
   perform tests.set_user('11111111-1111-1111-1111-111111111111');
   select count(*) into v_n from public.conversations
   where id = 'c0000000-0000-0000-0000-000000000002';
@@ -138,6 +140,7 @@ begin
   perform tests.assert_eq('templates: team template visible to teammate', v_n, 1);
 
   -- Non-admin cannot flip featured (trigger raises).
+  perform tests.set_user('22222222-2222-2222-2222-222222222222'); -- user_b: member, not admin
   begin
     update public.prompt_templates set featured = true
     where id = 'e0000000-0000-0000-0000-000000000002';

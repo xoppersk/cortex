@@ -66,9 +66,13 @@ begin
   select count(*) into v_n from public.knowledge_bases
   where id = 'f0000000-0000-0000-0000-00000000000a';
   perform tests.assert_eq('kb: member reads own-team KB', v_n, 1);
+  -- user_a is in team_a only; KB B (team_b) must be hidden from them.
+  -- (user_b is also in team_b, so they legitimately see KB B.)
+  perform tests.set_user('11111111-1111-1111-1111-111111111111');
   select count(*) into v_n from public.knowledge_bases
   where id = 'f0000000-0000-0000-0000-00000000000b';
   perform tests.assert_eq('kb: cross-team KB hidden from non-member', v_n, 0);
+  perform tests.set_user('22222222-2222-2222-2222-222222222222');
 
   select count(*) into v_n from public.documents
   where id = 'f0000000-0000-0000-0000-0000000000d0';
@@ -81,19 +85,16 @@ begin
   select count(*) into v_n from public.embeddings;
   perform tests.assert_eq('embeddings: member reads own-team embeddings', v_n, 1);
 
-  -- Members may create KBs; only admins may retune them.
+  -- Members may create KBs; only admins may retune them (RLS USING clause
+  -- means a denied UPDATE touches 0 rows rather than raising).
   insert into public.knowledge_bases (team_id, name, created_by)
   values ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Member KB',
           '22222222-2222-2222-2222-222222222222');
   perform tests.assert_true('kb: member can create', found);
 
-  begin
-    update public.knowledge_bases set retrieval_top_k = 16
-    where id = 'f0000000-0000-0000-0000-00000000000a';
-    raise exception 'FAIL kb: member retune should have been denied';
-  exception when insufficient_privilege then
-    raise notice 'ok kb: member cannot retune retrieval settings';
-  end;
+  update public.knowledge_bases set retrieval_top_k = 16
+  where id = 'f0000000-0000-0000-0000-00000000000a';
+  perform tests.assert_true('kb: member retune denied (0 rows)', not found);
 
   -- No client writes to chunks/embeddings (ingest is service_role only).
   begin

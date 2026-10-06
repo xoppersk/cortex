@@ -96,11 +96,14 @@ begin
   values (v_user_a, 'User A'), (v_user_b, 'User B')
   on conflict (id) do update set display_name = excluded.display_name;
 
-  insert into public.teams (id, name, slug)
+  -- seat_count is billing-guarded (only service_role may change it).
+  set role service_role;
+  insert into public.teams (id, name, slug, seat_count)
   values
-    (v_team_a, 'Team A', 'team-a-tests'),
-    (v_team_b, 'Team B', 'team-b-tests')
-  on conflict (id) do nothing;
+    (v_team_a, 'Team A', 'team-a-tests', 5),
+    (v_team_b, 'Team B', 'team-b-tests', 5)
+  on conflict (id) do update set seat_count = excluded.seat_count;
+  reset role;
 
   insert into public.team_members (team_id, user_id, role, status)
   values

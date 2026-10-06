@@ -67,7 +67,8 @@ insert into auth.users (id, email, encrypted_password, email_confirmed_at,
                        raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
 values
   ('11111111-1111-1111-1111-111111111111', 'alice@example.com', 'x', now(), '{}', '{}', now(), now()),
-  ('22222222-2222-2222-2222-222222222222', 'bob@example.com',   'x', now(), '{}', '{}', now(), now());
+  ('22222222-2222-2222-2222-222222222222', 'bob@example.com',   'x', now(), '{}', '{}', now(), now())
+on conflict (id) do nothing;
 
 -- ---------------------------------------------------------------------------
 -- 1-2. handle_new_user() trigger created the profiles
