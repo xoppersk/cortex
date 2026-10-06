@@ -13,7 +13,7 @@
 -- ---------------------------------------------------------------------------
 -- profiles
 -- ---------------------------------------------------------------------------
-create table public.profiles (
+create table if not exists public.profiles (
   id            uuid primary key references auth.users (id) on delete cascade,
   display_name  text,
   avatar_url    text,
@@ -87,6 +87,7 @@ create trigger profiles_set_updated_at
 alter table public.profiles enable row level security;
 
 -- Authenticated users can read their own profile only.
+drop policy if exists profiles_select_own on public.profiles;
 create policy profiles_select_own
   on public.profiles
   for select
@@ -94,6 +95,7 @@ create policy profiles_select_own
   using ((select auth.uid()) = id);
 
 -- Authenticated users can update their own profile only.
+drop policy if exists profiles_update_own on public.profiles;
 create policy profiles_update_own
   on public.profiles
   for update

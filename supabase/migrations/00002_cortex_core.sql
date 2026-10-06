@@ -11,6 +11,8 @@
 --   Every table has RLS enabled with team-scoped policies.
 -- =============================================================================
 
+create extension if not exists citext;
+
 -- ---------------------------------------------------------------------------
 -- profiles: extend the starter's table to the Cortex shape
 -- ---------------------------------------------------------------------------
@@ -22,10 +24,6 @@ alter table public.profiles
 alter table public.profiles
   add constraint profiles_default_temperature_check
   check (default_temperature >= 0 and default_temperature <= 2);
-
-alter table public.profiles
-  add constraint profiles_active_team_fk
-  foreign key (active_team_id) references public.teams (id) on delete set null;
 
 -- ---------------------------------------------------------------------------
 -- teams
@@ -51,6 +49,11 @@ create table public.teams (
   updated_at                timestamptz not null default now(),
   deleted_at                timestamptz
 );
+
+-- profiles.active_team_id FK (must come after teams exists)
+alter table public.profiles
+  add constraint profiles_active_team_fk
+  foreign key (active_team_id) references public.teams (id) on delete set null;
 
 -- ---------------------------------------------------------------------------
 -- team_members
@@ -100,7 +103,7 @@ create table public.conversations (
   temperature            numeric(3,2), -- null = team default at send time
   folder                 text,
   pinned                 boolean not null default false,
-  template_id            uuid references public.prompt_templates (id) on delete set null,
+  template_id            uuid, -- FK to prompt_templates added below (table created later in this file)
   search_vector          tsvector,
   message_count          int not null default 0,
   total_prompt_tokens    bigint not null default 0,
@@ -174,6 +177,11 @@ create table public.prompt_templates (
 create index prompt_templates_team_idx on public.prompt_templates (team_id, visibility);
 create index prompt_templates_category_idx on public.prompt_templates (team_id, category);
 
+-- conversations.template_id FK (prompt_templates is created above; conversations earlier)
+alter table public.conversations
+  add constraint conversations_template_fk
+  foreign key (template_id) references public.prompt_templates (id) on delete set null;
+
 create table public.prompt_template_versions (
   id          uuid primary key default gen_random_uuid(),
   template_id uuid not null references public.prompt_templates (id) on delete cascade,
@@ -194,7 +202,7 @@ create table public.usage_events (
   user_id                 uuid not null,
   conversation_id         uuid,
   message_id              uuid,
-  api_key_id              uuid references public.api_keys (id) on delete set null,
+  api_key_id              uuid, -- FK to api_keys added below (table created later in this file)
   template_id             uuid,
   model_id                text not null,
   prompt_tokens           int not null,
@@ -237,6 +245,11 @@ create table public.api_keys (
   revoked_at   timestamptz,
   created_at   timestamptz not null default now()
 );
+
+-- usage_events.api_key_id FK (api_keys created above; usage_events earlier)
+alter table public.usage_events
+  add constraint usage_events_api_key_fk
+  foreign key (api_key_id) references public.api_keys (id) on delete set null;
 
 -- ---------------------------------------------------------------------------
 -- audit_log (append-only)
@@ -958,7 +971,6 @@ create policy prompt_templates_select on public.prompt_templates
     and (
       visibility = 'team'
       or author_id = auth.uid()
-      or public.is_team_admin(team_id)
     )
   );
 
