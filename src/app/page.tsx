@@ -1,108 +1,108 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Command, Database, KeyRound, LayoutDashboard, ShieldCheck, Zap } from "lucide-react";
+import { Activity, ArrowRight, UserRound } from "lucide-react";
 
+import { requireUser } from "@/lib/auth/require-user";
+import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/app/empty-state";
 
-const FEATURES = [
-  {
-    icon: KeyRound,
-    title: "Supabase Auth",
-    description: "Email/password, magic links, and password reset — wired through @supabase/ssr cookie sessions.",
-  },
-  {
-    icon: Database,
-    title: "Postgres + Row Level Security",
-    description: "A profiles table with a handle_new_user() trigger and owner-only RLS, plus a pgTAP test skeleton.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Server-side guards",
-    description: "requireUser() for auth and a requireOrgAccess() pattern for multi-tenant authorization.",
-  },
-  {
-    icon: LayoutDashboard,
-    title: "App shell",
-    description: "Collapsible sidebar, header with theme toggle and user menu, command palette, empty states.",
-  },
-  {
-    icon: Command,
-    title: "Command palette",
-    description: "cmdk-based palette with an extensible actions array. Press ⌘K anywhere in the app.",
-  },
-  {
-    icon: Zap,
-    title: "CI gates",
-    description: "Lint → typecheck → Vitest → bundle-size gate on every push, with Vercel previews per PR.",
-  },
-] as const;
+export const metadata: Metadata = { title: "Dashboard" };
 
-export default function Home() {
+export default async function DashboardPage() {
+  const user = await requireUser("/app");
+
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("display_name, timezone, created_at")
+    .eq("id", user.id)
+    .single();
+
+  const greetingName = profile?.display_name || user.email?.split("@")[0] || "there";
+
   return (
-    <main className="min-h-svh">
-      {/* Top bar */}
-      <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-          <span className="font-semibold tracking-tight">Sevyn App Starter</span>
-          <nav className="flex items-center gap-2">
-            <Button variant="ghost" asChild>
-              <Link href="/login">Sign in</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/signup">Get started</Link>
-            </Button>
-          </nav>
-        </div>
-      </header>
-
-      {/* Hero */}
-      <section className="mx-auto max-w-5xl px-4 py-20 text-center md:py-28">
-        <h1 className="text-balance text-4xl font-bold tracking-tight md:text-6xl">
-          Ship your next SaaS on a starter that already does the boring parts
-        </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg text-muted-foreground">
-          Next.js App Router, TypeScript, Tailwind v4, shadcn/ui, and Supabase — with auth,
-          a Postgres schema, Row Level Security, an app shell, and CI gates baked in.
-          Clone it, rename it, build.
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Good to see you, {greetingName}.</h1>
+        <p className="text-muted-foreground">
+          This dashboard is yours to replace — the shell, auth, and data layer are already wired.
         </p>
-        <div className="mt-8 flex items-center justify-center gap-3">
-          <Button size="lg" asChild>
-            <Link href="/app">
-              Open the app <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-          <Button size="lg" variant="outline" asChild>
-            <Link href="/login">Sign in</Link>
-          </Button>
-        </div>
-      </section>
+      </div>
 
-      {/* Features */}
-      <section className="mx-auto max-w-5xl px-4 pb-20">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((feature) => (
-            <Card key={feature.title}>
-              <CardHeader>
-                <div className="mb-2 flex size-9 items-center justify-center rounded-lg bg-muted">
-                  <feature.icon className="size-4.5 text-foreground" />
-                </div>
-                <CardTitle className="text-base">{feature.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>{feature.description}</CardDescription>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <UserRound className="size-4" /> Your profile
+            </CardTitle>
+            <CardDescription>Read from public.profiles under Row Level Security.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-1 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Display name</span>
+              <span className="font-medium">{profile?.display_name || "Not set"}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Email</span>
+              <span className="font-medium">{user.email}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Timezone</span>
+              <span className="font-medium">{profile?.timezone}</span>
+            </div>
+            <Button asChild variant="outline" className="mt-3 w-fit">
+              <Link href="/app/account">
+                Edit profile <ArrowRight className="size-4" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
 
-      {/* Footer */}
-      <footer className="border-t">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 text-sm text-muted-foreground">
-          <span>Sevyn App Starter · Next.js + Supabase</span>
-          <span>Clone → rename → ship</span>
-        </div>
-      </footer>
-    </main>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Next steps</CardTitle>
+            <CardDescription>Make this starter yours.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="flex flex-col gap-3 text-sm">
+              <li className="flex gap-2">
+                <span className="text-muted-foreground">1.</span>
+                <span>
+                  Complete your profile on the{" "}
+                  <Link href="/app/account" className="underline underline-offset-4">
+                    account page
+                  </Link>{" "}
+                  — it writes through RLS via a Server Action.
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-muted-foreground">2.</span>
+                <span>
+                  Press <kbd className="rounded border bg-muted px-1.5 text-xs">⌘K</kbd> to open the
+                  command palette, then add your own commands in{" "}
+                  <code className="rounded bg-muted px-1 text-xs">app-shell.tsx</code>.
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-muted-foreground">3.</span>
+                <span>
+                  Add nav items to <code className="rounded bg-muted px-1 text-xs">NAV_ITEMS</code> in{" "}
+                  <code className="rounded bg-muted px-1 text-xs">app-sidebar.tsx</code> with matching
+                  pages under <code className="rounded bg-muted px-1 text-xs">src/app/(app)/app/</code>.
+                </span>
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
+
+      <EmptyState
+        icon={Activity}
+        title="No activity yet"
+        description="When your app records events — sign-ins, created records, team invites — summarize them here."
+      />
+    </div>
   );
 }
