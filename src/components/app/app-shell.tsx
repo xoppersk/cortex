@@ -1,20 +1,24 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { useMemo, useState, type ReactNode } from "react";
-import { LayoutDashboard, LogOut, Moon, Sun, UserRound } from "lucide-react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { Menu, Moon, Search, Sun } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Toaster } from "sonner";
 
-import { AppHeader } from "./app-header";
 import { AppSidebar, AppSidebarMobile } from "./app-sidebar";
 import { CommandPalette, openCommandPalette, type PaletteCommand } from "./command-palette";
+import { OfflineBanner } from "@/components/cortex/states";
+import { CortexBrand } from "@/components/cortex/cortex-mark";
 
 /**
- * Client shell composing sidebar + header + command palette around page content.
- * The (app)/layout.tsx server component fetches the user/profile and renders
- * this; all interactive state (collapsed sidebar, palette) lives here.
+ * Cortex client shell: 280px sidebar + content region + global ⌘K palette
+ * + toast stack + offline banner slot. No global topbar — pages render
+ * their own in-page headers (64px rule). Chat routes are full-bleed.
  */
 export function AppShell({
   email,
@@ -28,27 +32,64 @@ export function AppShell({
   children: ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [online, setOnline] = useState(true);
+  const [queued] = useState(0);
 
-  // Default palette actions. Clones extend this array — e.g. "New project",
-  // entity search — without touching the palette component itself.
+  const isChat = pathname === "/app/chat" || pathname.startsWith("/app/chat/");
+  const signatureMode = isChat;
+
+  useEffect(() => {
+    const update = () => setOnline(navigator.onLine);
+    update();
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => {
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
+    };
+  }, []);
+
   const commands = useMemo<PaletteCommand[]>(
     () => [
       {
-        id: "go-dashboard",
-        label: "Go to Dashboard",
-        keywords: "home overview",
-        icon: LayoutDashboard,
-        run: () => router.push("/app"),
+        id: "new-chat",
+        label: "New chat",
+        keywords: "conversation start",
+        run: () => router.push("/app/chat"),
       },
       {
-        id: "go-account",
-        label: "Go to Account settings",
-        keywords: "profile preferences",
-        icon: UserRound,
-        run: () => router.push("/app/account"),
+        id: "go-history",
+        label: "Go to History",
+        keywords: "search conversations archive",
+        run: () => router.push("/app/history"),
+      },
+      {
+        id: "go-templates",
+        label: "Go to Playbooks",
+        keywords: "templates library",
+        run: () => router.push("/app/templates"),
+      },
+      {
+        id: "go-usage",
+        label: "Go to Usage",
+        keywords: "tokens budget cost governance",
+        run: () => router.push("/app/usage"),
+      },
+      {
+        id: "go-team",
+        label: "Go to Team",
+        keywords: "members invites",
+        run: () => router.push("/app/team"),
+      },
+      {
+        id: "go-billing",
+        label: "Go to Billing",
+        keywords: "plan seats invoices",
+        run: () => router.push("/app/billing"),
       },
       {
         id: "toggle-theme",
@@ -61,7 +102,6 @@ export function AppShell({
         id: "sign-out",
         label: "Sign out",
         keywords: "logout",
-        icon: LogOut,
         run: () => {
           void createClient()
             .auth.signOut()
@@ -77,23 +117,45 @@ export function AppShell({
 
   return (
     <div className="flex min-h-svh">
-      <AppSidebar collapsed={collapsed} onToggleCollapse={() => setCollapsed((value) => !value)} />
-      <AppSidebarMobile open={mobileOpen} onOpenChange={setMobileOpen} />
+      <AppSidebar
+        collapsed={collapsed}
+        onToggleCollapse={() => setCollapsed((value) => !value)}
+        signatureMode={signatureMode}
+        displayName={displayName}
+        email={email}
+      />
+      <AppSidebarMobile
+        open={mobileOpen}
+        onOpenChange={setMobileOpen}
+        signatureMode={signatureMode}
+        displayName={displayName}
+        email={email}
+      />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <AppHeader
-          email={email}
-          displayName={displayName}
-          userMenu={userMenu}
-          onMenuClick={() => setMobileOpen(true)}
-          onPaletteOpen={openCommandPalette}
-        />
-        <main className="flex-1 p-4 md:p-8">
-          <div className="mx-auto w-full max-w-5xl">{children}</div>
+        {!online && <OfflineBanner queued={queued} />}
+        {/* Mobile top bar: sidebar is a drawer below md. */}
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-border px-4 md:hidden">
+          <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)} aria-label="Open navigation">
+            <Menu className="size-5" />
+          </Button>
+          <CortexBrand />
+          <Button variant="ghost" size="icon" onClick={openCommandPalette} aria-label="Search">
+            <Search className="size-5" />
+          </Button>
+        </div>
+        {userMenu}
+        <main className={cn("flex-1", isChat ? "flex flex-col" : "p-4 md:p-6")}>
+          {isChat ? (
+            children
+          ) : (
+            <div className="mx-auto w-full max-w-6xl">{children}</div>
+          )}
         </main>
       </div>
 
       <CommandPalette commands={commands} />
+      <Toaster position="bottom-right" />
     </div>
   );
 }
