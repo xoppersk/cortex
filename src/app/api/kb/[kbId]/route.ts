@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getActor, getActorTeam, jsonError } from "@/lib/api/auth";
-import { getKb, updateKb } from "@/lib/data/kb";
+import { getKb, updateKb, deleteKb } from "@/lib/data/kb";
 import { kbPatchSchema } from "@/lib/schemas";
 
 interface Params {
@@ -17,6 +17,18 @@ async function resolve(params: Params) {
   const kb = await getKb(team.actor.teamId, kbId);
   if (!kb) return { error: jsonError("not_found", "Knowledge base not found.", 404) } as const;
   return { actor, team: team.actor, kb } as const;
+}
+
+/** Deleting a knowledge base is an owner/admin action (also RLS-enforced). */
+export async function DELETE(_req: Request, params: Params) {
+  const r = await resolve(params);
+  if ("error" in r) return r.error;
+  if (r.team.role !== "owner" && r.team.role !== "admin") {
+    return jsonError("forbidden", "Only admins can delete a knowledge base.", 403);
+  }
+  const ok = await deleteKb(r.team.teamId, r.kb.id);
+  if (!ok) return jsonError("not_found", "Knowledge base not found.", 404);
+  return NextResponse.json({ ok: true });
 }
 
 export async function GET(_req: Request, params: Params) {
