@@ -173,6 +173,65 @@ export async function updateKb(
   return getKb(teamId, kbId);
 }
 
+export async function deleteKb(teamId: string, kbId: string): Promise<boolean> {
+  if (isDemoMode()) {
+    const db = getDB();
+    const idx = db.kbs.findIndex((k) => k.id === kbId && k.teamId === teamId);
+    if (idx === -1) return false;
+    db.kbs.splice(idx, 1);
+    db.documents = db.documents.filter((d) => d.kbId !== kbId);
+    db.chunks = db.chunks.filter((c) => c.kbId !== kbId);
+    return true;
+  }
+  const supabase = await createClient();
+  const { error, count } = await supabase
+    .from("knowledge_bases")
+    .delete({ count: "exact" })
+    .eq("id", kbId)
+    .eq("team_id", teamId);
+  if (error) throw new Error(error.message);
+  return (count ?? 0) > 0;
+}
+
+export interface ChunkDTO {
+  id: string;
+  index: number;
+  content: string;
+  tokenCount: number;
+  sectionHeading: string | null;
+}
+
+export async function getChunks(
+  teamId: string,
+  kbId: string,
+  documentId: string,
+): Promise<ChunkDTO[]> {
+  if (isDemoMode()) {
+    return getDB()
+      .chunks.filter((c) => c.kbId === kbId && c.documentId === documentId)
+      .sort((a, b) => a.chunkIndex - b.chunkIndex)
+      .map((c) => ({
+        id: c.id, index: c.chunkIndex, content: c.content,
+        tokenCount: c.tokenCount, sectionHeading: c.sectionHeading ?? null,
+      }));
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("document_chunks")
+    .select("id,chunk_index,content,token_count,metadata")
+    .eq("kb_id", kbId)
+    .eq("document_id", documentId)
+    .eq("team_id", teamId)
+    .order("chunk_index", { ascending: true })
+    .limit(200);
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((c) => ({
+    id: c.id, index: c.chunk_index, content: c.content,
+    tokenCount: c.token_count,
+    sectionHeading: (c.metadata as { section_heading?: string } | null)?.section_heading ?? null,
+  }));
+}
+
 export async function listDocuments(teamId: string, kbId: string): Promise<DocumentDTO[]> {
   if (isDemoMode()) {
     await ensureDemoKBSeeded();
