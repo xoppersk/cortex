@@ -74,7 +74,7 @@ function SidebarBody({
         <Button asChild className="w-full justify-start gap-2" size="lg">
           <Link href="/app/chat" onClick={onNavigate}>
             <MessageSquarePlus className="size-4" />
-            New conversation
+            + New conversation
           </Link>
         </Button>
       </div>
