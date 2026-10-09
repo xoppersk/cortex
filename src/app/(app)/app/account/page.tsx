@@ -21,7 +21,8 @@ export default async function AccountPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Account</h1>
+        <span className="screen-kicker">Cortex / Personal</span>
+        <h1 className="font-serif text-[30px] font-medium tracking-[-0.02em]">Account</h1>
         <p className="text-muted-foreground">Manage how you appear across the app.</p>
       </div>
 
