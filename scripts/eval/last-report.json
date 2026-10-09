@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-06T20:05:24.286Z",
+  "generatedAt": "2026-10-07T01:13:56.949Z",
   "casesTotal": 60,
   "casesPassed": 19,
   "groundednessAvg": 1,
   "precisionAt4Avg": 0.325,
   "answerRelevanceAvg": 0.4862,
-  "latencyP95Ms": 7,
+  "latencyP95Ms": 13,
   "gate": {
     "groundednessThreshold": 0.9,
     "precisionThreshold": 0.8,
@@ -20,7 +20,7 @@
       "groundedness": 1,
       "precisionAt4": 0.75,
       "answerRelevance": 0.55,
-      "latencyMs": 14,
+      "latencyMs": 13,
       "refused": false,
       "retrievedDocs": [
         "getting-started.md#Getting Started with Cortex",
@@ -38,7 +38,7 @@
       "groundedness": 1,
       "precisionAt4": 0.5,
       "answerRelevance": 0.75,
-      "latencyMs": 5,
+      "latencyMs": 11,
       "refused": false,
       "retrievedDocs": [
         "models.md#Cost guidance",
@@ -56,7 +56,7 @@
       "groundedness": 1,
       "precisionAt4": 0.5,
       "answerRelevance": 0.3333,
-      "latencyMs": 7,
+      "latencyMs": 8,
       "refused": false,
       "retrievedDocs": [
         "getting-started.md#Organizing conversations",
@@ -74,7 +74,7 @@
       "groundedness": 1,
       "precisionAt4": 0.5,
       "answerRelevance": 0.55,
-      "latencyMs": 6,
+      "latencyMs": 4,
       "refused": false,
       "retrievedDocs": [
         "pricing.md#Plans",
@@ -92,7 +92,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.3125,
-      "latencyMs": 6,
+      "latencyMs": 5,
       "refused": false,
       "retrievedDocs": [
         "pricing.md#Overage behavior",
@@ -110,7 +110,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.5,
-      "latencyMs": 4,
+      "latencyMs": 5,
       "refused": false,
       "retrievedDocs": [
         "pricing.md#Per-seat pricing",
@@ -128,7 +128,7 @@
       "groundedness": 1,
       "precisionAt4": 0.5,
       "answerRelevance": 0.55,
-      "latencyMs": 4,
+      "latencyMs": 5,
       "refused": false,
       "retrievedDocs": [
         "pricing.md#Plans",
@@ -164,7 +164,7 @@
       "groundedness": 1,
       "precisionAt4": 0.75,
       "answerRelevance": 0.8,
-      "latencyMs": 7,
+      "latencyMs": 4,
       "refused": false,
       "retrievedDocs": [
         "changelog-2026.md#July 2026 — API keys",
@@ -182,7 +182,7 @@
       "groundedness": 1,
       "precisionAt4": 0.5,
       "answerRelevance": 0.5625,
-      "latencyMs": 5,
+      "latencyMs": 8,
       "refused": false,
       "retrievedDocs": [
         "faq.md#Do you train models on my data?",
@@ -236,7 +236,7 @@
       "groundedness": 1,
       "precisionAt4": 0.5,
       "answerRelevance": 0.4167,
-      "latencyMs": 4,
+      "latencyMs": 8,
       "refused": false,
       "retrievedDocs": [
         "knowledge-base-guide.md#Quarantine",
@@ -254,7 +254,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.5,
-      "latencyMs": 3,
+      "latencyMs": 6,
       "refused": false,
       "retrievedDocs": [
         "security.md#PII redaction",
@@ -272,7 +272,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.7,
-      "latencyMs": 4,
+      "latencyMs": 15,
       "refused": false,
       "retrievedDocs": [
         "data-retention.md#Retention windows",
@@ -290,7 +290,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.5,
-      "latencyMs": 4,
+      "latencyMs": 8,
       "refused": false,
       "retrievedDocs": [
         "data-retention.md#Deleted conversations",
@@ -308,7 +308,7 @@
       "groundedness": 1,
       "precisionAt4": 0.5,
       "answerRelevance": 0.75,
-      "latencyMs": 3,
+      "latencyMs": 13,
       "refused": false,
       "retrievedDocs": [
         "data-retention.md#Export my data",
@@ -326,7 +326,7 @@
       "groundedness": 1,
       "precisionAt4": 0.5,
       "answerRelevance": 0.5625,
-      "latencyMs": 4,
+      "latencyMs": 7,
       "refused": false,
       "retrievedDocs": [
         "faq.md#Which model should I use?",
@@ -344,7 +344,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.3125,
-      "latencyMs": 5,
+      "latencyMs": 7,
       "refused": false,
       "retrievedDocs": [
         "models.md#Temperature",
@@ -416,7 +416,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.6875,
-      "latencyMs": 4,
+      "latencyMs": 5,
       "refused": false,
       "retrievedDocs": [
         "prompt-templates-guide.md#Sharing with the team",
@@ -452,7 +452,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.2857,
-      "latencyMs": 4,
+      "latencyMs": 11,
       "refused": false,
       "retrievedDocs": [
         "template-playbook-sales.md#Discovery call prep",
@@ -488,7 +488,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.5833,
-      "latencyMs": 4,
+      "latencyMs": 3,
       "refused": false,
       "retrievedDocs": [
         "teams-admin.md#Deactivating members",
@@ -524,7 +524,7 @@
       "groundedness": 1,
       "precisionAt4": 0.5,
       "answerRelevance": 0.45,
-      "latencyMs": 3,
+      "latencyMs": 5,
       "refused": false,
       "retrievedDocs": [
         "pricing.md#Per-seat pricing",
@@ -560,7 +560,7 @@
       "groundedness": 1,
       "precisionAt4": 0.5,
       "answerRelevance": 0.6667,
-      "latencyMs": 3,
+      "latencyMs": 4,
       "refused": false,
       "retrievedDocs": [
         "billing.md#Upgrading",
@@ -578,7 +578,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.2083,
-      "latencyMs": 4,
+      "latencyMs": 5,
       "refused": false,
       "retrievedDocs": [
         "billing.md#Seats",
@@ -596,7 +596,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.25,
-      "latencyMs": 4,
+      "latencyMs": 5,
       "refused": false,
       "retrievedDocs": [
         "billing.md#Failed payments",
@@ -614,7 +614,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.625,
-      "latencyMs": 4,
+      "latencyMs": 7,
       "refused": false,
       "retrievedDocs": [
         "api-keys-guide.md#Creating a key",
@@ -632,7 +632,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.375,
-      "latencyMs": 4,
+      "latencyMs": 8,
       "refused": false,
       "retrievedDocs": [
         "teams-admin.md#Deactivating members",
@@ -650,7 +650,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.5625,
-      "latencyMs": 3,
+      "latencyMs": 7,
       "refused": false,
       "retrievedDocs": [
         "api-keys-guide.md#API Keys Guide",
@@ -668,7 +668,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.4583,
-      "latencyMs": 4,
+      "latencyMs": 5,
       "refused": false,
       "retrievedDocs": [
         "usage-dashboard.md#Overview tab",
@@ -704,7 +704,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.4583,
-      "latencyMs": 3,
+      "latencyMs": 4,
       "refused": false,
       "retrievedDocs": [
         "usage-dashboard.md#API keys filter",
@@ -740,7 +740,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.5625,
-      "latencyMs": 3,
+      "latencyMs": 4,
       "refused": false,
       "retrievedDocs": [
         "keyboard-shortcuts.md#Keyboard Shortcuts",
@@ -830,7 +830,7 @@
       "groundedness": 1,
       "precisionAt4": 0.5,
       "answerRelevance": 0.4583,
-      "latencyMs": 3,
+      "latencyMs": 4,
       "refused": false,
       "retrievedDocs": [
         "knowledge-base-guide.md#When there's no answer",
@@ -848,7 +848,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.6667,
-      "latencyMs": 7,
+      "latencyMs": 4,
       "refused": false,
       "retrievedDocs": [
         "knowledge-base-guide.md#Creating a knowledge base",
@@ -902,7 +902,7 @@
       "groundedness": 1,
       "precisionAt4": 0.5,
       "answerRelevance": 0.5,
-      "latencyMs": 3,
+      "latencyMs": 4,
       "refused": false,
       "retrievedDocs": [
         "attachments.md#Knowledge base vs attachments",
@@ -920,7 +920,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.3333,
-      "latencyMs": 4,
+      "latencyMs": 3,
       "refused": false,
       "retrievedDocs": [
         "faq.md#Do you offer SSO/SAML?",
@@ -938,7 +938,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.4167,
-      "latencyMs": 3,
+      "latencyMs": 4,
       "refused": false,
       "retrievedDocs": [
         "faq.md#Can I use Cortex on my phone?",
@@ -956,7 +956,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.05,
-      "latencyMs": 4,
+      "latencyMs": 3,
       "refused": false,
       "retrievedDocs": [
         "changelog-2026.md#October 2026 — Knowledge bases (beta)",
@@ -974,7 +974,7 @@
       "groundedness": 1,
       "precisionAt4": 0.25,
       "answerRelevance": 0.75,
-      "latencyMs": 3,
+      "latencyMs": 4,
       "refused": false,
       "retrievedDocs": [
         "knowledge-base-guide.md#Measuring quality",
