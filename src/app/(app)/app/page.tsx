@@ -1,108 +1,100 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Activity, ArrowRight, UserRound } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { requireUser } from "@/lib/auth/require-user";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { EmptyState } from "@/components/app/empty-state";
+import { WORKSPACE_STATS, TRUTH_SETS, ACTUAL_METRICS } from "@/lib/cortex/truth";
 
-export const metadata: Metadata = { title: "Dashboard" };
+export const metadata: Metadata = { title: "Workspace" };
 
-export default async function DashboardPage() {
+/**
+ * /app — workspace home. Conversations noun stats, active threads,
+ * and the three governance pillars (coverage / quality / guardrail).
+ */
+export default async function WorkspaceHomePage() {
   const user = await requireUser("/app");
 
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name, timezone, created_at")
+    .select("display_name")
     .eq("id", user.id)
     .single();
 
-  const greetingName = profile?.display_name || user.email?.split("@")[0] || "there";
+  const name = profile?.display_name || user.email?.split("@")[0] || "there";
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Good to see you, {greetingName}.</h1>
-        <p className="text-muted-foreground">
-          This dashboard is yours to replace — the shell, auth, and data layer are already wired.
+    <div className="flex flex-col gap-10 py-6">
+      <header>
+        <span className="screen-kicker">Cortex / Workspace</span>
+        <h1 className="font-serif text-[36px] font-medium leading-tight tracking-[-0.02em]">
+          {greeting}, {name}.
+        </h1>
+        <p className="mt-2 max-w-[62ch] text-[15px] text-muted-foreground">
+          Start, revisit, and organize source-grounded conversations without
+          losing the thread.
         </p>
-      </div>
+        <Button className="mt-5" asChild>
+          <Link href="/app/chat">
+            Start conversation <ArrowRight className="size-4" />
+          </Link>
+        </Button>
+      </header>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <UserRound className="size-4" /> Your profile
-            </CardTitle>
-            <CardDescription>Read from public.profiles under Row Level Security.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-1 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Display name</span>
-              <span className="font-medium">{profile?.display_name || "Not set"}</span>
+      <section aria-label="Workspace statistics">
+        <div className="grid grid-cols-3 gap-3">
+          {WORKSPACE_STATS.map(([label, value]) => (
+            <div key={label} className="rounded-[14px] border border-border bg-card p-5">
+              <p className="text-[13px] text-muted-foreground">{label}</p>
+              <p className="kpi-numeral mt-1">{value}</p>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Email</span>
-              <span className="font-medium">{user.email}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Timezone</span>
-              <span className="font-medium">{profile?.timezone}</span>
-            </div>
-            <Button asChild variant="outline" className="mt-3 w-fit">
-              <Link href="/app/account">
-                Edit profile <ArrowRight className="size-4" />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+          ))}
+        </div>
+      </section>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Next steps</CardTitle>
-            <CardDescription>Make this starter yours.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="flex flex-col gap-3 text-sm">
-              <li className="flex gap-2">
-                <span className="text-muted-foreground">1.</span>
-                <span>
-                  Complete your profile on the{" "}
-                  <Link href="/app/account" className="underline underline-offset-4">
-                    account page
-                  </Link>{" "}
-                  — it writes through RLS via a Server Action.
-                </span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-muted-foreground">2.</span>
-                <span>
-                  Press <kbd className="rounded border bg-muted px-1.5 text-xs">⌘K</kbd> to open the
-                  command palette, then add your own commands in{" "}
-                  <code className="rounded bg-muted px-1 text-xs">app-shell.tsx</code>.
-                </span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-muted-foreground">3.</span>
-                <span>
-                  Add nav items to <code className="rounded bg-muted px-1 text-xs">NAV_ITEMS</code> in{" "}
-                  <code className="rounded bg-muted px-1 text-xs">app-sidebar.tsx</code> with matching
-                  pages under <code className="rounded bg-muted px-1 text-xs">src/app/(app)/app/</code>.
-                </span>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
+      <section>
+        <div className="section-rule">
+          <h4>Active threads</h4>
+          <span>{ACTUAL_METRICS[0]?.[1] ?? ""} conversations</span>
+        </div>
+        <div className="rounded-[14px] border border-border bg-card">
+          {TRUTH_SETS.threads.map(([title, sources, updated]) => (
+            <Link
+              key={title}
+              href={`/app/chat/${title === "Launch narrative" ? "launch-narrative" : "research-synthesis"}`}
+              className="flex items-baseline justify-between gap-4 border-b border-border px-5 py-4 last:border-0 hover:bg-accent"
+            >
+              <span className="font-medium">{title}</span>
+              <span className="shrink-0 font-mono text-[11px] text-muted-foreground">
+                {sources} · {updated}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
 
-      <EmptyState
-        icon={Activity}
-        title="No activity yet"
-        description="When your app records events — sign-ins, created records, team invites — summarize them here."
-      />
+      <section>
+        <div className="section-rule">
+          <h4>Why Cortex</h4>
+          <span>Source coverage · Answer quality · Cost guardrail</span>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          {[
+            ["Source coverage", "1,842 sources indexed across your collections, every answer traceable to its chunk."],
+            ["Answer quality", "94% groundedness with eval gates that block deploys on failure."],
+            ["Cost guardrail", "$184 of the $200 monthly budget — visible in the composer, not a report."],
+          ].map(([title, body]) => (
+            <article key={title} className="rounded-[14px] border border-border bg-card p-5">
+              <h5 className="font-serif text-lg font-medium">{title}</h5>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
