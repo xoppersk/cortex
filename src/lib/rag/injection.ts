@@ -62,7 +62,6 @@ const PATTERNS: InjectionPattern[] = [
   {
     name: "hidden-unicode",
     // Zero-width / bidi override characters often used to hide instructions.
-    // eslint-disable-next-line no-misleading-character-class
     regex: /[​‌‍﻿‪‫‬‭‮]/,
   },
 ];
