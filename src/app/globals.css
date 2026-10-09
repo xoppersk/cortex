@@ -1,80 +1,82 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@fontsource/newsreader/400.css";
+@import "@fontsource/newsreader/500.css";
+@import "@fontsource/newsreader/600.css";
+@import "@fontsource/newsreader/700.css";
+@import "@fontsource/work-sans/400.css";
+@import "@fontsource/work-sans/500.css";
+@import "@fontsource/work-sans/600.css";
+@import "@fontsource/work-sans/700.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-mono/600.css";
 
 @custom-variant dark (&:is(.dark *));
 
 /*
- * shadcn/ui "new-york" design tokens, Tailwind v4 style.
- * next-themes toggles the `.dark` class on <html>; the @theme block below
- * maps utilities like `bg-background` / `text-muted-foreground` to these vars.
+ * Cortex design tokens — nocturnal editorial AI workspace.
+ * Dark-first: deep slate canvas, never pure black. Violet #6D5CFF is the
+ * interaction cue (CTAs, streaming cursor, evidence), lifted to #8B7CFF on
+ * dark for contrast. Newsreader serif carries the editorial voice.
  */
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 0.875rem;
+  --background: #fafaf9;
+  --foreground: #17171c;
+  --card: #ffffff;
+  --card-foreground: #17171c;
+  --popover: #ffffff;
+  --popover-foreground: #17171c;
+  --primary: #6d5cff;
+  --primary-foreground: #ffffff;
+  --primary-muted: #ece9ff;
+  --secondary: #f1f0ec;
+  --secondary-foreground: #17171c;
+  --muted: #f1f0ec;
+  --muted-foreground: #6b7280;
+  --accent: #f1f0ec;
+  --accent-foreground: #17171c;
+  --destructive: #f43f5e;
+  --destructive-foreground: #ffffff;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --info: #38bdf8;
+  --border: #e7e5e0;
+  --input: #e7e5e0;
+  --ring: #6d5cff66;
+  --sidebar: #f5f4f1;
+  --sidebar-foreground: #17171c;
+  --sidebar-border: #e7e5e0;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #0c0e14;
+  --foreground: #ededf2;
+  --card: #141824;
+  --card-foreground: #ededf2;
+  --popover: #141824;
+  --popover-foreground: #ededf2;
+  --primary: #8b7cff;
+  --primary-foreground: #0c0e14;
+  --primary-muted: #26244d;
+  --secondary: #1c2230;
+  --secondary-foreground: #ededf2;
+  --muted: #1c2230;
+  --muted-foreground: #9aa3b2;
+  --accent: #1c2230;
+  --accent-foreground: #ededf2;
+  --destructive: #fb7185;
+  --destructive-foreground: #0c0e14;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --info: #38bdf8;
+  --border: #262d40;
+  --input: #262d40;
+  --ring: #8b7cff80;
+  --sidebar: #0b0d10;
+  --sidebar-foreground: #ededf2;
+  --sidebar-border: #262d40;
 }
 
 @theme inline {
@@ -86,6 +88,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-muted: var(--primary-muted);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -93,25 +96,22 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-sans: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
   --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-sm: calc(var(--radius) - 6px);
 }
 
 @layer base {
@@ -119,6 +119,311 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--primary) 28%, transparent);
   }
 }
+
+/* ————————————————————————————————————————————————
+ * Cortex editorial primitives
+ * ———————————————————————————————————————————————— */
+
+/* Streaming block cursor — the only motion allowed mid-stream. */
+@keyframes cortex-cursor-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+.streaming-cursor {
+  display: inline-block;
+  width: 9px;
+  height: 1.15em;
+  margin-left: 2px;
+  vertical-align: -0.2em;
+  background: var(--primary);
+  animation: cortex-cursor-pulse 1.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .streaming-cursor { animation: none; }
+  .cortex-entrance { animation: none !important; }
+}
+
+/* Message entrance: 120ms fade + rise, disabled while streaming. */
+@keyframes cortex-entrance {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.cortex-entrance {
+  animation: cortex-entrance 120ms ease-out;
+}
+
+/* User bubble: single rounded surface, br corner pinned. */
+.user-bubble {
+  margin-left: auto;
+  width: max-content;
+  max-width: 78%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px 14px 4px 14px;
+  padding: 11px 14px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--foreground);
+}
+
+/* Assistant voice: un-bubbled, 70ch measure, Newsreader serif headlines. */
+.assistant-body {
+  max-width: 70ch;
+  font-size: 15px;
+  line-height: 1.87;
+  color: var(--foreground);
+}
+.assistant-body .answer-h4 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 38px;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  margin: 0 0 24px;
+  max-width: 18ch;
+}
+.assistant-body .answer-kicker {
+  font: 600 11px var(--font-sans);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 24px 0 8px;
+  color: var(--muted-foreground);
+}
+.assistant-body .model-quote {
+  border-left: 2px solid var(--primary);
+  margin: 16px 0 20px;
+  padding: 4px 0 4px 20px;
+  font: 500 20px/1.45 var(--font-serif);
+  color: var(--foreground);
+}
+
+/* Citation chip: bracketed ID anchored to the source catalog. */
+.inline-cite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 27px;
+  height: 18px;
+  margin: 0 2px;
+  padding: 0 4px;
+  border: 1px solid var(--border);
+  background: var(--primary-muted);
+  color: var(--primary);
+  font: 500 10px var(--font-mono);
+  vertical-align: 1px;
+  text-decoration: none;
+  border-radius: 4px;
+}
+.inline-cite:hover,
+.inline-cite:focus-visible {
+  border-color: var(--primary);
+  outline: none;
+}
+
+/* Per-answer cost footer: tokens · latency — cost — budget ceiling. */
+.answer-cost {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font: 500 11px var(--font-mono);
+  color: var(--muted-foreground);
+}
+.answer-cost b {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+/* Source catalog rail: numbered evidence entries. */
+.source-card {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 9px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  scroll-margin-top: 16px;
+}
+.source-card > span {
+  font: 500 11px var(--font-mono);
+  color: var(--primary);
+}
+.source-card b {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 3px;
+}
+.source-card time {
+  display: block;
+  color: var(--muted-foreground);
+  font: 400 10px var(--font-mono);
+}
+
+/* Thread rhythm: 24px between messages, generous reading padding. */
+.thread {
+  padding: 40px clamp(24px, 7%, 72px) 32px;
+}
+
+/* Floating composer: the cockpit. 18px radius, one floating shadow only. */
+.composer {
+  margin: 0 clamp(24px, 7%, 72px) 20px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 8px 30px rgb(0 0 0 / 0.06);
+}
+.dark .composer {
+  box-shadow: 0 8px 30px rgb(0 0 0 / 0.45);
+}
+.composer textarea {
+  width: 100%;
+  background: transparent;
+  resize: none;
+  outline: none;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--foreground);
+  min-height: 24px;
+}
+.composer textarea::placeholder {
+  color: var(--muted-foreground);
+}
+
+/* Sidebar nav: 2px violet inset marker, never a filled pill. */
+.cortex-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+  border-radius: 0;
+  box-shadow: inset 2px 0 0 transparent;
+}
+.cortex-nav-item:hover {
+  color: var(--foreground);
+}
+.cortex-nav-item.active {
+  box-shadow: inset 2px 0 0 var(--primary);
+  color: var(--foreground);
+  font-weight: 600;
+}
+.cortex-nav-count {
+  margin-left: auto;
+  font: 400 10px var(--font-mono);
+  color: var(--muted-foreground);
+}
+.cortex-nav-label {
+  font: 500 10px var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted-foreground);
+  padding: 10px 10px 4px;
+}
+
+/* KPI numerals: big, tabular. */
+.kpi-numeral {
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Budget burn bar with 80/100 threshold markers. */
+.budget-track {
+  position: relative;
+  height: 6px;
+  width: 88px;
+  border-radius: 999px;
+  background: var(--muted);
+  overflow: visible;
+}
+.budget-track > i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: var(--primary);
+}
+.budget-track .threshold {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--warning);
+}
+
+/* Thin hairline section rule with right-aligned note. */
+.section-rule {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 26px 0 10px;
+}
+.section-rule h4 {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.section-rule span {
+  font: 400 11px var(--font-mono);
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+/* Designed-screen kicker: group / context over the h3. */
+.screen-kicker {
+  display: block;
+  font: 500 11px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+/* Scrollbar: quiet. */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Syntax highlighting — Cortex editorial palette (hljs classes from rehype-highlight). */
+.hljs {
+  background: transparent;
+  color: var(--code-fg, #e8e6e1);
+}
+.hljs-keyword, .hljs-selector-tag, .hljs-built_in { color: var(--primary); }
+.hljs-string, .hljs-attr, .hljs-template-string { color: #9ece8a; }
+.hljs-number, .hljs-literal { color: #e8b45a; }
+.hljs-comment, .hljs-quote { color: var(--muted-foreground); font-style: italic; }
+.hljs-title, .hljs-title-function_, .hljs-section { color: #7fb3e8; }
+.hljs-name, .hljs-selector-id, .hljs-selector-class { color: #c99ae8; }
+.hljs-type, .hljs-params, .hljs-variable, .hljs-template-variable { color: #e8e6e1; }
+.hljs-attribute, .hljs-symbol, .hljs-bullet, .hljs-link { color: #7fd4c9; }
+.hljs-operator, .hljs-punctuation { color: #9c9da2; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 700; }
+.hljs-addition { color: #9ece8a; }
+.hljs-deletion { color: #e88a8a; }

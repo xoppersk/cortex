@@ -6,11 +6,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Sevyn App Starter",
-    template: "%s · Sevyn App Starter",
+    default: "Cortex — the calm editorial AI workspace",
+    template: "%s · Cortex",
   },
   description:
-    "Production-ready Next.js + Supabase starter: auth, Postgres with Row Level Security, app shell, and CI gates.",
+    "A governed thinking environment where teams trace every answer back to its source, reuse what works, and see the cost of every decision.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
