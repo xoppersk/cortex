@@ -4,10 +4,10 @@
 @import "@fontsource/newsreader/500.css";
 @import "@fontsource/newsreader/600.css";
 @import "@fontsource/newsreader/700.css";
-@import "@fontsource/work-sans/400.css";
-@import "@fontsource/work-sans/500.css";
-@import "@fontsource/work-sans/600.css";
-@import "@fontsource/work-sans/700.css";
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/ibm-plex-sans/700.css";
 @import "@fontsource/ibm-plex-mono/400.css";
 @import "@fontsource/ibm-plex-mono/500.css";
 @import "@fontsource/ibm-plex-mono/600.css";
@@ -23,20 +23,20 @@
 :root {
   --radius: 0.875rem;
   --background: #fafaf9;
-  --foreground: #17171c;
+  --foreground: #18181b;
   --card: #ffffff;
-  --card-foreground: #17171c;
+  --card-foreground: #18181b;
   --popover: #ffffff;
-  --popover-foreground: #17171c;
+  --popover-foreground: #18181b;
   --primary: #6d5cff;
   --primary-foreground: #ffffff;
   --primary-muted: #ece9ff;
   --secondary: #f1f0ec;
-  --secondary-foreground: #17171c;
+  --secondary-foreground: #18181b;
   --muted: #f1f0ec;
   --muted-foreground: #6b7280;
   --accent: #f1f0ec;
-  --accent-foreground: #17171c;
+  --accent-foreground: #18181b;
   --destructive: #f43f5e;
   --destructive-foreground: #ffffff;
   --success: #10b981;
@@ -107,7 +107,7 @@
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
-  --font-sans: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 4px);
@@ -168,7 +168,7 @@
   border-radius: 14px 14px 4px 14px;
   padding: 11px 14px;
   font-size: 15px;
-  line-height: 1.75;
+  line-height: 25px;
   color: var(--foreground);
 }
 
@@ -176,14 +176,14 @@
 .assistant-body {
   max-width: 70ch;
   font-size: 15px;
-  line-height: 1.87;
+  line-height: 25px;
   color: var(--foreground);
 }
 .assistant-body .answer-h4 {
   font-family: var(--font-serif);
   font-weight: 500;
-  font-size: 38px;
-  line-height: 1.02;
+  font-size: 34px;
+  line-height: 34px;
   letter-spacing: -0.035em;
   margin: 0 0 24px;
   max-width: 18ch;
