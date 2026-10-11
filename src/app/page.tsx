@@ -4,7 +4,7 @@ import { ButtonLink } from "../components/Button";
 import { MarginNote, RichSegments } from "../components/Footnote";
 import { Meter } from "../components/Meter";
 import { SiteFooter, SiteHeader } from "../components/SiteHeader";
-import { getTemplates, getThread, getWorkspaceData } from "../lib/api";
+import { getPlaybooks, getWorkspaceData } from "../lib/api";
 import type { MarginNoteData } from "../lib/types";
 
 export const metadata: Metadata = {
@@ -95,12 +95,20 @@ function MarketingH2({ children }: { children: string }) {
   );
 }
 
+const excerptQuestion = "Why do buyers hesitate to forward AI answers to legal?";
+const excerptSegments = [
+  { text: "Seven of nine teams said an answer is only forwardable if the reviewer can open the document behind it" },
+  { text: "", footnote: 1 },
+  { text: ". Legal wants to know which version of a policy was read" },
+  { text: "", footnote: 2 },
+  { text: ", and whether it was still current when the answer was written" },
+  { text: "", footnote: 3 },
+  { text: "." },
+];
+
 export default function LandingPage() {
-  const thread = getThread();
   const workspace = getWorkspaceData().workspace;
-  const featured = getTemplates().featured;
-  const excerptBlock = thread.turns[0]?.answer.blocks[0];
-  const excerptSegments = excerptBlock?.type === "paragraph" ? excerptBlock.segments ?? [] : [];
+  const featured = getPlaybooks().featured;
 
   return (
     <div>
@@ -156,7 +164,7 @@ export default function LandingPage() {
                 color: "var(--ink)",
               }}
             >
-              {thread.header.title}
+              {excerptQuestion}
             </p>
             <p className="answer-text" style={{ fontSize: 20 }}>
               <RichSegments segments={excerptSegments} />
@@ -245,7 +253,7 @@ export default function LandingPage() {
             style={{ flex: "1 1 420px", maxWidth: 520, alignSelf: "flex-start" }}
           >
             <span className="caption" style={{ color: "var(--ink-4)" }}>
-              {featured.name} · {featured.runs}
+              {featured.name} · {featured.runs} runs this month · 39 passed checks
             </span>
             <p
               style={{

@@ -1,41 +1,47 @@
 import Link from "next/link";
-import { ButtonLink } from "../components/Button";
-import { SiteFooter, SiteHeader } from "../components/SiteHeader";
 
 export default function NotFound() {
   return (
     <div>
-      <SiteHeader />
+      <header className="site-header">
+        <div className="site-wrap site-header-inner">
+          <Link href="/" className="wordmark">
+            Cortex
+          </Link>
+        </div>
+      </header>
       <main className="site-wrap" style={{ paddingTop: 96, paddingBottom: 120 }}>
         <div className="stack-5" style={{ maxWidth: 640 }}>
-          <p className="caption">404 · Reference CTX-404-06</p>
+          <p className="caption">404 · nothing at this address</p>
           <h1 className="display-l" style={{ fontSize: 52 }}>
-            We can’t cite this page. It isn’t in the catalog.
+            We can&rsquo;t cite this page. It isn&rsquo;t in the catalog.
           </h1>
           <p className="serif-lead">
-            The page may have moved, or the link may point to a document your workspace has not added.
+            The link may be old, or the conversation may have been deleted or never shared with
+            you. If someone sent it, ask them to share it with your account.
           </p>
+          <p className="code muted-3">cortex.app/sevyn-labs/c/launch-narrative-v1</p>
           <div className="stack-3">
-            <p className="section-label">Try instead</p>
+            <p className="section-label">Did you mean</p>
             <p>
-              <Link href="/app/new">Start a new conversation</Link>
+              <Link href="/app/c/launch-narrative">Launch narrative</Link>{" "}
+              <span className="muted-3">conversation</span>
             </p>
             <p>
-              <Link href="/docs/citations">Read how citations work</Link>
+              <Link href="/app/history">All conversations</Link>{" "}
+              <span className="muted-3">24</span>
             </p>
             <p>
-              <Link href="/">Go to the Cortex home page</Link>
+              <Link href="/docs/citations">Docs</Link> <span className="muted-3">help</span>
             </p>
           </div>
-          <div>
-            <ButtonLink href="/" variant="primary" size="lg">
-              Go home
-            </ButtonLink>
-          </div>
-          <p className="caption">Reference code: CTX-404-06</p>
+          <p className="ui-text muted-3">
+            Something broke instead? Tell us and include reference{" "}
+            <span className="code">7Q2-41K</span>.
+          </p>
+          <p className="caption">© 2026 [Company] · Privacy · Terms · Security · Status · Help</p>
         </div>
       </main>
-      <SiteFooter />
     </div>
   );
 }
