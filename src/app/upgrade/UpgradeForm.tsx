@@ -2,35 +2,27 @@
 
 import { useState } from "react";
 import { Button } from "../../components/Button";
-import { formatMoney } from "../../lib/utils";
+import { LedgerRow } from "../../components/LedgerRow";
+import type { StatesData } from "../../lib/types";
 
-/*
- * S-08 upgrade controls: seats stepper and monthly-limit segmented control.
- * The summary math (seats × per-seat price) updates live from the fixture
- * values passed in by the server page.
- */
-export function UpgradeForm({
-  initialSeats,
-  perSeat,
-  monthlyLimit,
-  chargedDate,
-  workspace,
-  summary,
-}: {
-  initialSeats: number;
-  perSeat: number;
-  monthlyLimit: number;
-  chargedDate: string;
-  workspace: string;
-  summary: string;
-}) {
-  const [seats, setSeats] = useState(initialSeats);
-  const [limit, setLimit] = useState(monthlyLimit);
+type Upgrade = StatesData["upgrade"];
+
+export function UpgradeForm({ upgrade }: { upgrade: Upgrade }) {
+  const [seats, setSeats] = useState(upgrade.seatsInTrial);
+  const [limit, setLimit] = useState(upgrade.limitValue);
   const [done, setDone] = useState(false);
 
-  const limitOptions = [200, 250, 500];
-  const seatsTotal = seats * perSeat;
-  const liveSummary = `${seats} seats at ${formatMoney(perSeat)} is ${formatMoney(seatsTotal)}, charged ${chargedDate}. Model use is billed at cost up to the ${formatMoney(limit)} monthly limit.`;
+  const seatsTotal = seats * upgrade.perSeat;
+  const money = (value: number) => `$${value.toFixed(2)}`;
+
+  if (done) {
+    return (
+      <p className="ui-text" role="status">
+        Team starts on {upgrade.chargedDate}. {upgrade.workspace} keeps answering until then on the
+        trial.
+      </p>
+    );
+  }
 
   return (
     <div className="stack-6">
@@ -38,6 +30,9 @@ export function UpgradeForm({
         <span className="settings-grid-label" id="seats-label" style={{ paddingTop: 0 }}>
           Seats
         </span>
+        <p className="caption">
+          {upgrade.seatsInTrial} people are in the trial. Viewers are free.
+        </p>
         <div className="stepper" role="group" aria-labelledby="seats-label">
           <button
             type="button"
@@ -50,78 +45,57 @@ export function UpgradeForm({
           <span className="stepper-value" aria-live="polite">
             {seats}
           </span>
-          <button
-            type="button"
-            aria-label="Add a seat"
-            onClick={() => setSeats((value) => value + 1)}
-          >
+          <button type="button" aria-label="Add a seat" onClick={() => setSeats((value) => value + 1)}>
             +
           </button>
-          <span className="ui-text muted-3">
-            {formatMoney(perSeat)} per seat a month
-          </span>
         </div>
       </div>
 
       <div className="stack-3">
-        <span className="settings-grid-label" id="limit-label" style={{ paddingTop: 0 }}>
-          Monthly limit
+        <label className="settings-grid-label" htmlFor="upgrade-limit" style={{ paddingTop: 0 }}>
+          Monthly spending limit
+        </label>
+        <p className="caption">{upgrade.usageNote}</p>
+        <input
+          id="upgrade-limit"
+          className="field-control"
+          style={{ maxWidth: 160 }}
+          value={limit}
+          onChange={(event) => setLimit(event.target.value)}
+        />
+      </div>
+
+      <div className="stack-3">
+        <span className="settings-grid-label" style={{ paddingTop: 0 }}>
+          Payment
         </span>
-        <div className="segmented" role="group" aria-labelledby="limit-label">
-          {limitOptions.map((option) => (
-            <button
-              key={option}
-              type="button"
-              aria-pressed={limit === option}
-              onClick={() => setLimit(option)}
-            >
-              {formatMoney(option)}
-            </button>
-          ))}
+        <div className="row">
+          <Button variant="secondary" size="md">
+            Add a card
+          </Button>
+          <span className="ui-text muted-3">Or pay annually by invoice.</span>
         </div>
       </div>
 
-      <div>
-        <Button variant="secondary" size="md">
-          Add a card
-        </Button>
-      </div>
-
-      <div
-        className="stack-3"
-        style={{
-          borderTop: "1px solid var(--ink)",
-          paddingTop: 20,
-        }}
-      >
-        <dl className="definition-grid" style={{ gridTemplateColumns: "minmax(0, 1fr) auto" }}>
-          <dt style={{ color: "var(--ink-2)" }}>
-            Seats {seats} × {formatMoney(perSeat)}
-          </dt>
-          <dd style={{ textAlign: "right", fontWeight: 500, color: "var(--ink)" }}>
-            {formatMoney(seatsTotal)}
-          </dd>
-          <dt style={{ color: "var(--ink-2)" }}>
-            Model use at cost, up to the {formatMoney(limit)} monthly limit
-          </dt>
-          <dd style={{ textAlign: "right" }}>At cost</dd>
-        </dl>
-        <p className="ui-text muted-3">Charged on {chargedDate}</p>
-        <p className="summary-sentence" style={{ fontSize: 16 }}>
-          {seats === initialSeats && limit === monthlyLimit ? summary : liveSummary}
-        </p>
-        {done ? (
-          <p className="ui-text" role="status" style={{ fontSize: 14 }}>
-            {workspace} is on Team. The first charge lands on {chargedDate}.
-          </p>
-        ) : (
-          <div>
-            <Button variant="primary" size="lg" onClick={() => setDone(true)}>
-              Upgrade
-            </Button>
-          </div>
-        )}
-      </div>
+      <section className="stack-3" aria-labelledby="upgrade-plan-heading">
+        <h2 className="section-label" id="upgrade-plan-heading" style={{ fontSize: 15 }}>
+          Team plan
+        </h2>
+        <div className="ledger">
+          <LedgerRow
+            title={`${seats} seats × $${upgrade.perSeat}`}
+            value={money(seatsTotal)}
+          />
+          <LedgerRow title="Model use at cost" description={upgrade.modelUseNote} value={`up to ${limit}`} />
+          <LedgerRow featured title={`Charged ${upgrade.chargedDate}`} value={money(seatsTotal)} />
+        </div>
+        <p className="caption">{upgrade.footerNote}</p>
+        <div>
+          <Button variant="primary" size="lg" onClick={() => setDone(true)}>
+            Start Team on {upgrade.chargedDate}
+          </Button>
+        </div>
+      </section>
     </div>
   );
 }

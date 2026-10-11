@@ -1,40 +1,35 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getStates, getWorkspaceData } from "../../lib/api";
+import { getStates } from "../../lib/api";
 import { UpgradeForm } from "./UpgradeForm";
 
 export const metadata: Metadata = { title: "Upgrade to Team" };
 
-/*
- * S-08 Upgrade. All numbers from the states fixture (seats, per-seat price,
- * monthly limit, charged date, summary sentence). The fixture's chargedDate
- * is "Oct 13"; the summary sentence spells it out as "October 13", which is
- * the "Charged on" line shown here.
- */
+/* S-08 Upgrade: trial workspace (Sevyn Studios) converting to Team. */
 export default function UpgradePage() {
   const { upgrade } = getStates();
-  const workspace = getWorkspaceData().workspace;
 
   return (
     <main className="center-shell" style={{ alignItems: "flex-start" }}>
       <div className="center-card" style={{ maxWidth: 560 }}>
-        <Link href="/" className="wordmark">
-          Cortex
-        </Link>
+        <div className="row-between">
+          <p className="ui-text">
+            <Link href="/" className="wordmark">
+              Cortex
+            </Link>{" "}
+            · {upgrade.workspace}
+          </p>
+          <Link href="/app/history?state=empty">Back to workspace</Link>
+        </div>
+        <p className="caption">{upgrade.trialEnds}</p>
         <div className="stack-2">
           <h1 className="page-title" style={{ fontSize: 26 }}>
-            Upgrade {workspace.name} to Team
+            {upgrade.heading}
           </h1>
-          <p className="ui-text muted-3">The trial ends {upgrade.chargedDate}. Upgrading keeps every conversation, source and playbook.</p>
+          <p className="ui-text muted-3">{upgrade.body}</p>
         </div>
-        <UpgradeForm
-          initialSeats={upgrade.seats}
-          perSeat={upgrade.perSeat}
-          monthlyLimit={upgrade.monthlyLimit}
-          chargedDate="October 13"
-          workspace={workspace.name}
-          summary={upgrade.summary}
-        />
+        <UpgradeForm upgrade={upgrade} />
+        <p className="caption">© 2026 [Company] · Privacy · Terms · Security · Status · Help</p>
       </div>
     </main>
   );
