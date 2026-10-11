@@ -11,17 +11,22 @@ import { Field, fieldDescribedBy } from "../../components/Field";
  * With ?state=error the page renders prefilled in the designed error state.
  */
 const PERSONAL_DOMAINS = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com"];
+const EMAIL_HELPER =
+  "Use your work address so teammates can find your workspace. Personal addresses can join a workspace but not start one.";
 
 export function SignupForm({
   signupError,
   initialErrorState = false,
+  errorName = "",
+  errorEmail = "",
 }: {
   signupError: string;
   initialErrorState?: boolean;
+  errorName?: string;
+  errorEmail?: string;
 }) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState(initialErrorState ? "daniel.okafor@gmail.com" : "");
-  const [password, setPassword] = useState("");
+  const [name, setName] = useState(initialErrorState ? errorName : "");
+  const [email, setEmail] = useState(initialErrorState ? errorEmail : "");
   const [submitted, setSubmitted] = useState(initialErrorState);
   const [created, setCreated] = useState(false);
 
@@ -31,7 +36,7 @@ export function SignupForm({
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitted(true);
-    if (!PERSONAL_DOMAINS.includes(domain) && name.trim() && email.trim() && password) {
+    if (!PERSONAL_DOMAINS.includes(domain) && name.trim() && email.trim()) {
       setCreated(true);
     }
   }
@@ -45,8 +50,8 @@ export function SignupForm({
   }
 
   return (
-    <form className="stack-4" onSubmit={onSubmit}>
-      <Field label="Name" htmlFor="signup-name">
+    <form className="stack-4" onSubmit={onSubmit} noValidate>
+      <Field label="Your name" htmlFor="signup-name">
         <input
           id="signup-name"
           name="name"
@@ -58,7 +63,7 @@ export function SignupForm({
           onChange={(event) => setName(event.target.value)}
         />
       </Field>
-      <Field label="Work email" htmlFor="signup-email" error={emailError}>
+      <Field label="Work email" htmlFor="signup-email" error={emailError} helper={EMAIL_HELPER}>
         <input
           id="signup-email"
           name="email"
@@ -69,23 +74,11 @@ export function SignupForm({
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           aria-invalid={emailError ? true : undefined}
-          aria-describedby={fieldDescribedBy("signup-email", { error: emailError })}
-        />
-      </Field>
-      <Field label="Password" htmlFor="signup-password">
-        <input
-          id="signup-password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          required
-          className="field-control"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
+          aria-describedby={fieldDescribedBy("signup-email", { helper: EMAIL_HELPER, error: emailError })}
         />
       </Field>
       <Button type="submit" variant="primary" size="lg" className="btn-block">
-        Create workspace
+        Continue
       </Button>
     </form>
   );
