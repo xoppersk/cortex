@@ -4,12 +4,13 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Button } from "../../components/Button";
-import type { TemplatesData } from "../../lib/types";
+import { withDottedInputs } from "../app/playbooks/playbooks-tabs";
+import type { TemplateItem, TemplatesData } from "../../lib/types";
 
 /*
- * P-03 interactive part: category filters + search, with state mirrored in
- * the URL query (?category=&q=), the featured template expanded, the first
- * six rows, and a "Show N more" reveal for the rest.
+ * P-03 Templates: category filters + search (mirrored in the URL query),
+ * the featured template expanded with its instructions, the first six rows,
+ * and a "Show N more" reveal for the rest.
  */
 export function TemplatesBrowser({ data }: { data: TemplatesData }) {
   const router = useRouter();
@@ -20,28 +21,20 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
   const category = data.categories.some((item) => item.name === categoryParam) ? categoryParam : "All";
   const query = searchParams.get("q") ?? "";
 
-  // The featured template also appears in the full list; count it once.
   const rest = data.templates.filter((template) => template.id !== data.featured.id);
-  const matches = (template: (typeof rest)[number]) => {
+  const matches = (template: TemplateItem) => {
     const inCategory = category === "All" || template.category === category;
     const needle = query.trim().toLowerCase();
     const inQuery =
       needle.length === 0 ||
-      [template.name, template.inputs, template.sources, template.category]
+      [template.name, template.description, template.expects, template.category]
         .join(" ")
         .toLowerCase()
         .includes(needle);
     return inCategory && inQuery;
   };
 
-  const featuredMatches =
-    (category === "All" || data.featured.category === category) &&
-    (query.trim().length === 0 ||
-      [data.featured.name, data.featured.inputs, data.featured.sources, data.featured.category]
-        .join(" ")
-        .toLowerCase()
-        .includes(query.trim().toLowerCase()));
-
+  const featuredMatches = matches(data.featured);
   const filtered = rest.filter(matches);
   const visible = expanded ? filtered : filtered.slice(0, 6);
   const hiddenCount = filtered.length - visible.length;
@@ -60,6 +53,12 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
   }
 
   const featured = data.featured;
+  const grid = {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) 220px 110px",
+    gap: 24,
+    alignItems: "baseline",
+  } as const;
 
   return (
     <div className="stack-2">
@@ -105,18 +104,11 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
       <div role="table" aria-label="Templates">
         <div
           role="row"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) 170px 170px",
-            gap: 24,
-            padding: "0 0 10px",
-            fontSize: 13,
-            color: "var(--ink-4)",
-          }}
+          style={{ ...grid, padding: "0 0 10px", fontSize: 13, color: "var(--ink-4)" }}
         >
           <span role="columnheader">Template</span>
-          <span role="columnheader">Inputs</span>
-          <span role="columnheader">Sources</span>
+          <span role="columnheader">Expects</span>
+          <span role="columnheader">Copied</span>
         </div>
 
         {featuredMatches ? (
@@ -130,14 +122,7 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
               gap: 18,
             }}
           >
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "minmax(0, 1fr) 170px 170px",
-                gap: 24,
-                alignItems: "baseline",
-              }}
-            >
+            <div style={grid}>
               <span role="cell" className="stack-2">
                 <strong
                   style={{
@@ -158,33 +143,28 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
                     color: "var(--ink-2)",
                   }}
                 >
-                  Audience, promise, proof and risks for a launch.
+                  {featured.description}
                 </span>
               </span>
               <span role="cell" style={{ fontSize: 14, color: "var(--ink-2)" }}>
-                {featured.inputs}
+                {featured.expects}
               </span>
               <span role="cell" style={{ fontSize: 14, color: "var(--ink-2)" }}>
-                {featured.sources}
+                {featured.copied}
               </span>
             </div>
+            {featured.instructions ? (
+              <p className="answer-text" style={{ fontSize: 16, maxWidth: 640 }}>
+                {withDottedInputs(featured.instructions)}
+              </p>
+            ) : null}
             <dl className="definition-grid" style={{ maxWidth: 640 }}>
               <dt>Inputs</dt>
               <dd>{featured.inputs}</dd>
-              <dt>Sources</dt>
-              <dd>{featured.sources}</dd>
-              {featured.checks ? (
-                <>
-                  <dt>Checks</dt>
-                  <dd>{featured.checks}</dd>
-                </>
-              ) : null}
-              {featured.runs ? (
-                <>
-                  <dt>Runs</dt>
-                  <dd>{featured.runs}</dd>
-                </>
-              ) : null}
+              <dt>Checks</dt>
+              <dd>{featured.checks}</dd>
+              <dt>Typical run</dt>
+              <dd>{featured.typicalRun}</dd>
             </dl>
             <div>
               <Link href="/app/playbooks" className="btn btn-primary btn-md">
@@ -200,10 +180,7 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
             role="row"
             href="/app/playbooks"
             style={{
-              display: "grid",
-              gridTemplateColumns: "minmax(0, 1fr) 170px 170px",
-              gap: 24,
-              alignItems: "baseline",
+              ...grid,
               padding: "18px 0",
               borderTop: "1px solid var(--rule)",
               borderBottom:
@@ -224,14 +201,14 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
                   color: "var(--ink-3)",
                 }}
               >
-                {template.category}
+                {template.description}
               </span>
             </span>
             <span role="cell" style={{ fontSize: 14, color: "var(--ink-2)" }}>
-              {template.inputs}
+              {template.expects}
             </span>
             <span role="cell" style={{ fontSize: 14, color: "var(--ink-2)" }}>
-              {template.sources}
+              {template.copied}
             </span>
           </Link>
         ))}
