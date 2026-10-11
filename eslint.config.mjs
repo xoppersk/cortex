@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Extracted design-canvas bundle (reference only, gitignored):
+    ".canvas-ref/**",
   ]),
 ]);
 

@@ -1,132 +1,65 @@
 # Cortex
 
-**Your team's collective AI brain** — multi-model chat, prompt templates, usage metering, and real RAG over your knowledge base.
+**Answers that can show their work.**
 
-Cortex is a production-grade team AI workspace built with Next.js 16, Supabase (PostgreSQL + Row Level Security + pgvector), and the Vercel AI SDK. It demonstrates full-stack SaaS architecture: multi-tenant data isolation, hybrid retrieval with RRF fusion, eval-driven RAG development, and usage-based metering.
+Cortex is a research workspace for teams. You ask a question against your own
+documents; the answer is written like a document, every claim is footnoted to
+the exact passage it came from, and the sources sit in the margin next to the
+paragraph they support. Teams save good prompts as playbooks, test answer
+quality with evaluations, and control cost with per-answer and monthly
+spending limits.
 
-## Architecture
-
-```mermaid
-graph TB
-    subgraph "Client"
-        UI[Next.js 16 App Router<br/>React 19 + Tailwind v4]
-    end
-    
-    subgraph "API Layer"
-        CHAT[POST /api/chat<br/>Streaming via AI SDK v5]
-        RAG[POST /api/rag/ask<br/>Hybrid retrieval]
-        TPL[Templates API<br/>CRUD + versions]
-        KB[KB API<br/>Upload - ingest]
-    end
-    
-    subgraph "RAG Pipeline"
-        ING[Ingest: extract - PII redact<br/>- injection scan - chunk - embed]
-        RET[Retrieval: dense + sparse<br/>- RRF fusion - rerank]
-        GEN[Grounded generation<br/>with [n] citations]
-    end
-    
-    subgraph "Data"
-        PG[(PostgreSQL<br/>Row Level Security)]
-        VEC[(pgvector HNSW<br/>Embeddings)]
-        FTS[(Full-text search<br/>message_search)]
-    end
-    
-    subgraph "Providers"
-        MOCK[Mock provider<br/>deterministic, no keys]
-        OAI[OpenAI<br/>via AI SDK]
-        ANT[Anthropic<br/>via AI SDK]
-    end
-    
-    UI --> CHAT
-    UI --> RAG
-    UI --> TPL
-    UI --> KB
-    CHAT --> MOCK
-    CHAT --> OAI
-    CHAT --> ANT
-    RAG --> RET
-    RET --> VEC
-    RET --> FTS
-    RET --> GEN
-    KB --> ING
-    ING --> PG
-    ING --> VEC
-    CHAT --> PG
-    TPL --> PG
-```
+This repository is the front end, built exactly to the approved design
+(35 screens). There is no backend in this phase: all data comes from one
+typed fixture set behind `src/lib/api.ts`, so a real API can replace it later
+without touching the screens.
 
 ## Stack
 
-**Spelled out for keyword filters:**
-- **PostgreSQL** (via Supabase) — primary database, 20 tables
-- **Row Level Security** — team-scoped isolation on every table; helper functions `is_team_member()`, `team_role()`
-- **JWT auth** via Supabase Auth — email/password + Google OAuth, middleware guards
-- **pgvector HNSW** — vector similarity search for embeddings (1536-dim, cosine distance)
-- **Stripe webhooks** — seat-based billing, proration, `finalize_message()` usage metering
-- **Resend** — transactional email (invites, usage alerts)
-- **Vercel AI SDK v5** — streaming chat with `streamText` + `toUIMessageStreamResponse()`
-- **Next.js 16** App Router, **TypeScript strict**, **Tailwind CSS v4**, **shadcn/ui**
+- Next.js 16 (App Router) + TypeScript
+- Plain CSS variables — no UI kit, no Tailwind palette. Tokens live in
+  `src/app/globals.css` (`:root` light theme, `[data-theme="dark"]` variant).
+- Fonts via `next/font/google`: Source Serif 4, IBM Plex Sans, IBM Plex Mono.
+- Fixtures: typed JSON under `data/`, one canon (Sevyn Labs workspace,
+  $184 of the $200 monthly limit spent, 24 conversations, 5 collections /
+  32 documents / 1,842 passages). Every number on every screen derives from
+  these files; `src/lib/fixtures.test.ts` verifies the cross-sums.
 
-## Evaluation
+## Design rules (non-negotiable)
 
-**Headline (measured with mocks, pending real keys):**
-- **Groundedness: 1.00** (every cited claim supported by retrieved chunks)
-- **Precision@4: 0.33** (term-based mock retrieval)
+- Ink on paper. The only accent is `--highlight`, and it only marks words
+  taken from a source or a search match — never buttons, borders or decoration.
+- No shadows, gradients, glows, emoji, pill badges or KPI tiles. Hierarchy
+  comes from hairlines, weight and position.
+- One primary button per view. Summaries are written sentences, not number
+  cards. Max radius 8px. Text never below 12px.
 
-The eval harness (`scripts/eval/`) runs 60 seeded cases against the mock pipeline. The 0.80 precision gate is **provisional pending real embeddings** — term-based mocks cannot bridge vocabulary gaps like "cost" → "$20". See "Lessons Learned" below.
+## Routes
 
-Run it: `pnpm eval` (uses `DEMO_MODE=true`, no keys needed).
+| Area | Routes |
+| :-- | :-- |
+| Workspace | `/app/new`, `/app/c/[id]`, `/app/history`, `/app/playbooks`, `/app/playbooks/[id]/edit`, `/app/usage` |
+| Knowledge | `/app/knowledge`, `/app/knowledge/ask`, `/app/knowledge/documents`, `/app/knowledge/documents/[id]`, `/app/evaluations` |
+| Settings | `/settings/members`, `/settings/workspace`, `/settings/api-keys`, `/settings/billing`, `/settings/audit`, `/settings/profile` |
+| Public | `/`, `/pricing`, `/templates`, `/docs/citations`, `/changelog` |
+| System | `/login`, `/signup`, `/invite/[token]`, `/upgrade`, custom 404 |
+| Dev | `/dev/components` — every design-system component in its documented states |
 
-## Setup
+System states are reachable in context via query toggles, e.g.
+`/app/c/launch-evidence?state=sources-down` (catalog unreachable),
+`?state=limit` (monthly limit hit), `/app/new?state=viewer` (Viewer role),
+`/app/history?state=empty`, `/signup?state=error`.
+
+## Develop
 
 ```bash
-git clone https://github.com/xoppersk/cortex.git
-cd cortex
 pnpm install
-cp .env.example .env.local
-# Fill in Supabase keys (see "Secrets Needed" below)
-pnpm dev                    # http://localhost:3000
-pnpm eval                   # RAG eval harness (mocked)
-pnpm test                   # Vitest unit tests
+pnpm dev        # http://localhost:3000
+pnpm build      # production build
+pnpm typecheck  # tsc --noEmit
+pnpm test       # vitest — fixture canon checks
+pnpm lint       # eslint
 ```
 
-### Demo mode (no keys)
-```bash
-DEMO_MODE=true pnpm dev
-```
-Uses in-memory store with seeded data. Mock LLM generates deterministic responses.
-
-## Secrets Needed
-
-| Secret | Where to get it | Where it goes |
-|--------|-----------------|---------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Dashboard → Project Settings | `.env.local` / Vercel env |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard → API | `.env.local` / Vercel env |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → API | `.env.local` / Vercel env (server only) |
-| `OPENAI_API_KEY` | platform.openai.com | `.env.local` / Vercel env (optional; mock used if absent) |
-| `ANTHROPIC_API_KEY` | console.anthropic.com | `.env.local` / Vercel env (optional) |
-| `STRIPE_SECRET_KEY` | dashboard.stripe.com (test mode) | `.env.local` / Vercel env (optional; stubs return 501) |
-| `STRIPE_WEBHOOK_SECRET` | Stripe Dashboard → Webhooks | `.env.local` / Vercel env |
-| `RESEND_API_KEY` | resend.com | `.env.local` / Vercel env (optional; logs to console) |
-
-**Never commit these.** See `.env.example` for the shape.
-
-## Lessons Learned
-
-1. **Mocks must mirror architecture, not quality.** The mock embedding is term-based; it implements the hybrid RRF interface faithfully but can't match semantic quality. Document the gap honestly.
-
-2. **Eval-driven RAG development works.** 60 cases written first forced us to confront vocabulary gaps early. The harness caught ranking bugs (missing headings in reranker) that unit tests missed.
-
-3. **RLS is the hard part.** Migrations were straightforward; getting RLS right for team isolation took 3 iterations.
-
-4. **Provider adapter pattern pays off.** Mock default + real adapters behind env checks meant the app worked from day one without keys.
-
-## AI-Workflow Note
-
-Built with AI assistance (Muse). Workflow: specs first (6 design docs) → eval first (60 cases) → vertical slices per phase → mock-driven (no keys needed) → CI gates (typecheck + lint + test + eval + build).
-
-The AI wrote ~85% of the code; Sheku provided direction and made the call to mark the precision gate provisional.
-
-## License
-
-MIT — portfolio project.
+Dark theme is supported from Personal settings › Appearance
+(Light / Dark / Match system) and is built purely from the tokens.

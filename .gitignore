@@ -51,3 +51,6 @@ supabase/config.toml.bak
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# canvas reference extraction (scratch)
+.canvas-ref/
