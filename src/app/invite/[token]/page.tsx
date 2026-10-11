@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Button, ButtonLink } from "../../../components/Button";
 import { Field } from "../../../components/Field";
+import { LedgerRow } from "../../../components/LedgerRow";
 import { getStates } from "../../../lib/api";
 
-export const metadata: Metadata = { title: "You’re invited" };
+export const metadata: Metadata = { title: "You're invited" };
 
 /* S-03 Invite: centred card, all details from the states fixture. */
 export default async function InvitePage({
@@ -22,17 +23,18 @@ export default async function InvitePage({
         <Link href="/" className="wordmark">
           Cortex
         </Link>
+        <p className="caption">Invitation · expires {invite.expires}</p>
         <div className="stack-3">
           <h1 className="page-title" style={{ fontSize: 26 }}>
-            {invite.inviter} invited you to {invite.workspace}
+            {invite.inviter} invited you to {invite.workspace}.
           </h1>
           <p className="serif-lead" style={{ fontSize: 18 }}>
-            You’ll join as an {invite.role}.
+            You&rsquo;ll join as an {invite.role}: {invite.roleDescription}.
           </p>
         </div>
 
         <form className="stack-4" action="/app/new" method="get">
-          <Field label="Email" htmlFor="invite-email">
+          <Field label="Joining as" htmlFor="invite-email">
             <input
               id="invite-email"
               name="email"
@@ -42,7 +44,7 @@ export default async function InvitePage({
               readOnly
             />
           </Field>
-          <Field label="Your name" htmlFor="invite-name">
+          <Field label="Your name, as teammates will see it" htmlFor="invite-name">
             <input
               id="invite-name"
               name="name"
@@ -62,17 +64,24 @@ export default async function InvitePage({
           </div>
         </form>
 
+        <p className="caption">
+          Not you? <Link href="/login">Sign in with another account</Link>. Joining adds a seat to
+          the workspace&rsquo;s bill, not yours.
+        </p>
+
         <div className="stack-3 hairline-top" style={{ paddingTop: 20 }}>
-          <h2 className="section-label">What’s waiting</h2>
-          <ul className="stack-2" style={{ listStyle: "none" }}>
+          <h2 className="section-label">Waiting for you</h2>
+          <div className="ledger">
             {invite.waiting.map((item) => (
-              <li key={item} className="ui-text">
-                {item}
-              </li>
+              <LedgerRow key={item.label} title={item.label} description={item.detail} />
             ))}
-          </ul>
-          <p className="caption">This invite expires {invite.expires}.</p>
+          </div>
+          <blockquote className="pull-quote" style={{ fontSize: 18 }}>
+            {invite.quote.text}
+          </blockquote>
+          <p className="caption">— {invite.quote.author}</p>
         </div>
+        <p className="caption">© 2026 [Company] · Privacy · Terms · Security · Status · Help</p>
       </div>
     </main>
   );
