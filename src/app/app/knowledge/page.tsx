@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Button } from "../../../components/Button";
 import { getKnowledge } from "../../../lib/api";
 import { formatNumber } from "../../../lib/utils";
 import type { Collection } from "../../../lib/types";
@@ -10,43 +11,41 @@ function CollectionStatus({ collection }: { collection: Collection }) {
     return (
       <div className="stack-2">
         <span>{status.label}</span>
-        <div
-          className="progress-track"
-          role="img"
-          aria-label={`Indexing ${percent}% complete`}
-        >
+        <div className="progress-track" role="img" aria-label={`Indexing ${percent}% complete`}>
           <div className="progress-fill" style={{ width: `${percent}%` }} />
         </div>
-        <span className="caption">{percent}% complete</span>
+        {status.note ? <span className="caption">{status.note}</span> : null}
       </div>
     );
   }
-  if (status.type === "stale") {
-    return <span className="warn-text">{status.label}</span>;
-  }
-  return <span>{status.label}</span>;
+  return (
+    <span>
+      {status.label}
+      {status.note ? (
+        <>
+          <br />
+          <span className="caption">{status.note}</span>
+        </>
+      ) : null}
+    </span>
+  );
 }
 
 export default function KnowledgePage() {
   const knowledge = getKnowledge();
   const { collections } = knowledge;
-  const totalDocuments = collections.reduce((total, c) => total + c.documents, 0);
-  const totalPassages = collections.reduce((total, c) => total + c.passages, 0);
-  const indexing = collections.find((c) => c.status.type === "indexing");
-  const stale = collections.find((c) => c.status.type === "stale");
 
   return (
     <>
       <div className="page-head">
-        <h1 className="page-title">Knowledge</h1>
-        <p className="summary-sentence">
-          {collections.length} collections hold {totalDocuments} documents and{" "}
-          {formatNumber(totalPassages)} passages.
-          {indexing
-            ? ` ${indexing.name} is still indexing at ${indexing.status.percent ?? 0}%.`
-            : ""}
-          {stale ? ` ${stale.name} has ${stale.status.label.charAt(0).toLowerCase()}${stale.status.label.slice(1)}.` : ""}
-        </p>
+        <h1 className="page-title">Knowledge bases</h1>
+        <p className="summary-sentence">{knowledge.summary}</p>
+        <div className="row-between" style={{ marginTop: "var(--space-4)" }}>
+          <Link href="/app/knowledge/documents">Upload documents</Link>
+          <Button variant="primary" size="md">
+            New knowledge base
+          </Button>
+        </div>
       </div>
 
       <div className="doc-margin">
@@ -64,7 +63,7 @@ export default function KnowledgePage() {
                   </th>
                   <th scope="col">Newest</th>
                   <th scope="col" className="numeric">
-                    Cited 30d
+                    Cited, 30 d
                   </th>
                   <th scope="col">Status</th>
                 </tr>
@@ -79,11 +78,15 @@ export default function KnowledgePage() {
                       >
                         {collection.name}
                       </Link>
+                      <br />
+                      <span className="muted-3">
+                        {collection.description} · {collection.owner}
+                      </span>
                     </td>
                     <td className="numeric">{collection.documents}</td>
                     <td className="numeric">{formatNumber(collection.passages)}</td>
                     <td>{collection.newest}</td>
-                    <td className="numeric">{collection.cited30d}</td>
+                    <td className="numeric">{collection.cited30d ?? "—"}</td>
                     <td>
                       <CollectionStatus collection={collection} />
                     </td>
@@ -102,8 +105,20 @@ export default function KnowledgePage() {
                 <div key={item.label} className="stack-2">
                   <p className="section-label">{item.label}</p>
                   <p className="caption">{item.detail}</p>
+                  {item.actionLabel ? (
+                    <p>
+                      <Link href="/app/knowledge/documents">{item.actionLabel}</Link>
+                    </p>
+                  ) : null}
                 </div>
               ))}
+              <div className="stack-2">
+                <p className="section-label">{knowledge.evaluationLine.label}</p>
+                <p className="caption">{knowledge.evaluationLine.detail}</p>
+                <p>
+                  <Link href="/app/evaluations">{knowledge.evaluationLine.actionLabel}</Link>
+                </p>
+              </div>
             </div>
           </div>
         </div>
