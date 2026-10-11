@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { ButtonLink } from "../../../components/Button";
 import { PlaybooksTabs } from "./playbooks-tabs";
 
 export const metadata: Metadata = { title: "Playbooks" };
@@ -8,10 +9,14 @@ export default function PlaybooksPage() {
   return (
     <div>
       <div className="page-head">
-        <h1 className="page-title">Playbooks</h1>
+        <div className="page-head-row">
+          <h1 className="page-title">Playbooks</h1>
+          <ButtonLink href="/app/playbooks/launch-brief/edit" variant="primary" size="md">
+            New playbook
+          </ButtonLink>
+        </div>
         <p className="summary-sentence">
-          Prompts the team has agreed are worth keeping, with the sources and checks each run has to
-          pass.
+          Prompts that worked once, saved so the team can run them again with their own inputs.
         </p>
       </div>
       <Suspense fallback={<p className="caption">Loading playbooks…</p>}>
