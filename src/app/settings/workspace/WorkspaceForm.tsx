@@ -1,220 +1,126 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Button } from "../../../components/Button";
-import { fieldDescribedBy } from "../../../components/Field";
-import { SettingsSection } from "../../../components/SettingsSection";
 import type { AdminData } from "../../../lib/types";
+import { cx } from "../../../lib/utils";
 
 type Settings = AdminData["workspaceSettings"];
 
-type FieldKey =
-  | "name"
-  | "slug"
-  | "supportEmail"
-  | "model"
-  | "citationRule"
-  | "sourceFreshnessDays"
-  | "monthlyLimit"
-  | "perAnswerCeiling"
-  | "alertThreshold"
-  | "passageYears"
-  | "deletedDocumentDays";
-
-type Values = Record<FieldKey, string>;
-
-const CITATION_RULES = ["Every claim cited", "Key claims cited", "Citations when asked"];
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-/**
- * The one unsaved change the fixtures describe: the support email has been
- * edited away from support@sevynlabs.io, so that field starts changed.
- */
-const CHANGED_SUPPORT_EMAIL = "hello@sevynlabs.io";
-
-function valuesFromSettings(settings: Settings, supportEmail: string): Values {
-  return {
-    name: settings.identity.name,
-    slug: settings.identity.slug,
-    supportEmail,
-    model: settings.answerDefaults.model,
-    citationRule: settings.answerDefaults.citationRule,
-    sourceFreshnessDays: String(settings.answerDefaults.sourceFreshnessDays),
-    monthlyLimit: String(settings.spending.monthlyLimit),
-    perAnswerCeiling: String(settings.spending.perAnswerCeiling),
-    alertThreshold: String(settings.spending.alertThreshold),
-    passageYears: String(settings.retention.passageYears),
-    deletedDocumentDays: String(settings.retention.deletedDocumentDays),
-  };
-}
-
-function validateField(key: FieldKey, value: string): string | undefined {
-  const trimmed = value.trim();
-  switch (key) {
-    case "name":
-      return trimmed ? undefined : "Enter a workspace name.";
-    case "slug":
-      if (!trimmed) return "Enter a slug.";
-      return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(trimmed)
-        ? undefined
-        : "Use lowercase letters, numbers and hyphens.";
-    case "supportEmail":
-      if (!trimmed) return "Enter a support email address.";
-      return EMAIL_PATTERN.test(trimmed) ? undefined : "Enter a valid email address.";
-    case "sourceFreshnessDays": {
-      const days = Number(trimmed);
-      return Number.isInteger(days) && days >= 0 ? undefined : "Enter a whole number of days.";
-    }
-    case "monthlyLimit": {
-      const limit = Number(trimmed);
-      return Number.isFinite(limit) && limit > 0 ? undefined : "Enter a monthly limit above $0.";
-    }
-    case "perAnswerCeiling": {
-      const ceiling = Number(trimmed);
-      return Number.isFinite(ceiling) && ceiling > 0 ? undefined : "Enter a per-answer ceiling above $0.";
-    }
-    case "alertThreshold": {
-      const threshold = Number(trimmed);
-      return Number.isFinite(threshold) && threshold >= 1 && threshold <= 100
-        ? undefined
-        : "Enter a percentage between 1 and 100.";
-    }
-    case "passageYears": {
-      const years = Number(trimmed);
-      return Number.isInteger(years) && years > 0 ? undefined : "Enter a whole number of years above 0.";
-    }
-    case "deletedDocumentDays": {
-      const days = Number(trimmed);
-      return Number.isInteger(days) && days >= 0 ? undefined : "Enter a whole number of days.";
-    }
-    default:
-      return undefined;
-  }
-}
-
-function GridRow({
-  label,
-  htmlFor,
+function Section({
+  title,
   children,
+  note,
 }: {
-  label: string;
-  htmlFor: string;
-  children: React.ReactNode;
+  title: string;
+  children: ReactNode;
+  note?: string;
 }) {
   return (
+    <section className="stack-4 hairline-top" style={{ paddingTop: "var(--space-6)" }}>
+      <h2 className="section-label" style={{ fontSize: 15 }}>
+        {title}
+      </h2>
+      {children}
+      {note ? <p className="caption">{note}</p> : null}
+    </section>
+  );
+}
+
+function Row({ label, htmlFor, children }: { label: string; htmlFor?: string; children: ReactNode }) {
+  return (
     <div className="settings-grid">
-      <label className="settings-grid-label" htmlFor={htmlFor}>
-        {label}
-      </label>
-      <div>{children}</div>
+      {htmlFor ? (
+        <label className="settings-grid-label" htmlFor={htmlFor}>
+          {label}
+        </label>
+      ) : (
+        <span className="settings-grid-label">{label}</span>
+      )}
+      <div className="stack-2">{children}</div>
     </div>
   );
 }
 
-export function WorkspaceForm({
-  settings,
-  models,
-}: {
-  settings: Settings;
-  models: Array<{ id: string; name: string }>;
-}) {
-  const [saved, setSaved] = useState<Values>(() =>
-    valuesFromSettings(settings, settings.identity.supportEmail),
-  );
-  const [values, setValues] = useState<Values>(() =>
-    valuesFromSettings(settings, CHANGED_SUPPORT_EMAIL),
-  );
-  const [google, setGoogle] = useState(settings.signIn.google);
-  const [savedGoogle, setSavedGoogle] = useState(settings.signIn.google);
-  const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({});
-  const [submitted, setSubmitted] = useState(false);
+export function WorkspaceForm({ settings }: { settings: Settings }) {
+  const savedCeiling = "$0.10";
+  const [name, setName] = useState(settings.identity.name);
+  const [slug, setSlug] = useState(settings.identity.slug);
+  const [model, setModel] = useState(settings.answerDefaults.model);
+  const [citationRule, setCitationRule] = useState(settings.answerDefaults.citationRule);
+  const [freshness, setFreshness] = useState(String(settings.answerDefaults.sourceFreshnessDays));
+  const [ceiling, setCeiling] = useState(settings.answerDefaults.perAnswerCeiling);
+  const [limit, setLimit] = useState(settings.spending.monthlyLimit);
+  const [alertAt, setAlertAt] = useState(settings.spending.alertThreshold);
+  const [allowRaise, setAllowRaise] = useState(settings.spending.allowEditorsRaise);
+  const [keepConversations, setKeepConversations] = useState(settings.retention.conversations);
+  const [keepPassages, setKeepPassages] = useState(settings.retention.passages);
+  const [signInOptions, setSignInOptions] = useState(settings.signIn.options.map((o) => o.checked));
   const [savedMessage, setSavedMessage] = useState(false);
 
-  const changedKeys = (Object.keys(values) as FieldKey[]).filter((key) => values[key] !== saved[key]);
-  const unsavedChanges = changedKeys.length + (google !== savedGoogle ? 1 : 0);
+  const savedValues = {
+    name: settings.identity.name,
+    slug: settings.identity.slug,
+    model: settings.answerDefaults.model,
+    citationRule: settings.answerDefaults.citationRule,
+    freshness: String(settings.answerDefaults.sourceFreshnessDays),
+    ceiling: savedCeiling,
+    limit: settings.spending.monthlyLimit,
+    alertAt: settings.spending.alertThreshold,
+    allowRaise: settings.spending.allowEditorsRaise,
+    keepConversations: settings.retention.conversations,
+    keepPassages: settings.retention.passages,
+  };
+  const currentValues = {
+    name, slug, model, citationRule, freshness, ceiling, limit, alertAt,
+    allowRaise, keepConversations, keepPassages,
+  };
+  const changedCount =
+    (Object.keys(savedValues) as Array<keyof typeof savedValues>).filter(
+      (key) => savedValues[key] !== currentValues[key],
+    ).length +
+    signInOptions.filter((checked, i) => checked !== settings.signIn.options[i]!.checked).length;
 
-  function update(key: FieldKey, value: string) {
-    setValues((current) => ({ ...current, [key]: value }));
+  function discard() {
+    setName(savedValues.name);
+    setSlug(savedValues.slug);
+    setModel(savedValues.model);
+    setCitationRule(savedValues.citationRule);
+    setFreshness(savedValues.freshness);
+    setCeiling(savedValues.ceiling);
+    setLimit(savedValues.limit);
+    setAlertAt(savedValues.alertAt);
+    setAllowRaise(savedValues.allowRaise);
+    setKeepConversations(savedValues.keepConversations);
+    setKeepPassages(savedValues.keepPassages);
+    setSignInOptions(settings.signIn.options.map((o) => o.checked));
     setSavedMessage(false);
-    if (submitted) {
-      setErrors((current) => ({ ...current, [key]: validateField(key, value) }));
-    }
   }
 
-  function handleDiscard() {
-    setValues(saved);
-    setGoogle(savedGoogle);
-    setErrors({});
-    setSubmitted(false);
-    setSavedMessage(false);
-  }
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmitted(true);
-    const nextErrors: Partial<Record<FieldKey, string>> = {};
-    (Object.keys(values) as FieldKey[]).forEach((key) => {
-      const error = validateField(key, values[key]);
-      if (error) nextErrors[key] = error;
-    });
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0) {
-      setSavedMessage(false);
-      return;
-    }
-    setSaved(values);
-    setSavedGoogle(google);
     setSavedMessage(true);
   }
 
-  function controlProps(key: FieldKey, helper?: string) {
-    const error = errors[key];
-    return {
-      id: `workspace-${key}`,
-      className:
-        values[key] !== saved[key] ? "field-control is-changed" : "field-control",
-      "aria-invalid": error ? (true as const) : undefined,
-      "aria-describedby": fieldDescribedBy(`workspace-${key}`, { helper, error }),
-    };
-  }
-
-  function fieldNotes(key: FieldKey, helper?: string) {
-    const error = errors[key];
-    return (
-      <>
-        {values[key] !== saved[key] ? (
-          <p className="changed-note">changed from {saved[key]}</p>
-        ) : null}
-        {helper ? (
-          <p className="field-helper" id={`workspace-${key}-helper`}>
-            {helper}
-          </p>
-        ) : null}
-        {error ? (
-          <p className="field-error" id={`workspace-${key}-error`} role="alert">
-            {error}
-          </p>
-        ) : null}
-      </>
-    );
-  }
+  const changedClass = (key: keyof typeof savedValues) =>
+    cx("field-control", savedValues[key] !== currentValues[key] && "is-changed");
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
+    <form onSubmit={save} className="stack-6" style={{ maxWidth: "var(--column-doc)" }}>
       <header className="page-head">
         <div className="page-head-row">
           <div className="stack-2">
-            <h1 className="page-title">Workspace</h1>
+            <h1 className="page-title">Workspace settings</h1>
             <p className="caption" role="status">
-              {unsavedChanges > 0
-                ? `${unsavedChanges} unsaved ${unsavedChanges === 1 ? "change" : "changes"}`
+              {changedCount > 0
+                ? `${changedCount} unsaved ${changedCount === 1 ? "change" : "changes"}`
                 : savedMessage
                   ? "All changes saved"
                   : "No unsaved changes"}
             </p>
           </div>
           <div className="row">
-            <Button variant="secondary" size="md" onClick={handleDiscard} disabled={unsavedChanges === 0}>
+            <Button variant="secondary" size="md" onClick={discard} disabled={changedCount === 0}>
               Discard
             </Button>
             <Button variant="primary" size="md" type="submit">
@@ -224,247 +130,172 @@ export function WorkspaceForm({
         </div>
       </header>
 
-      <SettingsSection
-        title="Identity"
-        margin={
-          <p className="caption">
-            The name and slug appear in shared links and on every answer this workspace sends outside
-            Cortex.
-          </p>
-        }
-      >
-        <div className="stack-5">
-          <GridRow label="Workspace name" htmlFor="workspace-name">
+      <Section title="Identity">
+        <Row label="Workspace name" htmlFor="ws-name">
+          <input
+            id="ws-name"
+            className={changedClass("name")}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </Row>
+        <Row label="Address" htmlFor="ws-slug">
+          <div className="row" style={{ alignItems: "center" }}>
+            <span className="ui-text muted-3">{settings.identity.addressPrefix}</span>
             <input
-              {...controlProps("name")}
-              value={values.name}
-              onChange={(event) => update("name", event.target.value)}
+              id="ws-slug"
+              className={changedClass("slug")}
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
             />
-            {fieldNotes("name")}
-          </GridRow>
-          <GridRow label="Slug" htmlFor="workspace-slug">
-            <input
-              {...controlProps("slug", "Used in shared links.")}
-              value={values.slug}
-              onChange={(event) => update("slug", event.target.value)}
-            />
-            {fieldNotes("slug", "Used in shared links.")}
-          </GridRow>
-          <GridRow label="Support email" htmlFor="workspace-supportEmail">
-            <input
-              {...controlProps("supportEmail", "Replies to shared answers are sent to this address.")}
-              type="email"
-              value={values.supportEmail}
-              onChange={(event) => update("supportEmail", event.target.value)}
-            />
-            {fieldNotes("supportEmail", "Replies to shared answers are sent to this address.")}
-          </GridRow>
-        </div>
-      </SettingsSection>
+          </div>
+          <p className="field-helper">{settings.identity.addressNote}</p>
+        </Row>
+      </Section>
 
-      <SettingsSection
-        title="Answer defaults"
-        margin={
-          <p className="caption">
-            These defaults apply to new conversations. Conversations already started keep the settings
-            they began with.
-          </p>
-        }
-      >
-        <div className="stack-5">
-          <GridRow label="Model" htmlFor="workspace-model">
-            <select
-              {...controlProps("model")}
-              value={values.model}
-              onChange={(event) => update("model", event.target.value)}
-            >
-              {models.map((model) => (
-                <option key={model.id} value={model.name}>
-                  {model.name}
-                </option>
-              ))}
-            </select>
-            {fieldNotes("model")}
-          </GridRow>
-          <GridRow label="Citation rule" htmlFor="workspace-citationRule">
-            <select
-              {...controlProps("citationRule")}
-              value={values.citationRule}
-              onChange={(event) => update("citationRule", event.target.value)}
-            >
-              {CITATION_RULES.map((rule) => (
-                <option key={rule} value={rule}>
-                  {rule}
-                </option>
-              ))}
-            </select>
-            {fieldNotes("citationRule")}
-          </GridRow>
-          <GridRow label="Source freshness, days" htmlFor="workspace-sourceFreshnessDays">
+      <Section title="Answer defaults" note={settings.answerDefaults.note}>
+        <Row label="Default model" htmlFor="ws-model">
+          <select
+            id="ws-model"
+            className={changedClass("model")}
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+          >
+            {settings.answerDefaults.modelOptions.map((option) => (
+              <option key={option}>{option}</option>
+            ))}
+          </select>
+        </Row>
+        <Row label="Citations" htmlFor="ws-citations">
+          <select
+            id="ws-citations"
+            className={changedClass("citationRule")}
+            value={citationRule}
+            onChange={(e) => setCitationRule(e.target.value)}
+          >
+            {settings.answerDefaults.citationOptions.map((option) => (
+              <option key={option}>{option}</option>
+            ))}
+          </select>
+        </Row>
+        <Row label="Source freshness" htmlFor="ws-freshness">
+          <div className="row" style={{ alignItems: "center" }}>
             <input
-              {...controlProps("sourceFreshnessDays", "Passages older than this are marked as stale in answers.")}
+              id="ws-freshness"
+              className={changedClass("freshness")}
+              style={{ width: 84 }}
               type="number"
-              min={0}
-              step={1}
-              inputMode="numeric"
-              value={values.sourceFreshnessDays}
-              onChange={(event) => update("sourceFreshnessDays", event.target.value)}
+              value={freshness}
+              onChange={(e) => setFreshness(e.target.value)}
             />
-            {fieldNotes("sourceFreshnessDays", "Passages older than this are marked as stale in answers.")}
-          </GridRow>
-        </div>
-      </SettingsSection>
+            <span className="ui-text">days</span>
+          </div>
+        </Row>
+        <Row label="Stop an answer at" htmlFor="ws-ceiling">
+          <input
+            id="ws-ceiling"
+            className={changedClass("ceiling")}
+            style={{ width: 120 }}
+            value={ceiling}
+            onChange={(e) => setCeiling(e.target.value)}
+          />
+          {ceiling !== savedCeiling ? (
+            <p className="changed-note">changed from {savedCeiling}</p>
+          ) : null}
+        </Row>
+      </Section>
 
-      <SettingsSection
-        title="Spending"
-        margin={
-          <p className="caption">
-            When monthly spend reaches the limit, new answers stop until an admin raises the limit or
-            the next cycle starts.
-          </p>
-        }
-      >
-        <div className="stack-5">
-          <GridRow label="Monthly limit, $" htmlFor="workspace-monthlyLimit">
+      <Section title="Spending" note={settings.spending.note}>
+        <Row label="Limit per billing cycle" htmlFor="ws-limit">
+          <input
+            id="ws-limit"
+            className={changedClass("limit")}
+            style={{ width: 120 }}
+            value={limit}
+            onChange={(e) => setLimit(e.target.value)}
+          />
+        </Row>
+        <Row label="Alert admins at" htmlFor="ws-alert">
+          <div className="row" style={{ alignItems: "center" }}>
             <input
-              {...controlProps("monthlyLimit")}
+              id="ws-alert"
+              className={changedClass("alertAt")}
+              style={{ width: 84 }}
               type="number"
-              min={0}
-              step={1}
-              inputMode="decimal"
-              value={values.monthlyLimit}
-              onChange={(event) => update("monthlyLimit", event.target.value)}
+              value={alertAt}
+              onChange={(e) => setAlertAt(e.target.value)}
             />
-            {fieldNotes("monthlyLimit")}
-          </GridRow>
-          <GridRow label="Per-answer ceiling, $" htmlFor="workspace-perAnswerCeiling">
+            <span className="ui-text">% of the limit</span>
+          </div>
+        </Row>
+        <Row label="">
+          <label className="check-row">
             <input
-              {...controlProps("perAnswerCeiling", "A single answer stops when its cost reaches the ceiling.")}
-              type="number"
-              min={0}
-              step={0.01}
-              inputMode="decimal"
-              value={values.perAnswerCeiling}
-              onChange={(event) => update("perAnswerCeiling", event.target.value)}
+              type="checkbox"
+              checked={allowRaise}
+              onChange={(e) => setAllowRaise(e.target.checked)}
             />
-            {fieldNotes("perAnswerCeiling", "A single answer stops when its cost reaches the ceiling.")}
-          </GridRow>
-          <GridRow label="Alert at, %" htmlFor="workspace-alertThreshold">
-            <input
-              {...controlProps("alertThreshold", "Admins are emailed when spend reaches this share of the monthly limit.")}
-              type="number"
-              min={1}
-              max={100}
-              step={1}
-              inputMode="numeric"
-              value={values.alertThreshold}
-              onChange={(event) => update("alertThreshold", event.target.value)}
-            />
-            {fieldNotes("alertThreshold", "Admins are emailed when spend reaches this share of the monthly limit.")}
-          </GridRow>
-        </div>
-      </SettingsSection>
+            <span>{settings.spending.allowEditorsLabel}</span>
+          </label>
+        </Row>
+      </Section>
 
-      <SettingsSection
-        title="Retention"
-        margin={
-          <p className="caption">
-            Passages stay available for citation after a document is deleted, until the retention period
-            ends. After that they cannot be recovered.
-          </p>
-        }
-      >
-        <div className="stack-5">
-          <GridRow label="Keep passages, years" htmlFor="workspace-passageYears">
-            <input
-              {...controlProps("passageYears")}
-              type="number"
-              min={1}
-              step={1}
-              inputMode="numeric"
-              value={values.passageYears}
-              onChange={(event) => update("passageYears", event.target.value)}
-            />
-            {fieldNotes("passageYears")}
-          </GridRow>
-          <GridRow label="Deleted documents, days" htmlFor="workspace-deletedDocumentDays">
-            <input
-              {...controlProps("deletedDocumentDays", "Deleted documents are removed for good after this many days.")}
-              type="number"
-              min={0}
-              step={1}
-              inputMode="numeric"
-              value={values.deletedDocumentDays}
-              onChange={(event) => update("deletedDocumentDays", event.target.value)}
-            />
-            {fieldNotes("deletedDocumentDays", "Deleted documents are removed for good after this many days.")}
-          </GridRow>
-        </div>
-      </SettingsSection>
+      <Section title="Retention" note={settings.retention.note}>
+        <Row label="Keep conversations" htmlFor="ws-keep-conversations">
+          <select
+            id="ws-keep-conversations"
+            className={changedClass("keepConversations")}
+            value={keepConversations}
+            onChange={(e) => setKeepConversations(e.target.value)}
+          >
+            {settings.retention.conversationsOptions.map((option) => (
+              <option key={option}>{option}</option>
+            ))}
+          </select>
+        </Row>
+        <Row label="Keep cited passages" htmlFor="ws-keep-passages">
+          <select
+            id="ws-keep-passages"
+            className={changedClass("keepPassages")}
+            value={keepPassages}
+            onChange={(e) => setKeepPassages(e.target.value)}
+          >
+            {settings.retention.passagesOptions.map((option) => (
+              <option key={option}>{option}</option>
+            ))}
+          </select>
+        </Row>
+      </Section>
 
-      <SettingsSection
-        title="Sign-in"
-        margin={
-          <p className="caption">
-            People sign in with an address at this workspace&rsquo;s domain. Turning a method off stops
-            new sign-ins with it right away.
-          </p>
-        }
-      >
-        <div className="stack-5">
-          <div className="settings-grid">
-            <span className="settings-grid-label" id="signin-google-label">
-              Google
-            </span>
-            <label className="check-row">
+      <Section title="Sign-in" note={settings.signIn.note}>
+        <div className="stack-3">
+          {settings.signIn.options.map((option, index) => (
+            <label key={option.label} className="check-row">
               <input
                 type="checkbox"
-                checked={google}
-                onChange={(event) => {
-                  setGoogle(event.target.checked);
-                  setSavedMessage(false);
-                }}
-                aria-labelledby="signin-google-label"
+                checked={signInOptions[index] ?? false}
+                disabled={"disabled" in option && Boolean(option.disabled)}
+                onChange={(e) =>
+                  setSignInOptions((previous) =>
+                    previous.map((value, i) => (i === index ? e.target.checked : value)),
+                  )
+                }
               />
-              <span>Allow signing in with Google</span>
+              <span>{option.label}</span>
             </label>
-          </div>
-          <div className="settings-grid">
-            <span className="settings-grid-label">Single sign-on (SSO)</span>
-            <div className="stack-2">
-              <div className="row">
-                <span className="ui-text">{settings.signIn.sso.state}</span>
-                <Button variant="quiet" size="sm">
-                  Enterprise
-                </Button>
-              </div>
-              <p className="caption">{settings.signIn.sso.label}</p>
-            </div>
-          </div>
+          ))}
         </div>
-      </SettingsSection>
+      </Section>
 
-      <SettingsSection
-        title="Delete workspace"
-        margin={
-          <p className="caption">
-            <span className="danger-text">Deleting cannot be undone.</span> Export anything the team
-            still needs before you delete.
-          </p>
-        }
-      >
-        <div className="stack-4">
-          <p className="ui-text">
-            Deleting this workspace removes every conversation, document and playbook for everyone in{" "}
-            {settings.identity.name}. This cannot be undone.
-          </p>
-          <div>
-            <Button variant="destructive" size="md">
-              Delete workspace
-            </Button>
-          </div>
+      <Section title="Delete workspace">
+        <p className="ui-text">{settings.deleteWorkspace.body}</p>
+        <div>
+          <Button variant="destructive" size="md">
+            {settings.deleteWorkspace.buttonLabel}
+          </Button>
         </div>
-      </SettingsSection>
+        <p className="caption">{settings.deleteWorkspace.note}</p>
+      </Section>
     </form>
   );
 }
