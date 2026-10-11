@@ -1,1 +1,42 @@
-{"currentUser":{"email":"sheku@sevynlabs.io","id":"sheku-koroma","name":"Sheku Koroma","owner":true,"role":"Admin"},"models":[{"id":"cortex-4","name":"Cortex 4"},{"id":"cortex-4-mini","name":"Cortex 4 mini"}],"workspace":{"alertThreshold":0.9,"billingCycle":{"daysLeft":3,"end":"Oct 9","label":"Sep 10 – Oct 9","start":"Sep 10"},"citationRule":"Every claim cited","defaultModel":"Cortex 4","fixtureDate":"Oct 6","fixtureNow":"Tuesday, October 6, 2026, 10:41 PM","id":"sevyn-labs","monthlyLimit":200,"name":"Sevyn Labs","paidSeats":5,"perAnswerCeiling":0.08,"plan":"Team","projectedSpend":209,"slug":"sevyn-labs","sourceFreshnessDays":30,"spend":184}}
+{
+ "currentUser": {
+  "email": "sheku@sevynlabs.io",
+  "id": "sheku-koroma",
+  "name": "Sheku Koroma",
+  "owner": true,
+  "role": "Admin"
+ },
+ "models": [
+  {
+   "id": "cortex-4",
+   "name": "Cortex 4"
+  },
+  {
+   "id": "cortex-4-mini",
+   "name": "Cortex 4 mini"
+  }
+ ],
+ "workspace": {
+  "alertThreshold": 0.9,
+  "billingCycle": {
+   "daysLeft": 3,
+   "end": "Oct 9",
+   "label": "Sep 10 – Oct 9",
+   "start": "Sep 10"
+  },
+  "citationRule": "Every claim must be cited",
+  "defaultModel": "Cortex 4",
+  "fixtureDate": "Oct 6",
+  "fixtureNow": "Tuesday, October 6, 2026, 10:41 PM",
+  "id": "sevyn-labs",
+  "monthlyLimit": 200,
+  "name": "Sevyn Labs",
+  "paidSeats": 5,
+  "perAnswerCeiling": 0.08,
+  "plan": "Team",
+  "projectedSpend": 209,
+  "slug": "sevyn-labs",
+  "sourceFreshnessDays": 30,
+  "spend": 184
+ }
+}

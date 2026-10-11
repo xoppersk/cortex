@@ -1,1 +1,316 @@
-{"composer":{"costSentence":"About $0.012–$0.020 for a reply like this. $0.052 has been spent in this conversation.","model":"Cortex 4","playbook":"No playbook","sources":"3 collections"},"header":{"edited":"Edited 10:41 PM","meta":"Launch narrative · Started by Maya Jordan · Oct 6, 10:12 PM · Shared with 3 people","project":"Launch narrative","title":"Why do buyers hesitate to forward AI answers to legal?"},"id":"launch-evidence","notes":[{"broken":false,"catalog":"Catalog 02","documentTitle":"Customer interview synthesis","excerpt":[{"text":"Reviewers said they would forward an answer when they could "},{"mark":true,"text":"open the document behind it"},{"text":" without asking the author for help."}],"id":"note-1","meta":"Catalog 02 · Oct 2 · passage 118","n":1,"paragraphId":"turn-1-p1"},{"broken":false,"catalog":"Catalog 02","documentTitle":"Procurement call notes, Northwind","excerpt":[{"text":"Legal asked which policy version the answer relied on and who had approved it."}],"id":"note-2","meta":"Catalog 02 · Sep 30 · passage 22","n":2,"paragraphId":"turn-1-p1"},{"broken":false,"catalog":"Catalog 04","documentTitle":"Product council synthesis","excerpt":[{"text":"“…whether the source was "},{"mark":true,"text":"current on the day the answer was given"},{"text":".”"}],"expanded":true,"id":"note-3","meta":"Catalog 04 · Oct 1 · passage 9","n":3,"paragraphId":"turn-1-p1"},{"broken":false,"catalog":"Catalog 03","documentTitle":"Security and legal review","excerpt":[{"text":"Retention and reviewer access were raised before model quality in the review."}],"id":"note-4","meta":"Catalog 03 · Sep 29 · passage 41","n":4,"paragraphId":"turn-1-p2"},{"broken":false,"catalog":"Catalog 02","documentTitle":"Customer interview synthesis","excerpt":[{"text":"A shared answer needs a stable passage link that survives forwarding."}],"id":"note-5","meta":"Catalog 02 · Oct 2 · passage 121","n":5,"paragraphId":"turn-1-p2"}],"streamContinuation":" how long that passage is kept. It should not promise that a cited answer is correct; it should promise that a reviewer can test it.","turns":[{"answer":{"blocks":[{"segments":[{"text":"Seven of nine teams said an answer is only forwardable if the reviewer can open the document behind it"},{"footnote":1,"text":""},{"text":". Legal wants to know which version of a policy was read"},{"footnote":2,"text":""},{"text":", and whether it was "},{"mark":true,"text":"still current when the answer was written"},{"footnote":3,"text":""},{"text":"."}],"type":"paragraph"},{"segments":[{"text":"The hesitation is rarely about the model. Reviewers ask who can see the source"},{"footnote":4,"text":""},{"text":", how long the passage is kept, and whether the link still works when the answer is forwarded outside the team"},{"footnote":5,"text":""},{"text":"."}],"type":"paragraph"},{"attribution":"Customer interview synthesis, passage 118","text":"I can defend a number if I can open the page it came from.","type":"pullQuote"}],"footer":{"citedLabel":"every claim cited","cost":0.014,"duration":"8.4 sec","tokens":"13,092 tokens"},"heading":"Buyers forward answers they can inspect."},"id":"turn-1","question":"Why do buyers hesitate to forward AI answers to legal?","speaker":"Maya Jordan","time":"10:12 PM"},{"answer":{"blocks":[{"segments":[{"text":"Promise the chain from claim to passage. The brief should show the document, the passage and the version read, then name"}],"type":"paragraph"}],"footer":null,"heading":"Promise the chain, not certainty.","streaming":{"costSoFar":0.019,"label":"Writing"}},"id":"turn-2","question":"What should we promise legal reviewers in the launch brief?","speaker":"Sheku Koroma","time":"10:28 PM"}]}
+{
+ "id": "launch-narrative",
+ "header": {
+  "title": "Launch narrative",
+  "meta": "32 sources · Cortex 4 · shared with Maya Jordan and Owen Clarke",
+  "project": "Launch narrative",
+  "edited": "Edited 10:41 PM"
+ },
+ "composer": {
+  "sources": "Positioning research, Customer interviews",
+  "playbook": "Launch brief",
+  "model": "Cortex 4",
+  "costSentence": "About $0.012 for this reply. $0.030 left of this thread’s $0.08 limit.",
+  "placeholder": "Ask a follow-up"
+ },
+ "streamContinuation": "",
+ "turns": [
+  {
+   "id": "turn-1",
+   "speaker": "Sheku Koroma",
+   "time": "10:04 PM",
+   "question": "Turn the research into a clear launch position. Use only sources updated this month.",
+   "answer": {
+    "heading": "Lead with confidence, not complexity.",
+    "blocks": [
+     {
+      "type": "paragraph",
+      "segments": [
+       {
+        "text": "Your strongest position is not “another AI workspace.” It is a governed thinking environment where teams can trace every answer back to its source"
+       },
+       {
+        "text": "",
+        "footnote": 1
+       },
+       {
+        "text": ", reuse what works, and see the cost of a decision before it lands"
+       },
+       {
+        "text": "",
+        "footnote": 2
+       },
+       {
+        "text": "."
+       }
+      ]
+     },
+     {
+      "type": "pullQuote",
+      "text": "“Cortex turns scattered expertise into trusted, repeatable playbooks — with citations and cost controls built in.”",
+      "attribution": "Proposed one-liner. Not sourced; it summarises 1–5."
+     },
+     {
+      "type": "paragraph",
+      "segments": [
+       {
+        "text": "The proof is operational. "
+       },
+       {
+        "text": "Every claim stays attached to evidence",
+        "mark": true
+       },
+       {
+        "text": "",
+        "footnote": 3
+       },
+       {
+        "text": ", every useful response can become a team pattern"
+       },
+       {
+        "text": "",
+        "footnote": 4
+       },
+       {
+        "text": ", and every model decision stays inside a visible budget"
+       },
+       {
+        "text": "",
+        "footnote": 5
+       },
+       {
+        "text": "."
+       }
+      ]
+     }
+    ],
+    "footer": {
+     "tokens": "2,184 tokens",
+     "duration": "4.2 s",
+     "cost": 0.031,
+     "citedLabel": "every claim cited"
+    }
+   }
+  },
+  {
+   "id": "turn-2",
+   "speaker": "Sheku Koroma",
+   "time": "10:09 PM",
+   "question": "What gives that position credibility with enterprise buyers?",
+   "answer": {
+    "heading": "Make trust observable.",
+    "blocks": [
+     {
+      "type": "paragraph",
+      "segments": [
+       {
+        "text": "Enterprise teams do not need another promise of accuracy. They need to see where an answer came from"
+       },
+       {
+        "text": "",
+        "footnote": 6
+       },
+       {
+        "text": " and who is allowed to change it"
+       },
+       {
+        "text": "",
+        "footnote": 7
+       },
+       {
+        "text": ". In practice that means three things the buyer can check for themselves:"
+       }
+      ]
+     },
+     {
+      "type": "list",
+      "items": [
+       [
+        {
+         "text": "Each claim opens the passage it came from."
+        }
+       ],
+       [
+        {
+         "text": "Roles, retention and audit history pass a security review"
+        },
+        {
+         "text": "",
+         "footnote": 7
+        },
+        {
+         "text": "."
+        }
+       ],
+       [
+        {
+         "text": "Spend is capped per answer, not reconciled at month end."
+        }
+       ]
+      ]
+     }
+    ],
+    "footer": null,
+    "streaming": {
+     "label": "Writing",
+     "costSoFar": 0.019
+    }
+   }
+  }
+ ],
+ "notes": [
+  {
+   "id": "note-1",
+   "n": 1,
+   "paragraphId": "turn-1-p1",
+   "documentTitle": "Positioning research",
+   "catalog": "Catalog 01",
+   "meta": "Catalog 01 · Oct 1"
+  },
+  {
+   "id": "note-2",
+   "n": 2,
+   "paragraphId": "turn-1-p1",
+   "documentTitle": "Model governance memo",
+   "catalog": "Catalog 03",
+   "meta": "Catalog 03 · Oct 1"
+  },
+  {
+   "id": "note-3",
+   "n": 3,
+   "paragraphId": "turn-1-p2",
+   "documentTitle": "Customer interview synthesis",
+   "catalog": "Catalog 02",
+   "meta": "Catalog 02 · Oct 2 · chunk 118",
+   "expanded": true,
+   "openPassage": true,
+   "excerpt": [
+    {
+     "text": "Buyers "
+    },
+    {
+     "text": "asked to see the document behind an answer before forwarding it to legal",
+     "mark": true
+    },
+    {
+     "text": ". Seven of nine teams named traceability as the deciding criterion."
+    }
+   ]
+  },
+  {
+   "id": "note-4",
+   "n": 4,
+   "paragraphId": "turn-1-p2",
+   "documentTitle": "Playbook reuse study",
+   "catalog": "Catalog 20",
+   "meta": "Catalog 20 · Oct 4"
+  },
+  {
+   "id": "note-5",
+   "n": 5,
+   "paragraphId": "turn-1-p2",
+   "documentTitle": "Finance team cost analysis",
+   "catalog": "Catalog 16",
+   "meta": "Catalog 16 · Oct 4"
+  },
+  {
+   "id": "note-6",
+   "n": 6,
+   "paragraphId": "turn-2-p1",
+   "documentTitle": "Product council interview synthesis",
+   "catalog": "Catalog 07",
+   "meta": "Catalog 07 · Oct 1"
+  },
+  {
+   "id": "note-7",
+   "n": 7,
+   "paragraphId": "turn-2-p1",
+   "documentTitle": "Legal review: evidence retention",
+   "catalog": "Catalog 17",
+   "meta": "Catalog 17 · Oct 2"
+  }
+ ],
+ "sourcesDown": {
+  "meta": "32 sources · Cortex 4",
+  "banner": "The answer is here. Its proof is not. The source catalog stopped responding at 10:14 PM. Your thread and draft are intact, but citations can’t be opened and new answers are paused until it’s back.",
+  "question": "Turn the research into a clear launch position.",
+  "footerLine": "Not verified while sources are unavailable · Copy and Share are paused for this answer",
+  "marginNoteTitle": "Answer",
+  "marginNoteStatus": "Not verified",
+  "marginNoteText": "Footnotes 1 and 2 pointed to Positioning research and Model governance memo. They’ll reconnect automatically.",
+  "composerNote": "New questions are paused until sources reconnect. Your draft is saved."
+ },
+ "limitState": {
+  "title": "Pricing analysis",
+  "speaker": "Sheku Koroma",
+  "time": "October 8, 4:51 PM",
+  "question": "Where do interviewed buyers anchor on seat price versus usage?",
+  "partialSegments": [
+   {
+    "text": "Most buyers anchored on the per-seat price first"
+   },
+   {
+    "text": "",
+    "footnote": 1
+   },
+   {
+    "text": " and only asked about usage once legal was involved"
+   },
+   {
+    "text": "",
+    "footnote": 2
+   },
+   {
+    "text": ". Three of the nine teams"
+   }
+  ],
+  "headline": "This answer stopped at the spending limit.",
+  "body": "The workspace used its $200 for this cycle mid-sentence. What was written is kept and both citations work. Everyone can still read, open sources and share; new answers wait for the limit to rise or reset.",
+  "adminHeading": "You’re an admin, so you can",
+  "actions": [
+   {
+    "label": "Raise the limit to $250 for this cycle",
+    "detail": "Finishes this answer first, about $0.02"
+   },
+   {
+    "label": "Wait for the reset",
+    "detail": "7 hours, then $200 is available again"
+   }
+  ],
+  "usageLinkLabel": "See where this cycle’s $200 went",
+  "editorsNote": "Editors see the same message with a button to ask you instead.",
+  "composerNote": "Paused at the $200 limit. You can still write a draft; it sends when answers resume."
+ },
+ "blocked": {
+  "meta": "Shared by Sheku Koroma · you can read and open every source",
+  "heading": "Make trust observable.",
+  "segments": [
+   {
+    "text": "Enterprise teams need to see where an answer came from"
+   },
+   {
+    "text": "",
+    "footnote": 6
+   },
+   {
+    "text": " and who is allowed to change it"
+   },
+   {
+    "text": "",
+    "footnote": 7
+   },
+   {
+    "text": ". Roles, retention and audit history pass a security review"
+   },
+   {
+    "text": "",
+    "footnote": 7
+   },
+   {
+    "text": "."
+   }
+  ],
+  "noticeHeading": "You can read this conversation, but not ask in it.",
+  "noticeBody": "Viewers don’t use a paid seat, so they can’t send questions. To check a claim, open its footnote. To ask something new, request Editor access — Sheku or Priya will be notified."
+ }
+}

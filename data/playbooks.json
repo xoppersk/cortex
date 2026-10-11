@@ -1,1 +1,194 @@
-{"archived":[{"id":"launch-brief-v3","name":"Launch brief, version 3","runs":18,"status":"Archived Sep 18","updated":"Sep 18"},{"id":"interview-guide-2025","name":"Interview guide 2025","runs":9,"status":"Archived Aug 29","updated":"Aug 29"}],"edit":{"changesSincePrevious":["Minimum match raised from 0.65 to 0.70","Pricing archive added as a source","Failed runs can no longer be shared"],"checks":[{"label":"Every claim has a citation","type":"toggle","value":true},{"label":"Minimum match","type":"number","value":0.7},{"label":"Maximum cost per answer","prefix":"$","type":"number","value":0.08},{"label":"Sources newer than","suffix":"days","type":"number","value":30}],"inputs":[{"example":"Cortex","input":"product","notes":"Named in the first sentence","type":"Text"},{"example":"Legal and security reviewers","input":"audience","notes":"Sets the proof standard","type":"Text"},{"example":"October 21","input":"launch date","notes":"Used in the closing line","type":"Date"},{"example":"Evidence before automation","input":"single promise","notes":"One sentence only","type":"Text"}],"instructions":"Write a launch brief for [product] aimed at [audience]. State the [single promise] in one sentence, then give the three strongest pieces of proof. Use only the approved sources. Every claim must cite the passage it came from.","preview":"Write a launch brief for Cortex aimed at legal and security reviewers. State the single promise in one sentence, then give the three strongest pieces of proof…","sharing":{"options":[{"label":"Only I can run it","value":"private"},{"label":"Team can run it","value":"run"},{"label":"Team can run and edit it","value":"edit"}],"selected":"run"},"sources":[{"label":"Customer interviews","state":"checked"},{"label":"Positioning research","state":"checked"},{"label":"Product docs","state":"checked"},{"label":"Pricing archive","note":"Indexing, 62%","state":"disabled"}],"testRunCost":0.03,"version":"v5"},"featured":{"avgCost":0.03,"checks":"4 checks","id":"launch-brief","inputs":"product · audience · launch date · single promise","instructions":"Write a launch brief for [product] aimed at [audience]. State the [single promise] in one sentence, then the three strongest pieces of proof. End with what the product will not claim.","name":"Launch brief","owner":"Maya Jordan","passRate":"39 of 41 runs passed","runs":41,"sources":"Customer interviews · Positioning research · Product docs","updated":"Oct 5"},"private":[{"avgCost":0.021,"id":"board-update-draft","name":"Board update draft","owner":"Sheku Koroma","passRate":"8 of 8 runs passed","runs":8,"updated":"Oct 4"},{"avgCost":0.017,"id":"weekly-evidence-review","name":"Weekly evidence review","owner":"Sheku Koroma","passRate":"11 of 12 runs passed","runs":12,"updated":"Sep 29"}],"team":[{"avgCost":0.028,"id":"customer-interview-synthesis","name":"Customer interview synthesis","owner":"Owen Clarke","passRate":"26 of 28 runs passed","runs":28,"updated":"Oct 6"},{"avgCost":0.024,"id":"pricing-objection-response","name":"Pricing objection response","owner":"Priya Shah","passRate":"17 of 19 runs passed","runs":19,"updated":"Oct 3"},{"avgCost":0.019,"id":"security-review-summary","name":"Security review summary","owner":"Lena Brooks","passRate":"14 of 14 runs passed","runs":14,"updated":"Oct 2"},{"avgCost":0.026,"id":"research-synthesis","name":"Research synthesis","owner":"Owen Clarke","passRate":"31 of 34 runs passed","runs":34,"updated":"Sep 30"}]}
+{
+ "featured": {
+  "id": "launch-brief",
+  "name": "Launch brief",
+  "owner": "Maya Jordan",
+  "runs": 41,
+  "updated": "Oct 6",
+  "description": "Audience, promise, proof and risks for a launch, every claim cited.",
+  "instructions": "Write a launch brief for product aimed at audience, shipping launch date. State the single promise in one sentence, then the three strongest pieces of proof from knowledge base. List the risks a skeptical buyer role would raise, and end with what we will not claim. Keep it under word limit words.",
+  "inputs": "6, of which 4 required",
+  "sources": "Positioning research, Customer interviews",
+  "checks": "Every claim cited; sources under 30 days old",
+  "avgCost": 0.034,
+  "passRate": "39 of 41 runs passed checks"
+ },
+ "team": [
+  {
+   "id": "weekly-decision-memo",
+   "name": "Weekly decision memo",
+   "owner": "Sheku Koroma",
+   "runs": 22,
+   "updated": "Oct 3",
+   "description": "One decision, the options, the evidence, a recommendation.",
+   "inputsLabel": "4 inputs"
+  },
+  {
+   "id": "objection-map",
+   "name": "Objection map",
+   "owner": "Maya Jordan",
+   "runs": 17,
+   "updated": "Oct 2",
+   "description": "Group buyer objections by stage and pair each with a cited answer."
+  },
+  {
+   "id": "interview-digest",
+   "name": "Interview digest",
+   "owner": "Owen Clarke",
+   "runs": 12,
+   "updated": "Sep 29",
+   "description": "Turn one call transcript into themes, quotes and follow-ups."
+  },
+  {
+   "id": "eval-failure-triage",
+   "name": "Eval failure triage",
+   "owner": "Priya Shah",
+   "runs": 6,
+   "updated": "Sep 24",
+   "description": "Explain why an answer failed its checks and which source to fix."
+  }
+ ],
+ "private": [
+  {
+   "id": "research-synthesis",
+   "name": "Research synthesis",
+   "owner": "Sheku Koroma",
+   "runs": 9,
+   "updated": "Oct 2",
+   "description": "Themes across interviews, each with its strongest quote.",
+   "inputsLabel": "3 inputs"
+  },
+  {
+   "id": "board-update-draft",
+   "name": "Board update draft",
+   "owner": "Sheku Koroma",
+   "runs": 8,
+   "updated": "Oct 4",
+   "description": "Draft the board update from the week’s shared conversations.",
+   "avgCost": 0.021,
+   "passRate": "8 of 8 runs passed"
+  }
+ ],
+ "archived": [
+  {
+   "id": "launch-brief-v3",
+   "name": "Launch brief, version 3",
+   "runs": 18,
+   "updated": "Sep 18",
+   "status": "Archived Sep 18"
+  },
+  {
+   "id": "interview-guide-2025",
+   "name": "Interview guide 2025",
+   "runs": 9,
+   "updated": "Aug 29",
+   "status": "Archived Aug 29"
+  }
+ ],
+ "edit": {
+  "version": "v5",
+  "liveVersion": "v4",
+  "savedNote": "Draft saved 2 min ago",
+  "instructions": "Write a launch brief for [product] aimed at [audience], shipping [launch date]. State the [single promise] in one sentence, then the three strongest pieces of proof from [knowledge base]. List the risks a skeptical [buyer role] would raise, and end with what we will not claim. Keep it under [word limit] words.",
+  "inputs": [
+   {
+    "input": "product",
+    "type": "Short text",
+    "required": true,
+    "example": "Cortex Team plan"
+   },
+   {
+    "input": "audience",
+    "type": "Short text",
+    "required": true,
+    "example": "Heads of research at 200–2,000 person companies"
+   },
+   {
+    "input": "launch date",
+    "type": "Date",
+    "required": true,
+    "example": "November 4, 2026"
+   },
+   {
+    "input": "knowledge base",
+    "type": "Source picker",
+    "required": true,
+    "example": "Positioning research"
+   },
+   {
+    "input": "buyer role",
+    "type": "Choice",
+    "required": false,
+    "example": "Procurement lead"
+   },
+   {
+    "input": "word limit",
+    "type": "Number",
+    "required": false,
+    "example": "400"
+   }
+  ],
+  "sources": [
+   {
+    "label": "Positioning research · 188 passages",
+    "state": "checked"
+   },
+   {
+    "label": "Customer interviews · 426 passages",
+    "state": "checked"
+   },
+   {
+    "label": "Pricing archive · indexing, 62% · can be added once ready",
+    "state": "disabled"
+   },
+   {
+    "label": "Let the runner swap in a different source through the knowledge base input",
+    "state": "unchecked"
+   }
+  ],
+  "checks": [
+   {
+    "label": "Every factual claim has a citation",
+    "checked": true
+   },
+   {
+    "label": "Cited sources were updated in the last",
+    "checked": true,
+    "inputValue": "30",
+    "inputSuffix": "days"
+   },
+   {
+    "label": "Stop a run that would cost more than",
+    "checked": true,
+    "inputValue": "$0.08"
+   },
+   {
+    "label": "Require a reviewer before the result can be shared",
+    "checked": false
+   }
+  ],
+  "sharing": {
+   "selected": "team",
+   "options": [
+    {
+     "value": "me",
+     "label": "Only me"
+    },
+    {
+     "value": "team",
+     "label": "Go-to-market team · 6 people can run it, Maya and you can edit it"
+    },
+    {
+     "value": "everyone",
+     "label": "Everyone in Sevyn Labs"
+    }
+   ]
+  },
+  "preview": "Write a launch brief for Cortex Team plan aimed at heads of research at 200–2,000 person companies, shipping November 4, 2026. State the single promise in one sentence, then the three strongest pieces of proof from Positioning research…",
+  "testRunCost": 0.03,
+  "changesSincePrevious": [
+   "Added buyer role input",
+   "Source freshness tightened from 60 to 30 days"
+  ]
+ }
+}

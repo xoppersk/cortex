@@ -1,1 +1,79 @@
-{"members":[{"detail":"Owner","email":"sheku@sevynlabs.io","id":"sheku-koroma","lastActive":"Now","name":"Sheku Koroma","role":"Admin","team":"Owner"},{"detail":"Product","email":"maya.jordan@sevynlabs.io","id":"maya-jordan","lastActive":"10:32 PM","name":"Maya Jordan","role":"Editor","team":"Product"},{"detail":"Admin since Oct 6","email":"priya.shah@sevynlabs.io","id":"priya-shah","lastActive":"9:48 PM","name":"Priya Shah","role":"Admin","team":"Operations"},{"detail":"Research","email":"owen.clarke@sevynlabs.io","id":"owen-clarke","lastActive":"Yesterday","name":"Owen Clarke","role":"Editor","team":"Research"},{"detail":"Legal","email":"lena.brooks@sevynlabs.io","id":"lena-brooks","lastActive":"Oct 4","name":"Lena Brooks","role":"Viewer","team":"Legal"}],"pendingInvite":{"email":"daniel.okafor@sevynlabs.io","expires":"Oct 12","name":"Daniel Okafor","role":"Editor","sent":"Oct 6"},"roleDefinitions":[{"description":"Can change workspace settings, billing, members and API keys.","role":"Admin"},{"description":"Can ask questions, add documents and publish playbooks.","role":"Editor"},{"description":"Can read conversations and leave comments. Cannot change sources or settings.","role":"Viewer"}]}
+{
+ "summary": "Five paid seats on the Team plan, all in use. One invitation is waiting; it becomes a sixth seat when accepted.",
+ "members": [
+  {
+   "id": "sheku-koroma",
+   "name": "Sheku Koroma",
+   "email": "sheku@sevynlabs.io",
+   "role": "Admin",
+   "team": "Operations",
+   "detail": "Owner · Operations",
+   "lastActive": "Now",
+   "self": true
+  },
+  {
+   "id": "maya-jordan",
+   "name": "Maya Jordan",
+   "email": "maya@sevynlabs.io",
+   "role": "Editor",
+   "team": "Product",
+   "detail": "Product",
+   "lastActive": "10:12 PM",
+   "removable": true
+  },
+  {
+   "id": "priya-shah",
+   "name": "Priya Shah",
+   "email": "priya@sevynlabs.io",
+   "role": "Admin",
+   "team": "Operations",
+   "detail": "Operations",
+   "lastActive": "Oct 6",
+   "note": "Changed from Editor today"
+  },
+  {
+   "id": "owen-clarke",
+   "name": "Owen Clarke",
+   "email": "owen@sevynlabs.io",
+   "role": "Editor",
+   "team": "Research",
+   "detail": "Research",
+   "lastActive": "Oct 6",
+   "removable": true
+  },
+  {
+   "id": "lena-brooks",
+   "name": "Lena Brooks",
+   "email": "lena@sevynlabs.io",
+   "role": "Viewer",
+   "team": "Legal",
+   "detail": "Legal",
+   "lastActive": "Oct 3",
+   "removable": true
+  }
+ ],
+ "pendingInvite": {
+  "name": "Daniel Okafor",
+  "email": "daniel.okafor@sevynlabs.io",
+  "role": "Editor",
+  "sent": "Oct 5",
+  "expires": "Oct 12",
+  "label": "Invited by you, Oct 5 · expires Oct 12",
+  "status": "Not joined"
+ },
+ "roleDefinitions": [
+  {
+   "role": "Viewer",
+   "description": "Reads shared conversations and opens their sources. Cannot ask questions, so costs nothing."
+  },
+  {
+   "role": "Editor",
+   "description": "Asks questions, runs and builds playbooks, uploads documents."
+  },
+  {
+   "role": "Admin",
+   "description": "Everything above, plus members, keys, budgets and billing."
+  }
+ ],
+ "rolesFooter": "Every role change is written to the audit log. A new seat is billed from the day the invite is accepted."
+}

@@ -1,1 +1,339 @@
-{"apiKeys":{"reveal":{"key":"ctx_live_7f3a9c2e5b814d0aa61e4f29c8d31756","label":"Production API key","warning":"This key is shown once. Store it now; it cannot be shown again."},"rows":[{"access":"All collections, answers and playbooks","cost":18,"flag":"Over-broad access","id":"production-api","lastUsed":"10:39 PM","name":"Production API"},{"access":"Customer interviews and Product docs","cost":6,"flag":null,"id":"maya-integration","lastUsed":"9:12 PM","name":"Maya's integration"},{"access":"Customer interviews only","cost":3,"flag":null,"id":"owen-research-script","lastUsed":"Yesterday","name":"Owen's research script"},{"access":"Indexing only","cost":2,"flag":null,"id":"legacy-indexing","lastUsed":"Sep 18","name":"Legacy indexing"}]},"audit":{"entries":[{"day":"Today","entries":[{"actor":"Sheku Koroma","changes":{"after":"Admin","before":"Editor","from":"Settings · Members"},"expanded":true,"id":"audit-role","sentence":"Sheku Koroma made Priya Shah an Admin.","time":"10:06 PM","what":"Member role changed","when":"Today","who":"Sheku Koroma"},{"actor":"Maya Jordan","id":"audit-playbook","sentence":"Maya Jordan published Launch brief, version 5.","time":"8:44 PM","what":"Playbook published","when":"Today","who":"Maya Jordan"},{"actor":"Priya Shah","id":"audit-limit","sentence":"Priya Shah exported the October usage report.","time":"4:17 PM","what":"Report exported","when":"Today","who":"Priya Shah"}]},{"day":"Yesterday","entries":[{"actor":"Owen Clarke","id":"audit-doc","sentence":"Owen Clarke added Interview round 2 notes to Customer interviews.","time":"3:21 PM","what":"Document added","when":"Yesterday","who":"Owen Clarke"},{"actor":"Sheku Koroma","id":"audit-key","sentence":"Sheku Koroma created the Production API key.","time":"11:03 AM","what":"API key created","when":"Yesterday","who":"Sheku Koroma"}]},{"day":"Oct 4","entries":[{"actor":"Lena Brooks","id":"audit-retention","sentence":"Lena Brooks opened the Retention policy from an answer in Launch narrative.","time":"2:09 PM","what":"Source opened","when":"Oct 4","who":"Lena Brooks"}]}]},"billing":{"card":{"detail":"Visa ending 4242 · Expires Oct 2026","warning":"The card on file expires this month. Update it before October 31 to keep the workspace running."},"nextInvoice":{"date":"Oct 13","lines":[{"amount":150,"label":"Team plan · 5 seats at $30"},{"amount":40,"label":"Model use at cost"},{"amount":4,"label":"Indexing"}],"total":194},"pastInvoices":[{"amount":176,"date":"Sep 13","id":"INV-2026-09","label":"Team plan and model use"},{"amount":162,"date":"Aug 13","id":"INV-2026-08","label":"Team plan and model use"},{"amount":148,"date":"Jul 13","id":"INV-2026-07","label":"Team plan and model use"}],"plan":{"cycle":"Sep 10 – Oct 9","name":"Team","seats":5},"rangeSentence":"This cycle runs from September 10 to October 9. The next invoice is charged on October 13."},"profile":{"appearance":"Light","emailDigest":true,"jobTitle":"Founder","name":"Sheku Koroma","notifications":{"evaluationFailures":true,"inviteAccepted":true,"mentions":true,"weeklyUsage":false},"reading":{"sourcePlacement":"Margin","textSize":"Standard"},"sessions":[{"detail":"Philadelphia · Current session","name":"MacBook Pro · Safari"},{"detail":"Philadelphia · Last used Oct 5","name":"iPhone · Cortex"}],"sourcePlacement":"Margin","textSize":"Standard","timezone":"Eastern Time"},"workspaceSettings":{"answerDefaults":{"citationRule":"Every claim cited","model":"Cortex 4","sourceFreshnessDays":30},"identity":{"name":"Sevyn Labs","slug":"sevyn-labs","supportEmail":"support@sevynlabs.io"},"retention":{"deletedDocumentDays":30,"passageYears":7},"signIn":{"google":true,"sso":{"label":"SSO is available on Enterprise.","state":"Disabled"}},"spending":{"alertThreshold":90,"monthlyLimit":200,"perAnswerCeiling":0.08},"unsavedChanges":1}}
+{
+ "apiKeys": {
+  "summary": "Keys let other tools ask Cortex questions. Each one is limited to what it needs and counts toward the same spending limit.",
+  "reveal": {
+   "heading": "“Zapier sync” is ready. Copy it now.",
+   "body": "This is the only time the full key is shown. If you lose it, revoke it and create another.",
+   "label": "New API key",
+   "key": "cx_live_7Hq2·····································mT4w",
+   "can": "Ask questions, read sources",
+   "cannot": "Upload, change settings",
+   "expires": "January 9, 2027"
+  },
+  "rows": [
+   {
+    "id": "zapier-sync",
+    "name": "Zapier sync",
+    "masked": "cx_live_7Hq2…mT4w",
+    "createdNote": "created just now by you",
+    "access": "Ask, read sources",
+    "lastUsed": "Never",
+    "cost": null
+   },
+   {
+    "id": "production-api",
+    "name": "Production API",
+    "masked": "cx_live_Pk81…a0Qe",
+    "createdNote": "created Aug 2 by you",
+    "access": "Ask, read sources",
+    "lastUsed": "Oct 6, 10:08 PM",
+    "cost": 22
+   },
+   {
+    "id": "evaluation-runner",
+    "name": "Evaluation runner",
+    "masked": "cx_live_Ev3c…91Lb",
+    "createdNote": "created Sep 12 by Owen Clarke",
+    "access": "Run evaluations",
+    "lastUsed": "Oct 5, 2:00 AM",
+    "cost": 7
+   },
+   {
+    "id": "local-development",
+    "name": "Local development",
+    "masked": "cx_test_Ld09…xx2K",
+    "createdNote": "created Sep 20 by you",
+    "access": "Full workspace",
+    "flag": "Broader than it needs",
+    "lastUsed": "Oct 3",
+    "expiresNote": "Expires Oct 31",
+    "cost": null
+   }
+  ],
+  "footer": "Revoking is immediate and permanent, and is recorded in the audit log. Calls made with a revoked key are refused with a 401 error.",
+  "footerNote": "Revoking is immediate and permanent, and is recorded in the audit log. Calls made with a revoked key are refused with a 401 error."
+ },
+ "audit": {
+  "summary": "Every change to people, keys, settings and shared work. Entries cannot be edited or deleted and are kept for one year.",
+  "totalEntries": 38,
+  "filters": {
+   "who": [
+    "Everyone",
+    "Sheku Koroma",
+    "Maya Jordan",
+    "Priya Shah",
+    "API keys"
+   ],
+   "what": [
+    "All changes",
+    "Members and roles",
+    "API keys",
+    "Settings",
+    "Exports"
+   ],
+   "when": [
+    "Last 7 days",
+    "Last 30 days",
+    "Custom range"
+   ]
+  },
+  "groups": [
+   {
+    "day": "Tuesday, October 6",
+    "entries": [
+     {
+      "time": "10:41 PM",
+      "actor": "Sheku Koroma",
+      "sentence": "created API key Zapier sync with ask and read-sources access",
+      "category": "API keys"
+     },
+     {
+      "time": "10:12 PM",
+      "actor": "Sheku Koroma",
+      "sentence": "changed Priya Shah’s role",
+      "category": "Members",
+      "changes": {
+       "before": "Editor",
+       "after": "Admin · can now manage members, keys and billing"
+      },
+      "context": "From Chrome on macOS · Philadelphia, PA"
+     },
+     {
+      "time": "9:58 PM",
+      "actor": "Cortex",
+      "sentence": "emailed the workspace admin: spending reached 90% of the $200 limit",
+      "category": "Spending"
+     },
+     {
+      "time": "6:20 PM",
+      "actor": "Maya Jordan",
+      "sentence": "published Launch brief v4 to the Go-to-market team",
+      "category": "Playbooks"
+     },
+     {
+      "time": "2:14 PM",
+      "actor": "Owen Clarke",
+      "sentence": "exported Research synthesis as PDF, including 7 cited passages",
+      "category": "Exports"
+     }
+    ]
+   },
+   {
+    "day": "Monday, October 5",
+    "entries": [
+     {
+      "time": "4:02 PM",
+      "actor": "Sheku Koroma",
+      "sentence": "invited daniel.okafor@sevynlabs.io as Editor",
+      "category": "Members"
+     },
+     {
+      "time": "2:00 AM",
+      "actor": "Evaluation runner (API key)",
+      "sentence": "ran Launch claims, 47 of 50 passed",
+      "category": "Evaluations"
+     }
+    ]
+   },
+   {
+    "day": "Earlier",
+    "entries": [
+     {
+      "time": "Oct 3",
+      "actor": "Sheku Koroma",
+      "sentence": "revoked API key Old staging, last used September 14",
+      "category": "API keys"
+     },
+     {
+      "time": "Oct 2",
+      "actor": "Sheku Koroma",
+      "sentence": "changed how long cited passages are kept from 2 years to 7 years",
+      "category": "Settings"
+     }
+    ]
+   }
+  ],
+  "notShown": "Questions and answers themselves. Those stay in each conversation, visible to the people it is shared with. Streaming this log to Splunk or Datadog is part of Enterprise."
+ },
+ "billing": {
+  "summary": "Team plan, five seats. The next invoice is on October 9 and will be between $334 and $353, depending on use over the next three days and whether Daniel joins.",
+  "card": {
+   "warning": "Your card expires at the end of October. The October 9 payment will go through; the November 9 payment will fail unless you update it.",
+   "detail": "Visa ending 7731 · expires 10/26",
+   "receiptsEmail": "billing@sevynlabs.io"
+  },
+  "nextInvoice": {
+   "heading": "Next invoice, so far",
+   "lines": [
+    {
+     "label": "5 seats × $30",
+     "detail": "October 9 – November 8",
+     "amount": "$150.00"
+    },
+    {
+     "label": "Model use, September 10 – October 9",
+     "detail": "Capped at your $200 limit · see usage",
+     "amount": "$184.00"
+    },
+    {
+     "label": "Daniel Okafor’s seat, if he joins before October 9",
+     "detail": "Prorated at $1.00 per remaining day",
+     "amount": "up to $3.00"
+    }
+   ],
+   "totalLabel": "Total so far",
+   "total": "$334.00"
+  },
+  "plan": {
+   "heading": "Plan",
+   "body": "Team · $30 per seat per month, model use at cost up to your limit. Enterprise adds single sign-on, custom retention and audit export. Priced per contract.",
+   "actionLabel": "Talk to sales"
+  },
+  "pastInvoices": [
+   {
+    "date": "Sep 9, 2026",
+    "details": "5 seats, $167.40 model use",
+    "amount": "$317.40",
+    "status": "Paid"
+   },
+   {
+    "date": "Aug 9, 2026",
+    "details": "4 seats, 1 added Jul 27, $129.15 model use",
+    "amount": "$262.15",
+    "status": "Paid"
+   },
+   {
+    "date": "Jul 9, 2026",
+    "details": "4 seats, $78.60 model use",
+    "amount": "$198.60",
+    "status": "Paid"
+   }
+  ]
+ },
+ "profile": {
+  "name": "Sheku Koroma",
+  "email": "sheku@sevynlabs.io",
+  "teamLabel": "Operations",
+  "profileNote": "Your name and team label appear on shared conversations and in the audit log.",
+  "notifications": [
+   {
+    "label": "Someone shares a conversation or playbook with me",
+    "checked": true
+   },
+   {
+    "label": "A playbook I own fails its checks",
+    "checked": true
+   },
+   {
+    "label": "Workspace spending crosses the alert level · admins only",
+    "checked": false
+   },
+   {
+    "label": "Every Monday, with last week’s usage and evaluation results",
+    "checked": false
+   }
+  ],
+  "notificationsNote": "Mentions in a conversation always notify you in the app.",
+  "reading": {
+   "appearance": "Light",
+   "textSize": "Comfortable · 18",
+   "textSizeOptions": [
+    "Comfortable · 18",
+    "Compact · 16",
+    "Large · 20"
+   ],
+   "sourcePlacement": "In the margin",
+   "sourcePlacementOptions": [
+    "In the margin",
+    "Below each answer"
+   ]
+  },
+  "sessions": [
+   {
+    "name": "Chrome on macOS · this device",
+    "place": "Philadelphia, PA",
+    "when": "Now"
+   },
+   {
+    "name": "Cortex for iPhone",
+    "place": "Philadelphia, PA",
+    "when": "Oct 6"
+   },
+   {
+    "name": "Safari on macOS",
+    "place": "New York, NY",
+    "when": "Sep 21"
+   }
+  ],
+  "twoStepNote": "Two-step verification is on. Admins in this workspace are required to keep it on."
+ },
+ "workspaceSettings": {
+  "unsavedChanges": 1,
+  "identity": {
+   "name": "Sevyn Labs",
+   "slug": "sevyn-labs",
+   "addressPrefix": "cortex.app/",
+   "addressNote": "Changing the address breaks links people have already bookmarked. Old links redirect for 30 days."
+  },
+  "answerDefaults": {
+   "model": "Cortex 4",
+   "modelOptions": [
+    "Cortex 4",
+    "Cortex 4 mini"
+   ],
+   "citationRule": "Every claim must be cited",
+   "citationOptions": [
+    "Every claim must be cited",
+    "Cite when available"
+   ],
+   "sourceFreshnessDays": 30,
+   "perAnswerCeiling": "$0.08",
+   "perAnswerNote": "changed from $0.10",
+   "note": "These apply to new conversations. Playbooks keep their own settings. People can loosen them for a single conversation only if you allow it below."
+  },
+  "spending": {
+   "monthlyLimit": "$200",
+   "alertThreshold": "90",
+   "allowEditorsRaise": true,
+   "allowEditorsLabel": "Let editors raise the per-answer limit for one conversation, up to $0.25",
+   "note": "At the limit, new answers pause. Reading, sharing and citations keep working. $184 is spent so far this cycle."
+  },
+  "retention": {
+   "conversations": "2 years",
+   "conversationsOptions": [
+    "2 years",
+    "1 year",
+    "Forever"
+   ],
+   "passages": "7 years",
+   "passagesOptions": [
+    "7 years",
+    "Same as conversation"
+   ],
+   "note": "Cited passages are stored as they were when the answer was written, so an old answer still shows what it relied on even after the document changes."
+  },
+  "signIn": {
+   "options": [
+    {
+     "label": "Anyone with an @sevynlabs.io address can join as a Viewer",
+     "checked": true
+    },
+    {
+     "label": "Require two-step verification for admins",
+     "checked": true
+    },
+    {
+     "label": "Single sign-on with Okta, Entra or Google · Enterprise plan",
+     "checked": false,
+     "disabled": true
+    }
+   ],
+   "note": "Domain joins count as seats only once someone is promoted to Editor."
+  },
+  "deleteWorkspace": {
+   "body": "Removes 24 conversations, 7 playbooks and 32 documents for everyone. Billing stops at the end of the cycle. This cannot be undone after 14 days.",
+   "buttonLabel": "Delete Sevyn Labs workspace",
+   "note": "Export first from Audit log or each conversation’s menu."
+  }
+ }
+}

@@ -1,1 +1,89 @@
-{"failures":[{"expected":"A claim tied to passage 118 in Customer interview synthesis.","fixLabel":"Open the passage","got":"A claim tied to an interview passage from round 1 that was over 30 days old.","id":"Q17","question":"Why do buyers hesitate to forward AI answers to legal?","why":"The answer used a stale passage when a current passage made the same point."},{"expected":"The $30 Team seat price and model use at cost, stated separately.","fixLabel":"Review the pricing source","got":"A single blended price of $30 per seat.","id":"Q31","question":"What does a Team workspace cost each month?","why":"Two pricing passages were merged into one claim."},{"expected":"No claim. The approved sources do not support a retention period for shared links.","fixLabel":"Mark as unanswerable","got":"Shared links are kept for seven years.","id":"Q42","question":"How long are shared answer links kept?","why":"The answer borrowed the passage-retention period and applied it to shared links."}],"otherSets":[{"latest":"33 of 36 passed","name":"Pricing claims","questions":36},{"latest":"24 of 24 passed","name":"Security statements","questions":24}],"runCost":1.4,"runs":[{"date":"Sep 28","passed":41},{"date":"Sep 30","passed":44},{"date":"Oct 2","passed":45},{"date":"Oct 4","passed":46},{"date":"Oct 5","passed":47}],"set":{"name":"Launch claims","questions":50},"summary":"47 of 50 Launch claims questions passed on October 5. Three failed: one used a stale passage, one merged two pricing claims, and one answered a question the sources do not support."}
+{
+ "summary": "Last night 47 of 50 questions passed. All three failures came from what was retrieved, not from how the model wrote the answer.",
+ "set": {
+  "name": "Launch claims",
+  "questions": 50,
+  "edited": "Oct 4",
+  "schedule": "runs nightly at 2 AM"
+ },
+ "runCost": 1.4,
+ "failures": [
+  {
+   "id": "Q17",
+   "tag": "Wrong answer",
+   "question": "What retention period did legal approve for evidence?",
+   "expected": "Seven years, from Legal review: evidence retention",
+   "got": "Five years, from Security review notes, an earlier draft",
+   "why": "The correct passage matched at 0.66, under the 0.70 minimum, so it was never read.",
+   "fixLabel": "Lower minimum to 0.65 for Security and legal",
+   "actions": [
+    "Lower minimum to 0.65 for Security and legal",
+    "Inspect passage"
+   ]
+  },
+  {
+   "id": "Q31",
+   "tag": "No answer",
+   "question": "Which competitor lacks per-answer cost limits?",
+   "expected": "Two of five, from Competitive capability matrix",
+   "got": "“The sources don’t say.”",
+   "why": "The matrix failed to split because of merged cells, so it has no passages.",
+   "fixLabel": "Split by row and retry",
+   "actions": [
+    "Split by row and retry"
+   ]
+  },
+  {
+   "id": "Q42",
+   "tag": "Out of date",
+   "question": "When does the onboarding pilot end?",
+   "expected": "November 15, from Launch readiness memo",
+   "got": "October 31, from Onboarding spec v2, last updated July 14",
+   "why": "The stale spec scored higher than the current memo.",
+   "fixLabel": "Keep Onboarding spec v2 out of answers",
+   "actions": [
+    "Keep Onboarding spec v2 out of answers"
+   ]
+  }
+ ],
+ "runs": [
+  {
+   "date": "Oct 5",
+   "passed": 47,
+   "cost": 1.38
+  },
+  {
+   "date": "Oct 4",
+   "passed": 46,
+   "cost": 1.41
+  },
+  {
+   "date": "Oct 3",
+   "passed": 45,
+   "cost": 1.36
+  },
+  {
+   "date": "Oct 1",
+   "passed": 44,
+   "cost": 1.33
+  },
+  {
+   "date": "Sep 28",
+   "passed": 41,
+   "cost": 1.29
+  }
+ ],
+ "runsNote": "Up six questions since re-ranking was switched on, September 29.",
+ "otherSets": [
+  {
+   "name": "Pricing",
+   "questions": 24,
+   "latest": "22 passed · Oct 4"
+  },
+  {
+   "name": "Security answers",
+   "questions": 18,
+   "latest": "18 passed · Oct 3"
+  }
+ ]
+}

@@ -1,1 +1,89 @@
-{"auth":{"quote":{"segments":[{"text":"Seven of nine teams said an answer is only forwardable if the reviewer can open the document behind it"},{"footnote":1,"text":""},{"text":"."}],"source":"Customer interview synthesis · Catalog 02 · passage 118"},"signupError":"Use your work email. Personal addresses can't join a team workspace.","trialFacts":["14 days, no card","$20 of model use included","Up to 3 people","Everything in Team"]},"emptyHistory":{"heading":"Begin with a question worth keeping.","starters":[{"label":"Ask the customer interviews","text":"Why do buyers hesitate to forward AI answers to legal?"},{"label":"Start from the Launch brief playbook","text":"Write the launch brief for Cortex."},{"label":"Ask the product docs","text":"How do citations work?"}],"workspace":"Sevyn Studios trial workspace"},"invite":{"email":"daniel.okafor@sevynlabs.io","expires":"Oct 12","inviter":"Sheku Koroma","name":"Daniel Okafor","role":"Editor","waiting":["3 shared conversations","The Launch brief playbook","Customer interviews, 9 documents"],"workspace":"Sevyn Labs"},"upgrade":{"chargedDate":"Oct 13","monthlyLimit":200,"perSeat":30,"seats":5,"summary":"5 seats at $30 is $150, charged October 13. Model use is billed at cost up to the $200 monthly limit."}}
+{
+ "auth": {
+  "quote": {
+   "segments": [
+    {
+     "text": "“If I can’t show where it came from, I can’t send it.”"
+    },
+    {
+     "text": "",
+     "footnote": 1
+    }
+   ],
+   "source": "A head of research, in the interview study that shaped Cortex. Every answer you get here is footnoted like this one."
+  },
+  "signupError": "Use your work address so teammates can find your workspace. Personal addresses can join a workspace but not start one.",
+  "trialFacts": [
+   "14 days, no card needed",
+   "$20 of model use, roughly 600 cited answers",
+   "Up to 3 people and 25 documents",
+   "When it ends, nothing is deleted. Answers pause until someone picks a plan."
+  ]
+ },
+ "signup": {
+  "stepLabel": "Step 1 of 2 · then name your workspace",
+  "errorName": "Amara Conteh",
+  "errorEmail": "amara.conteh@gmail.com",
+  "legal": "By continuing you agree to the terms and privacy policy. Your documents are never used for training."
+ },
+ "invite": {
+  "inviter": "Sheku Koroma",
+  "role": "Editor",
+  "email": "daniel.okafor@sevynlabs.io",
+  "name": "Daniel Okafor",
+  "workspace": "Sevyn Labs",
+  "expires": "October 12",
+  "roleDescription": "you can ask questions, run playbooks and upload documents",
+  "waiting": [
+   {
+    "label": "Launch narrative",
+    "detail": "shared conversation"
+   },
+   {
+    "label": "Launch brief",
+    "detail": "playbook"
+   },
+   {
+    "label": "Weekly decision memo",
+    "detail": "playbook"
+   },
+   {
+    "label": "5 knowledge bases",
+    "detail": "32 documents"
+   }
+  ],
+  "quote": {
+   "text": "“Start with Launch narrative. Every claim there is cited, so you can check our thinking before you add to it.”",
+   "author": "Sheku"
+  }
+ },
+ "emptyHistory": {
+  "workspace": "Sevyn Studios · trial",
+  "caption": "No conversations yet",
+  "heading": "Begin with a question worth keeping.",
+  "body": "Cortex works best when you name the decision, attach the evidence, and say what a useful answer should make clearer.",
+  "starters": [
+   "What do our audience surveys say viewers want more of?",
+   "Summarise the channel research into three bets for next quarter.",
+   "Which claims in our channel plan have no evidence behind them yet?"
+  ],
+  "readyToCite": [
+   "Channel research · 64 passages",
+   "Audience surveys · 112 passages",
+   "Add your own documents"
+  ]
+ },
+ "upgrade": {
+  "workspace": "Sevyn Studios",
+  "trialEnds": "Trial ends Tuesday, October 13",
+  "heading": "Keep Sevyn Studios answering.",
+  "body": "Nothing is deleted when the trial ends; answers just pause. Pick seats and a spending limit and the switch happens on the 13th.",
+  "seatsInTrial": 3,
+  "perSeat": 30,
+  "limitValue": "$75",
+  "usageNote": "The trial used $14.20 in 12 days, about $36 a month at that pace.",
+  "modelUseNote": "Billed after each month, never over $75",
+  "chargedDate": "October 13",
+  "footerNote": "Seats added later are charged for the days left in the month. Cancel any time before the 13th and nothing is charged."
+ }
+}

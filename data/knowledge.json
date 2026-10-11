@@ -1,1 +1,583 @@
-{"ask":{"answerBlocks":[{"segments":[{"text":"Seven of nine teams said an answer is only forwardable if the reviewer can open the document behind it"},{"footnote":1,"text":""},{"text":". Legal wants to know which version of a policy was read"},{"footnote":2,"text":""},{"text":", and whether it was "},{"mark":true,"text":"still current when the answer was written"},{"footnote":3,"text":""},{"text":". Reviewers also ask how long the cited passage is kept"},{"footnote":4,"text":""},{"text":"."}],"type":"paragraph"}],"answerHeading":"Buyers forward answers they can inspect.","collectionId":"customer-interviews","question":"Why do buyers hesitate to forward AI answers to legal?","search":{"freshnessDays":30,"minimumMatch":0.7,"reranking":true,"top":8},"trace":[{"cite":1,"excerpt":"Reviewers would forward an answer when they could open the document behind it.","match":0.91,"outcome":"Cited","source":"Customer interview synthesis · passage 118"},{"cite":2,"excerpt":"Legal asked which policy version the answer relied on and who approved it.","match":0.86,"outcome":"Cited","source":"Procurement call notes, Northwind · passage 22"},{"cite":3,"excerpt":"The source was current on the day the answer was given.","match":0.81,"outcome":"Cited","source":"Product council synthesis · passage 9"},{"cite":4,"excerpt":"Retention and reviewer access were raised before model quality.","match":0.78,"outcome":"Cited","source":"Security and legal review · passage 41"},{"cite":null,"excerpt":"Interview round 1 · passage 7","match":0.72,"outcome":"Set aside · over 30 days old","setAside":true,"source":"Interview round 1 · passage 7"},{"cite":null,"excerpt":"The team discussed forwarding reports by email.","match":0.66,"outcome":"Set aside · below 0.70","setAside":true,"source":"Customer interview synthesis · passage 77"},{"cite":null,"excerpt":"A reviewer can request access from the document owner.","match":0.64,"outcome":"Set aside · below 0.70","setAside":true,"source":"Product docs · passage 203"},{"cite":null,"excerpt":"Forwarding was mentioned in the meeting agenda only.","match":0.61,"outcome":"Set aside · below 0.70","setAside":true,"source":"Research review notes · passage 12"}]},"collections":[{"cited30d":148,"documents":9,"id":"customer-interviews","name":"Customer interviews","newest":"Oct 5","passages":426,"status":{"label":"Current","type":"current"}},{"cited30d":96,"documents":6,"id":"positioning-research","name":"Positioning research","newest":"Oct 3","passages":188,"status":{"label":"Current","type":"current"}},{"cited30d":211,"documents":9,"id":"product-docs","name":"Product docs","newest":"Oct 6","passages":724,"status":{"label":"Current","type":"current"}},{"cited30d":84,"documents":5,"id":"security-and-legal","name":"Security and legal","newest":"Sep 29","passages":412,"status":{"label":"2 documents over 60 days old","type":"stale"}},{"cited30d":17,"documents":3,"id":"pricing-archive","name":"Pricing archive","newest":"Aug 18","passages":92,"status":{"label":"Indexing","percent":62,"type":"indexing"}}],"documents":[{"collection":"Customer interviews","id":"customer-interview-synthesis","passages":148,"status":"indexed","title":"Customer interview synthesis","updated":"Oct 5"},{"collection":"Customer interviews","id":"interview-round-2-notes","passages":64,"status":"indexed","title":"Interview round 2 notes","updated":"Oct 4"},{"collection":"Customer interviews","id":"interview-round-1-notes","passages":58,"status":"indexed","title":"Interview round 1 notes","updated":"Sep 18"},{"collection":"Customer interviews","id":"procurement-call-notes","passages":36,"status":"indexed","title":"Procurement call notes, Northwind","updated":"Sep 30"},{"collection":"Customer interviews","id":"legal-review-call","passages":31,"status":"indexed","title":"Legal review call transcript","updated":"Sep 29"},{"collection":"Customer interviews","id":"research-review-notes","passages":27,"status":"indexed","title":"Research review notes","updated":"Sep 26"},{"collection":"Customer interviews","id":"buyer-panel-summary","passages":24,"status":"indexed","title":"Buyer panel summary","updated":"Sep 22"},{"collection":"Customer interviews","id":"support-leads-interviews","passages":21,"status":"indexed","title":"Support leads interviews","updated":"Sep 19"},{"collection":"Customer interviews","id":"win-loss-export","passages":17,"status":"indexed","title":"Win-loss interview export","updated":"Sep 15"},{"collection":"Positioning research","id":"positioning-draft-4","passages":42,"status":"indexed","title":"Positioning draft 4","updated":"Oct 3"},{"collection":"Positioning research","id":"positioning-draft-3","passages":39,"status":"indexed","title":"Positioning draft 3","updated":"Sep 27"},{"collection":"Positioning research","id":"category-analysis","passages":34,"status":"indexed","title":"Category analysis","updated":"Sep 24"},{"collection":"Positioning research","id":"competitor-claims","passages":29,"status":"indexed","title":"Competitor claims audit","updated":"Sep 21"},{"collection":"Positioning research","id":"analyst-briefing","passages":24,"status":"indexed","title":"Analyst briefing notes","updated":"Sep 18"},{"collection":"Positioning research","id":"message-testing","passages":20,"status":"indexed","title":"Message testing results","updated":"Sep 15"},{"collection":"Product docs","id":"product-council-synthesis","passages":96,"status":"indexed","title":"Product council synthesis","updated":"Oct 1"},{"collection":"Product docs","id":"citations-specification","passages":112,"status":"indexed","title":"Citations specification","updated":"Oct 6"},{"collection":"Product docs","id":"playbooks-specification","passages":104,"status":"indexed","title":"Playbooks specification","updated":"Oct 5"},{"collection":"Product docs","id":"usage-limits-guide","passages":88,"status":"indexed","title":"Usage limits guide","updated":"Oct 4"},{"collection":"Product docs","id":"retrieval-trace-notes","passages":83,"status":"indexed","title":"Retrieval trace notes","updated":"Oct 2"},{"collection":"Product docs","id":"sharing-permissions","passages":76,"status":"indexed","title":"Sharing and permissions","updated":"Sep 30"},{"collection":"Product docs","id":"evaluation-guide","passages":69,"status":"indexed","title":"Evaluation guide","updated":"Sep 28"},{"collection":"Product docs","id":"api-reference-draft","passages":54,"status":"indexed","title":"API reference draft","updated":"Sep 25"},{"collection":"Product docs","id":"release-checklist","passages":42,"status":"indexed","title":"Release checklist","updated":"Sep 23"},{"collection":"Security and legal","id":"security-legal-review","passages":118,"status":"indexed","title":"Security and legal review","updated":"Sep 29"},{"collection":"Security and legal","id":"retention-policy","passages":96,"status":"stale","title":"Retention policy","updated":"Aug 3"},{"collection":"Security and legal","id":"data-processing-summary","passages":84,"status":"indexed","title":"Data processing summary","updated":"Sep 20"},{"collection":"Security and legal","id":"access-control-policy","passages":67,"status":"stale","title":"Access control policy","updated":"Jul 29"},{"collection":"Security and legal","id":"incident-response-plan","passages":47,"status":"indexed","title":"Incident response plan","updated":"Sep 12"},{"collection":"Pricing archive","id":"pricing-history-2025","passages":41,"status":"indexing","title":"Pricing history 2025","updated":"Aug 18"},{"collection":"Pricing archive","id":"pricing-objections-archive","passages":29,"status":"indexed","title":"Pricing objections archive","updated":"Aug 12"},{"collection":"Pricing archive","id":"q3-win-loss-export","passages":22,"status":"failed","title":"Q3 win-loss export.csv","updated":"Aug 9"}],"inspector":{"documentId":"customer-interview-synthesis","documentTitle":"Customer interview synthesis","passages":[{"number":116,"overlap":"…the reviewer needs the version that was read, not the version that exists now.","text":"Reviewers asked for the version that was read, not the version that exists now."},{"number":117,"overlap":"The passage continues into passage 118.","text":"A forwarded answer carries no context unless the passage travels with it."},{"number":118,"overlap":"Selected passage","selected":true,"text":"Reviewers said they would forward an answer when they could open the document behind it without asking the author for help."},{"number":119,"overlap":"Overlap with passage 118: document behind it.","text":"The document behind it has to open at the passage, not at the first page."},{"number":120,"overlap":"Continues the retention answer in passage 121.","text":"Retention matters because a reviewer may return to the answer weeks later."}],"selectedPassage":{"characters":142,"cited":18,"match":0.91,"number":118,"tokens":31,"words":24}},"needsAttention":[{"detail":"Q3 win-loss export.csv could not be parsed.","label":"1 failed document"},{"detail":"Retention policy and Access control policy are over 60 days old.","label":"2 stale documents"},{"detail":"Pricing archive is indexing, 62% complete.","label":"Indexing in progress"}]}
+{
+ "ask": {
+  "collectionId": "customer-interviews",
+  "collectionLabel": "Customer interviews · 9 documents, 426 passages",
+  "question": "Why do buyers hesitate to forward AI answers to legal?",
+  "answerHeading": "They cannot show legal where the answer came from.",
+  "answerBlocks": [
+   {
+    "type": "paragraph",
+    "segments": [
+     {
+      "text": "Seven of nine teams said an answer is only forwardable if the reviewer can open the document behind it"
+     },
+     {
+      "text": "",
+      "footnote": 1
+     },
+     {
+      "text": ". The concern is less about accuracy than accountability: legal wants to know which version of a policy was read"
+     },
+     {
+      "text": "",
+      "footnote": 2
+     },
+     {
+      "text": " and whether that version was still current when the answer was written"
+     },
+     {
+      "text": "",
+      "footnote": 3
+     },
+     {
+      "text": "."
+     }
+    ]
+   },
+   {
+    "type": "paragraph",
+    "segments": [
+     {
+      "text": "Two teams added that they now paste answers into email with the source attached by hand, which they described as “the step that kills the time saving”"
+     },
+     {
+      "text": "",
+      "footnote": 4
+     },
+     {
+      "text": "."
+     }
+    ]
+   }
+  ],
+  "answerMeta": "4 citations from 3 documents · 1,206 tokens · $0.014",
+  "search": {
+   "top": 8,
+   "minimumMatch": 0.7,
+   "freshnessDays": 30,
+   "reranking": true
+  },
+  "traceIntro": "Eight passages came back. Four were cited; the other four were set aside for the reasons shown.",
+  "trace": [
+   {
+    "cite": 1,
+    "excerpt": "“…asked to see the document behind an answer before forwarding it to legal.”",
+    "source": "Customer interview synthesis · passage 118",
+    "match": 0.91,
+    "outcome": "Cited"
+   },
+   {
+    "cite": 2,
+    "excerpt": "“Legal’s first question was always which version of the policy the tool had read.”",
+    "source": "Procurement call notes, Northwind · passage 22",
+    "match": 0.86,
+    "outcome": "Cited"
+   },
+   {
+    "cite": null,
+    "excerpt": "“Legal’s first question was always which version…”",
+    "source": "Customer interview synthesis · passage 131",
+    "match": 0.85,
+    "outcome": "Set aside: repeats 2",
+    "setAside": true
+   },
+   {
+    "cite": 3,
+    "excerpt": "“…whether the source was current on the day the answer was given.”",
+    "source": "Product council interview synthesis · passage 9",
+    "match": 0.81,
+    "outcome": "Cited"
+   },
+   {
+    "cite": 4,
+    "excerpt": "“Honestly, attaching the PDF by hand is the step that kills the time saving.”",
+    "source": "Customer interview synthesis · passage 140",
+    "match": 0.78,
+    "outcome": "Cited"
+   },
+   {
+    "cite": null,
+    "excerpt": "“Our legal team signs off on vendor AI tools quarterly.”",
+    "source": "Pilot team diary study · passage 61",
+    "match": 0.74,
+    "outcome": "Set aside: off the question",
+    "setAside": true
+   },
+   {
+    "cite": null,
+    "excerpt": "“Forwarding was blocked by the DLP policy in June.”",
+    "source": "Interview round 1 notes · passage 7",
+    "match": 0.72,
+    "outcome": "Set aside: updated June 18, over 30 days old",
+    "setAside": true
+   },
+   {
+    "cite": null,
+    "excerpt": "“Most of the team forwards summaries, not raw answers.”",
+    "source": "Customer interview synthesis · passage 77",
+    "match": 0.66,
+    "outcome": "Set aside: below 0.70",
+    "setAside": true
+   }
+  ]
+ },
+ "collections": [
+  {
+   "cited30d": 212,
+   "documents": 9,
+   "id": "customer-interviews",
+   "name": "Customer interviews",
+   "newest": "Oct 2",
+   "passages": 426,
+   "status": {
+    "type": "current",
+    "label": "Ready"
+   },
+   "description": "Transcripts and syntheses",
+   "owner": "Maya Jordan"
+  },
+  {
+   "cited30d": 164,
+   "documents": 6,
+   "id": "positioning-research",
+   "name": "Positioning research",
+   "newest": "Oct 6",
+   "passages": 188,
+   "status": {
+    "type": "current",
+    "label": "Ready"
+   },
+   "description": "Market and narrative work",
+   "owner": "Sheku Koroma"
+  },
+  {
+   "cited30d": 97,
+   "documents": 9,
+   "id": "product-docs",
+   "name": "Product docs",
+   "newest": "Oct 5",
+   "passages": 724,
+   "status": {
+    "type": "current",
+    "label": "Ready",
+    "note": "2 documents over 60 days old"
+   },
+   "description": "Specs, decision logs, postmortems",
+   "owner": "Owen Clarke"
+  },
+  {
+   "cited30d": 58,
+   "documents": 5,
+   "id": "security-and-legal",
+   "name": "Security and legal",
+   "newest": "Oct 3",
+   "passages": 412,
+   "status": {
+    "type": "current",
+    "label": "Ready"
+   },
+   "description": "Reviews, retention, procurement",
+   "owner": "Priya Shah"
+  },
+  {
+   "cited30d": null,
+   "documents": 3,
+   "id": "pricing-archive",
+   "name": "Pricing archive",
+   "newest": "Oct 4",
+   "passages": 92,
+   "status": {
+    "type": "indexing",
+    "label": "Indexing, 62%",
+    "percent": 62,
+    "note": "About 4 min left"
+   },
+   "description": "Price tests and finance memos",
+   "owner": "Priya Shah"
+  }
+ ],
+ "documents": [
+  {
+   "id": "competitive-capability-matrix",
+   "title": "Competitive capability matrix",
+   "collection": "Positioning research",
+   "passages": 0,
+   "status": "failed",
+   "updated": "Oct 2",
+   "format": "XLSX · 3 sheets",
+   "owner": "Sheku Koroma",
+   "statusDetail": "Merged cells on sheet 2. Split by row and retry"
+  },
+  {
+   "id": "pricing-test-q3",
+   "title": "Pricing test, Q3 cohort",
+   "collection": "Pricing archive",
+   "passages": null,
+   "status": "indexing",
+   "updated": "Oct 4",
+   "format": "PDF · 41 pages",
+   "owner": "Priya Shah",
+   "statusDetail": "Indexing, page 25 of 41"
+  },
+  {
+   "id": "onboarding-spec-v2",
+   "title": "Onboarding spec v2",
+   "collection": "Product docs",
+   "passages": 88,
+   "status": "stale",
+   "updated": "Jul 14",
+   "format": "Google Doc · synced",
+   "owner": "Owen Clarke",
+   "statusNote": "Cited 9 times this month"
+  },
+  {
+   "id": "retrieval-architecture-notes",
+   "title": "Retrieval architecture notes",
+   "collection": "Product docs",
+   "passages": 64,
+   "status": "stale",
+   "updated": "Jul 30",
+   "format": "Markdown",
+   "owner": "Owen Clarke",
+   "statusNote": "Cited 3 times this month"
+  },
+  {
+   "id": "customer-interview-synthesis",
+   "title": "Customer interview synthesis",
+   "collection": "Customer interviews",
+   "passages": 164,
+   "status": "indexed",
+   "updated": "Oct 2",
+   "format": "PDF · 32 pages",
+   "owner": "Maya Jordan"
+  },
+  {
+   "id": "launch-readiness-memo",
+   "title": "Launch readiness memo",
+   "collection": "Positioning research",
+   "passages": 27,
+   "status": "indexed",
+   "updated": "Oct 6",
+   "format": "Google Doc · synced",
+   "owner": "Sheku Koroma"
+  },
+  {
+   "id": "legal-review-evidence-retention",
+   "title": "Legal review: evidence retention",
+   "collection": "Security and legal",
+   "passages": 96,
+   "status": "indexed",
+   "updated": "Oct 2",
+   "format": "PDF · 18 pages",
+   "owner": "Priya Shah"
+  },
+  {
+   "id": "finance-team-cost-analysis",
+   "title": "Finance team cost analysis",
+   "collection": "Pricing archive",
+   "passages": 31,
+   "status": "indexed",
+   "updated": "Oct 4",
+   "format": "XLSX · 1 sheet",
+   "owner": "Priya Shah"
+  },
+  {
+   "id": "interview-round-2-transcripts",
+   "title": "Interview round 2 transcripts",
+   "collection": "Customer interviews",
+   "passages": 58,
+   "status": "indexed",
+   "updated": "Oct 1",
+   "format": "DOCX · 12 files",
+   "owner": "Maya Jordan"
+  },
+  {
+   "id": "procurement-call-notes-northwind",
+   "title": "Procurement call notes, Northwind",
+   "collection": "Customer interviews",
+   "passages": 34,
+   "status": "indexed",
+   "updated": "Sep 30",
+   "format": "PDF · 9 pages",
+   "owner": "Maya Jordan"
+  },
+  {
+   "id": "pilot-team-diary-study",
+   "title": "Pilot team diary study",
+   "collection": "Customer interviews",
+   "passages": 41,
+   "status": "indexed",
+   "updated": "Sep 26",
+   "format": "Markdown",
+   "owner": "Owen Clarke"
+  },
+  {
+   "id": "interview-round-1-notes",
+   "title": "Interview round 1 notes",
+   "collection": "Customer interviews",
+   "passages": 29,
+   "status": "indexed",
+   "updated": "Sep 18",
+   "format": "DOCX · 8 files",
+   "owner": "Maya Jordan"
+  },
+  {
+   "id": "retailco-onboarding-call",
+   "title": "RetailCo onboarding call",
+   "collection": "Customer interviews",
+   "passages": 22,
+   "status": "indexed",
+   "updated": "Sep 30",
+   "format": "Call transcript",
+   "owner": "Owen Clarke"
+  },
+  {
+   "id": "support-escalation-interviews",
+   "title": "Support escalation interviews",
+   "collection": "Customer interviews",
+   "passages": 31,
+   "status": "indexed",
+   "updated": "Sep 22",
+   "format": "Call transcripts",
+   "owner": "Maya Jordan"
+  },
+  {
+   "id": "champion-user-panel",
+   "title": "Champion user panel",
+   "collection": "Customer interviews",
+   "passages": 27,
+   "status": "indexed",
+   "updated": "Sep 15",
+   "format": "PDF · 14 pages",
+   "owner": "Owen Clarke"
+  },
+  {
+   "id": "win-loss-call-notes",
+   "title": "Win-loss call notes",
+   "collection": "Customer interviews",
+   "passages": 20,
+   "status": "indexed",
+   "updated": "Sep 29",
+   "format": "Markdown",
+   "owner": "Maya Jordan"
+  },
+  {
+   "id": "positioning-workshop-notes",
+   "title": "Positioning workshop notes",
+   "collection": "Positioning research",
+   "passages": 44,
+   "status": "indexed",
+   "updated": "Oct 3",
+   "format": "Markdown",
+   "owner": "Sheku Koroma"
+  },
+  {
+   "id": "competitive-landscape-scan",
+   "title": "Competitive landscape scan",
+   "collection": "Positioning research",
+   "passages": 52,
+   "status": "indexed",
+   "updated": "Sep 27",
+   "format": "PDF · 22 pages",
+   "owner": "Sheku Koroma"
+  },
+  {
+   "id": "narrative-testing-round-1",
+   "title": "Narrative testing, round 1",
+   "collection": "Positioning research",
+   "passages": 38,
+   "status": "indexed",
+   "updated": "Sep 24",
+   "format": "Google Doc · synced",
+   "owner": "Maya Jordan"
+  },
+  {
+   "id": "category-naming-study",
+   "title": "Category naming study",
+   "collection": "Positioning research",
+   "passages": 27,
+   "status": "indexed",
+   "updated": "Oct 5",
+   "format": "Markdown",
+   "owner": "Sheku Koroma"
+  },
+  {
+   "id": "product-requirements-q4",
+   "title": "Product requirements, Q4",
+   "collection": "Product docs",
+   "passages": 118,
+   "status": "indexed",
+   "updated": "Oct 4",
+   "format": "Google Doc · synced",
+   "owner": "Owen Clarke"
+  },
+  {
+   "id": "decision-log-2026",
+   "title": "Decision log 2026",
+   "collection": "Product docs",
+   "passages": 96,
+   "status": "indexed",
+   "updated": "Oct 1",
+   "format": "Markdown",
+   "owner": "Owen Clarke"
+  },
+  {
+   "id": "api-design-notes",
+   "title": "API design notes",
+   "collection": "Product docs",
+   "passages": 84,
+   "status": "indexed",
+   "updated": "Sep 28",
+   "format": "Markdown",
+   "owner": "Priya Shah"
+  },
+  {
+   "id": "postmortem-search-outage",
+   "title": "Postmortem: search outage",
+   "collection": "Product docs",
+   "passages": 57,
+   "status": "indexed",
+   "updated": "Sep 19",
+   "format": "Google Doc · synced",
+   "owner": "Owen Clarke"
+  },
+  {
+   "id": "roadmap-rationale",
+   "title": "Roadmap rationale",
+   "collection": "Product docs",
+   "passages": 73,
+   "status": "indexed",
+   "updated": "Sep 30",
+   "format": "PDF · 16 pages",
+   "owner": "Sheku Koroma"
+  },
+  {
+   "id": "design-system-notes",
+   "title": "Design system notes",
+   "collection": "Product docs",
+   "passages": 66,
+   "status": "indexed",
+   "updated": "Oct 5",
+   "format": "Markdown",
+   "owner": "Maya Jordan"
+  },
+  {
+   "id": "release-checklist",
+   "title": "Release checklist",
+   "collection": "Product docs",
+   "passages": 78,
+   "status": "indexed",
+   "updated": "Oct 6",
+   "format": "Markdown",
+   "owner": "Owen Clarke"
+  },
+  {
+   "id": "security-review-notes",
+   "title": "Security review notes",
+   "collection": "Security and legal",
+   "passages": 88,
+   "status": "indexed",
+   "updated": "Oct 1",
+   "format": "PDF · 12 pages",
+   "owner": "Priya Shah"
+  },
+  {
+   "id": "data-retention-policy",
+   "title": "Data retention policy",
+   "collection": "Security and legal",
+   "passages": 74,
+   "status": "indexed",
+   "updated": "Sep 25",
+   "format": "PDF · 9 pages",
+   "owner": "Lena Brooks"
+  },
+  {
+   "id": "procurement-answers-draft",
+   "title": "Procurement answers, draft",
+   "collection": "Security and legal",
+   "passages": 69,
+   "status": "indexed",
+   "updated": "Oct 3",
+   "format": "Google Doc · synced",
+   "owner": "Priya Shah"
+  },
+  {
+   "id": "subprocessor-list",
+   "title": "Subprocessor list",
+   "collection": "Security and legal",
+   "passages": 85,
+   "status": "indexed",
+   "updated": "Sep 20",
+   "format": "XLSX · 1 sheet",
+   "owner": "Lena Brooks"
+  },
+  {
+   "id": "pricing-history-2024-2026",
+   "title": "Pricing history 2024–2026",
+   "collection": "Pricing archive",
+   "passages": 61,
+   "status": "indexed",
+   "updated": "Oct 4",
+   "format": "XLSX · 2 sheets",
+   "owner": "Priya Shah"
+  }
+ ],
+ "inspector": {
+  "documentId": "customer-interview-synthesis",
+  "documentTitle": "Customer interview synthesis",
+  "collectionName": "Customer interviews",
+  "totalPassages": 164,
+  "splitting": "split by heading, up to 256 tokens, 40 tokens of overlap",
+  "indexedLabel": "indexed Oct 2",
+  "sectionHeading": "4.2 Forwarding answers to legal",
+  "passages": [
+   {
+    "number": 116,
+    "text": "Across the nine teams we spoke to, the moment of friction was rarely the first answer. It came later, when someone needed to pass that answer to a colleague outside the tool."
+   },
+   {
+    "number": 117,
+    "text": "Research leads described a familiar loop: copy the answer, paste it into email, then search for the document it came from so the reader could check it. In two teams this loop had become a written procedure."
+   },
+   {
+    "number": 118,
+    "selected": true,
+    "overlapPrefix": "In two teams this loop had become a written procedure.",
+    "text": "In two teams this loop had become a written procedure. Buyers repeatedly asked to see the document behind an answer before forwarding it to legal. Seven of nine teams named traceability as the deciding criterion, ahead of answer quality and price. One head of research put it plainly: “If I can’t show where it came from,”"
+   },
+   {
+    "number": 119,
+    "overlapPrefix": "One head of research put it plainly: “If I can’t show where it came from,”",
+    "text": "One head of research put it plainly: “If I can’t show where it came from, I can’t send it. And if I can’t send it, the tool only saves me time when I’m working alone.”"
+   },
+   {
+    "number": 120,
+    "text": "Legal reviewers were consistent about what they needed: the source, the version, and the date the answer was given. None asked for a confidence score."
+   }
+  ],
+  "selectedPassage": {
+   "number": 118,
+   "tokens": 212,
+   "page": "14–15",
+   "heading": "4.2 Forwarding answers to legal",
+   "usage": "Retrieved for 31 questions and cited in 19 answers. Median match 0.84. Most recent: Launch narrative, Ask: forwarding to legal"
+  }
+ },
+ "needsAttention": [
+  {
+   "label": "Product docs has stale passages",
+   "detail": "Two documents were last updated in July. They were cited 12 times this month, including in Launch narrative.",
+   "actionLabel": "Review the two documents"
+  },
+  {
+   "label": "Pricing archive is not searchable yet",
+   "detail": "Answers will not cite it until indexing finishes. Two playbooks are waiting on it."
+  }
+ ],
+ "summary": "32 documents in five collections, split into 1,842 passages Cortex can cite. Two collections need attention before you rely on them.",
+ "evaluationLine": {
+  "label": "Last evaluation: 47 of 50 passed",
+  "detail": "All three failures trace to retrieval, not the model.",
+  "actionLabel": "See failures"
+ }
+}

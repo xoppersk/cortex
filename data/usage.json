@@ -1,1 +1,122 @@
-{"byModel":[{"amount":142,"name":"Cortex 4","readTokens":6840000,"writtenTokens":1920000},{"amount":31,"name":"Cortex 4 mini","readTokens":2380000,"writtenTokens":640000},{"amount":11,"name":"Indexing","readTokens":0,"writtenTokens":0}],"byPerson":[{"amount":62,"name":"Maya Jordan"},{"amount":52,"name":"Sheku Koroma"},{"amount":32,"name":"Owen Clarke"},{"amount":9,"name":"Priya Shah"},{"amount":29,"name":"API keys"}],"byProject":[{"amount":71,"name":"Launch narrative","readTokens":4620000,"writtenTokens":1280000},{"amount":58,"name":"Research synthesis","readTokens":3710000,"writtenTokens":940000},{"amount":29,"name":"Pricing analysis","readTokens":1640000,"writtenTokens":410000},{"amount":26,"name":"Unfiled","readTokens":1210000,"writtenTokens":290000}],"marginActions":[{"description":"Keep the monthly limit at $200 and cap each answer at $0.05.","label":"Cap answers at $0.05"},{"description":"Move the monthly limit from $200 to $250 for the rest of the cycle.","label":"Raise the limit to $250"},{"description":"The workspace reaches the limit around October 8 at the current pace.","label":"Do nothing"}],"projection":{"date":"Oct 12","value":209},"series":[{"date":"Sep 10","value":0},{"date":"Sep 19","value":38},{"date":"Sep 26","value":72},{"date":"Oct 3","value":126},{"date":"Oct 9","value":184}],"summary":"$184 of the $200 limit is spent with three days left. At this pace the workspace reaches the limit around October 8."}
+{
+ "summary": "$184 of the $200 limit is spent with three days left. At this week’s pace the workspace reaches the limit around October 8, a day before the cycle resets.",
+ "cycleLabel": "Billing cycle September 10 – October 9 · updated 10:12 PM",
+ "chartCaption": "Spend so far this cycle. The dotted segment assumes this week’s rate of about $8 a day.",
+ "series": [
+  {
+   "date": "Sep 10",
+   "value": 0
+  },
+  {
+   "date": "Sep 16",
+   "value": 41
+  },
+  {
+   "date": "Sep 23",
+   "value": 89
+  },
+  {
+   "date": "Sep 30",
+   "value": 138
+  },
+  {
+   "date": "Oct 6",
+   "value": 184
+  }
+ ],
+ "projection": {
+  "date": "Oct 9",
+  "value": 209
+ },
+ "byProject": [
+  {
+   "name": "Launch narrative",
+   "detail": "9 conversations",
+   "amount": 71,
+   "conversations": 9,
+   "tokensK": 3590,
+   "writtenTokens": 1810000,
+   "readTokens": 1780000
+  },
+  {
+   "name": "Research synthesis",
+   "detail": "7 conversations",
+   "amount": 58,
+   "conversations": 7,
+   "tokensK": 2810,
+   "writtenTokens": 1420000,
+   "readTokens": 1390000
+  },
+  {
+   "name": "Pricing analysis",
+   "detail": "4 conversations",
+   "amount": 29,
+   "conversations": 4,
+   "tokensK": 1420,
+   "writtenTokens": 730000,
+   "readTokens": 690000
+  },
+  {
+   "name": "Unfiled",
+   "detail": "4 conversations",
+   "amount": 26,
+   "conversations": 4,
+   "tokensK": null,
+   "writtenTokens": 0,
+   "readTokens": 0
+  }
+ ],
+ "byModel": [
+  {
+   "name": "Cortex 4",
+   "amount": 142,
+   "median": "4.1 s"
+  },
+  {
+   "name": "Cortex 4 mini",
+   "amount": 31,
+   "median": "1.6 s"
+  },
+  {
+   "name": "Indexing",
+   "amount": 11,
+   "median": "—"
+  }
+ ],
+ "byPerson": [
+  {
+   "name": "Maya Jordan",
+   "amount": 62
+  },
+  {
+   "name": "Sheku Koroma",
+   "amount": 52
+  },
+  {
+   "name": "Owen Clarke",
+   "amount": 32
+  },
+  {
+   "name": "Priya Shah",
+   "amount": 9
+  },
+  {
+   "name": "API keys",
+   "amount": 29
+  }
+ ],
+ "marginActions": [
+  {
+   "label": "Cap answers at $0.05 until Oct 9",
+   "description": "Saves about $6. Long answers may stop early."
+  },
+  {
+   "label": "Raise this cycle’s limit to $250",
+   "description": "Billed on Oct 9 with the plan."
+  },
+  {
+   "label": "Do nothing",
+   "description": "New answers pause at $200; reading and citations keep working."
+  }
+ ]
+}
