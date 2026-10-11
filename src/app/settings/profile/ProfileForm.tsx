@@ -1,28 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "../../../components/Button";
-import { SettingsSection } from "../../../components/SettingsSection";
+import { Field } from "../../../components/Field";
 import type { AdminData } from "../../../lib/types";
 
 type Profile = AdminData["profile"];
-type NotificationKey = keyof Profile["notifications"];
-
-const NOTIFICATION_LABELS: Record<NotificationKey, string> = {
-  evaluationFailures: "Evaluation failures",
-  inviteAccepted: "Invite accepted",
-  mentions: "Mentions",
-  weeklyUsage: "Weekly usage summary",
-};
 
 const APPEARANCE_OPTIONS = ["Light", "Dark", "Match system"] as const;
 type Appearance = (typeof APPEARANCE_OPTIONS)[number];
-
-const TEXT_SIZE_OPTIONS = ["Standard", "Large"] as const;
-type TextSize = (typeof TEXT_SIZE_OPTIONS)[number];
-
-const PLACEMENT_OPTIONS = ["Margin", "Below the answer"] as const;
-type Placement = (typeof PLACEMENT_OPTIONS)[number];
 
 function applyAppearance(appearance: Appearance) {
   const stored = appearance === "Match system" ? "system" : appearance.toLowerCase();
@@ -40,53 +26,31 @@ function applyAppearance(appearance: Appearance) {
   document.documentElement.dataset.theme = effective;
 }
 
-function Segmented<T extends string>({
-  label,
-  options,
-  value,
-  onChange,
-}: {
-  label: string;
-  options: readonly T[];
-  value: T;
-  onChange: (value: T) => void;
-}) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="segmented" role="group" aria-label={label}>
-      {options.map((option) => (
-        <button
-          key={option}
-          type="button"
-          aria-pressed={value === option}
-          onClick={() => onChange(option)}
-        >
-          {option}
-        </button>
-      ))}
-    </div>
+    <section className="stack-4 hairline-top" style={{ paddingTop: "var(--space-6)" }}>
+      <h2 className="section-label" style={{ fontSize: 15 }}>
+        {title}
+      </h2>
+      {children}
+    </section>
   );
 }
 
 export function ProfileForm({ profile, email }: { profile: Profile; email: string }) {
   const [name, setName] = useState(profile.name);
-  const [jobTitle, setJobTitle] = useState(profile.jobTitle);
-  const [notifications, setNotifications] = useState<Record<NotificationKey, boolean>>({
-    ...profile.notifications,
-  });
+  const [teamLabel, setTeamLabel] = useState(profile.teamLabel);
+  const [notifications, setNotifications] = useState(profile.notifications.map((n) => n.checked));
   const [appearance, setAppearance] = useState<Appearance>(
-    APPEARANCE_OPTIONS.includes(profile.appearance as Appearance)
-      ? (profile.appearance as Appearance)
+    APPEARANCE_OPTIONS.includes(profile.reading.appearance as Appearance)
+      ? (profile.reading.appearance as Appearance)
       : "Light",
   );
-  const [textSize, setTextSize] = useState<TextSize>(
-    profile.textSize === "Large" ? "Large" : "Standard",
-  );
-  const [placement, setPlacement] = useState<Placement>(
-    profile.sourcePlacement === "Below the answer" ? "Below the answer" : "Margin",
-  );
+  const [textSize, setTextSize] = useState(profile.reading.textSize);
+  const [placement, setPlacement] = useState(profile.reading.sourcePlacement);
   const [sessions, setSessions] = useState(profile.sessions);
+  const [status, setStatus] = useState<string | null>(null);
 
-  // Restore a previously saved appearance choice on this device.
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem("cortex-theme");
@@ -103,194 +67,143 @@ export function ProfileForm({ profile, email }: { profile: Profile; email: strin
     applyAppearance(next);
   }
 
-  const previewNote = (
-    <p className="caption">
-      1 · Customer interviews, round 2 · Catalog 02 · Oct 2 · passage 118
-    </p>
-  );
-
   return (
-    <div>
+    <div className="stack-6" style={{ maxWidth: "var(--column-doc)" }}>
       <header className="page-head">
-        <h1 className="page-title">Profile</h1>
-        <p className="summary-sentence">
-          These settings are yours alone. They follow you across every workspace you belong to.
-        </p>
+        <h1 className="page-title">Profile and preferences</h1>
+        {status ? (
+          <p className="caption" role="status">
+            {status}
+          </p>
+        ) : null}
       </header>
 
-      <SettingsSection
-        title="Profile"
-        margin={
-          <p className="caption">
-            Your name and job title appear next to your questions, comments and playbook runs.
-          </p>
-        }
-      >
-        <div className="stack-5">
-          <div className="settings-grid">
-            <label className="settings-grid-label" htmlFor="profile-name">
-              Name
-            </label>
-            <input
-              id="profile-name"
-              className="field-control"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              autoComplete="name"
-            />
+      <Section title="Profile">
+        <Field label="Name" htmlFor="profile-name">
+          <input
+            id="profile-name"
+            className="field-control"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+          />
+        </Field>
+        <Field label="Email" htmlFor="profile-email">
+          <div className="row" style={{ alignItems: "center" }}>
+            <input id="profile-email" className="field-control" value={email} readOnly />
+            <Button variant="quiet" size="sm">
+              Change
+            </Button>
           </div>
-          <div className="settings-grid">
-            <label className="settings-grid-label" htmlFor="profile-job-title">
-              Job title
-            </label>
-            <input
-              id="profile-job-title"
-              className="field-control"
-              value={jobTitle}
-              onChange={(event) => setJobTitle(event.target.value)}
-              autoComplete="organization-title"
-            />
-          </div>
-          <div className="settings-grid">
-            <span className="settings-grid-label">Email</span>
-            <div className="stack-2">
-              <p className="ui-text">{email}</p>
-              <p className="caption">This is the address you sign in with.</p>
-            </div>
-          </div>
-        </div>
-      </SettingsSection>
+        </Field>
+        <Field label="Team label" htmlFor="profile-team" helper={profile.profileNote}>
+          <input
+            id="profile-team"
+            className="field-control"
+            value={teamLabel}
+            onChange={(event) => setTeamLabel(event.target.value)}
+          />
+        </Field>
+      </Section>
 
-      <SettingsSection
-        title="Notifications"
-        margin={
-          <p className="caption">
-            Notifications are sent to {email}. Nothing is sent for conversations you have muted.
-          </p>
-        }
-      >
+      <Section title="Email me when">
         <div className="stack-3">
-          {(Object.keys(NOTIFICATION_LABELS) as NotificationKey[]).map((key) => (
-            <label key={key} className="check-row">
+          {profile.notifications.map((notification, index) => (
+            <label key={notification.label} className="check-row">
               <input
                 type="checkbox"
-                checked={notifications[key]}
+                checked={notifications[index] ?? false}
                 onChange={(event) =>
-                  setNotifications((current) => ({ ...current, [key]: event.target.checked }))
+                  setNotifications((previous) =>
+                    previous.map((value, i) => (i === index ? event.target.checked : value)),
+                  )
                 }
               />
-              <span>{NOTIFICATION_LABELS[key]}</span>
+              <span>{notification.label}</span>
             </label>
           ))}
         </div>
-      </SettingsSection>
+        <p className="caption">{profile.notificationsNote}</p>
+      </Section>
 
-      <SettingsSection
-        title="Reading"
-        margin={
-          <p className="caption">
-            Reading settings change only how answers look to you. Everyone else keeps their own
-            settings.
-          </p>
-        }
-      >
-        <div className="stack-5">
-          <div className="settings-grid">
-            <span className="settings-grid-label">Appearance</span>
-            <Segmented
-              label="Appearance"
-              options={APPEARANCE_OPTIONS}
-              value={appearance}
-              onChange={chooseAppearance}
-            />
-          </div>
-          <div className="settings-grid">
-            <span className="settings-grid-label">Text size</span>
-            <Segmented
-              label="Text size"
-              options={TEXT_SIZE_OPTIONS}
-              value={textSize}
-              onChange={setTextSize}
-            />
-          </div>
-          <div className="settings-grid">
-            <span className="settings-grid-label">Source placement</span>
-            <Segmented
-              label="Source placement"
-              options={PLACEMENT_OPTIONS}
-              value={placement}
-              onChange={setPlacement}
-            />
-          </div>
-          <div className="fragment stack-3" aria-label="Reading preview">
-            <p className="caption">Preview</p>
-            {placement === "Margin" ? (
-              <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-                <p
-                  className="answer-text"
-                  style={{ flex: "1 1 260px", fontSize: textSize === "Large" ? 20 : 18 }}
-                >
-                  Seven of nine teams said an answer is only forwardable if the reviewer can open the
-                  document behind it.<sup className="footnote">1</sup>
-                </p>
-                <div style={{ flex: "1 1 180px" }}>{previewNote}</div>
-              </div>
-            ) : (
-              <div className="stack-3">
-                <p className="answer-text" style={{ fontSize: textSize === "Large" ? 20 : 18 }}>
-                  Seven of nine teams said an answer is only forwardable if the reviewer can open the
-                  document behind it.<sup className="footnote">1</sup>
-                </p>
-                {previewNote}
-              </div>
-            )}
-          </div>
-        </div>
-      </SettingsSection>
-
-      <SettingsSection
-        title="Sessions"
-        margin={
-          <p className="caption">
-            Revoking a session signs that device out. It will need to sign in again before it can ask
-            questions.
-          </p>
-        }
-      >
-        <div>
-          {sessions.map((session, index) => {
-            const isCurrent = session.detail.includes("Current session");
-            return (
-              <div
-                key={session.name}
-                className="row-between hairline-top"
-                style={{ padding: "12px 0", borderTop: index === 0 ? 0 : undefined }}
+      <Section title="Reading">
+        <div className="stack-2">
+          <span className="field-label" id="appearance-label">
+            Appearance
+          </span>
+          <div className="segmented" role="group" aria-labelledby="appearance-label">
+            {APPEARANCE_OPTIONS.map((option) => (
+              <button
+                key={option}
+                type="button"
+                aria-pressed={appearance === option}
+                onClick={() => chooseAppearance(option)}
               >
-                <div className="stack-2">
-                  <p className="ui-strong" style={{ fontSize: 13 }}>
-                    {session.name}
-                  </p>
-                  <p className="caption">{session.detail}</p>
-                </div>
-                {isCurrent ? (
-                  <span className="caption">Current session</span>
-                ) : (
-                  <Button
-                    variant="quiet"
-                    size="sm"
-                    onClick={() =>
-                      setSessions((current) => current.filter((item) => item.name !== session.name))
-                    }
-                  >
-                    Revoke
-                  </Button>
-                )}
-              </div>
-            );
-          })}
-          {sessions.length === 0 ? <p className="ui-text">No active sessions.</p> : null}
+                {option}
+              </button>
+            ))}
+          </div>
         </div>
-      </SettingsSection>
+        <Field label="Answer text size" htmlFor="profile-text-size">
+          <select
+            id="profile-text-size"
+            className="field-control"
+            value={textSize}
+            onChange={(event) => setTextSize(event.target.value)}
+          >
+            {profile.reading.textSizeOptions.map((option) => (
+              <option key={option}>{option}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Show sources" htmlFor="profile-sources">
+          <select
+            id="profile-sources"
+            className="field-control"
+            value={placement}
+            onChange={(event) => setPlacement(event.target.value)}
+          >
+            {profile.reading.sourcePlacementOptions.map((option) => (
+              <option key={option}>{option}</option>
+            ))}
+          </select>
+        </Field>
+        <p className="caption">
+          Preview: every claim stays attached to its source <sup>1</sup>.
+        </p>
+        <p className="caption">Sources move below each answer automatically on narrow screens.</p>
+      </Section>
+
+      <Section title="Signed in">
+        <div className="ledger">
+          {sessions.map((session) => (
+            <div key={session.name} className="ledger-row" style={{ gridTemplateColumns: "1fr auto" }}>
+              <div>
+                <p className="ui-strong" style={{ fontSize: 13 }}>
+                  {session.name}
+                </p>
+                <p className="caption">{session.place}</p>
+              </div>
+              <span className="caption">{session.when}</span>
+            </div>
+          ))}
+        </div>
+        <div className="row">
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => {
+              setSessions((previous) => previous.slice(0, 1));
+              setStatus("Signed out of other devices.");
+            }}
+          >
+            Sign out other devices
+          </Button>
+          <Button variant="quiet" size="md">
+            Sign out
+          </Button>
+        </div>
+        <p className="caption">{profile.twoStepNote}</p>
+      </Section>
     </div>
   );
 }
