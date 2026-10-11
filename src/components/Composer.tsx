@@ -12,6 +12,9 @@ export function Composer({
   disabled = false,
   pausedMessage,
   onSend,
+  usingSentence = false,
+  sendLabel = "Send",
+  attachLabel,
 }: {
   sourcesLabel?: string;
   playbookLabel?: string;
@@ -21,6 +24,9 @@ export function Composer({
   disabled?: boolean;
   pausedMessage?: string;
   onSend?: (value: string) => void;
+  usingSentence?: boolean;
+  sendLabel?: string;
+  attachLabel?: string;
 }) {
   const [value, setValue] = useState("");
   const textareaId = useId();
@@ -56,19 +62,35 @@ export function Composer({
           }}
         />
         <div className="composer-row">
-          <span className="composer-links">
-            <button type="button" className="composer-link" disabled={disabled}>
-              Sources · {sourcesLabel}
-            </button>
-            <button type="button" className="composer-link" disabled={disabled}>
-              Playbook · {playbookLabel}
-            </button>
-          </span>
+          {usingSentence ? (
+            <span className="composer-links">
+              <button type="button" className="composer-link" disabled={disabled}>
+                Using {sourcesLabel} · Playbook {playbookLabel}
+              </button>
+            </span>
+          ) : (
+            <span className="composer-links">
+              {attachLabel ? (
+                <button type="button" className="composer-link" disabled={disabled}>
+                  {attachLabel}
+                </button>
+              ) : (
+                <>
+                  <button type="button" className="composer-link" disabled={disabled}>
+                    Sources · {sourcesLabel}
+                  </button>
+                  <button type="button" className="composer-link" disabled={disabled}>
+                    Playbook · {playbookLabel}
+                  </button>
+                </>
+              )}
+            </span>
+          )}
           <button type="button" className="composer-link" disabled={disabled} aria-label={`Model: ${model}`}>
             {model}
           </button>
-          <Button variant="primary" size="md" type="submit" disabled={disabled || !value.trim()}>
-            Send
+          <Button variant="primary" size="md" type="submit" disabled={disabled}>
+            {sendLabel}
           </Button>
         </div>
       </form>

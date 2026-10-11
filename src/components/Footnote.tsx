@@ -57,9 +57,14 @@ export function MarginNote({
         <br />
         <span className="margin-note-meta">{note.meta}</span>
       </p>
-      {note.excerpt.length > 0 ? (
+      {note.excerpt && note.excerpt.length > 0 ? (
         <p className="margin-note-excerpt">
           <RichSegments segments={note.excerpt} />
+        </p>
+      ) : null}
+      {note.openPassage ? (
+        <p>
+          <a href="/app/knowledge/documents/customer-interview-synthesis">Open passage</a>
         </p>
       ) : null}
       {children}
