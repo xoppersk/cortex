@@ -16,7 +16,7 @@ describe("fixture canon", () => {
     for (const collection of knowledge.collections) {
       const docs = knowledge.documents.filter((doc) => doc.collection === collection.name);
       expect(docs.length).toBe(collection.documents);
-      expect(sum(docs.map((doc) => doc.passages))).toBe(collection.passages);
+      expect(sum(docs.map((doc) => doc.passages ?? 0))).toBe(collection.passages);
     }
   });
 
