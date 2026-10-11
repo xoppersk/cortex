@@ -5,7 +5,7 @@ import { Button } from "../../../components/Button";
 import { Field, fieldDescribedBy } from "../../../components/Field";
 import type { Role } from "../../../lib/types";
 
-const ROLES: Role[] = ["Admin", "Editor", "Viewer"];
+const ROLES: Role[] = ["Editor", "Viewer", "Admin"];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function InviteForm() {
@@ -17,7 +17,8 @@ export function InviteForm() {
 
   function validateEmail(value: string): string | undefined {
     if (!value.trim()) return "Enter an email address.";
-    if (!EMAIL_PATTERN.test(value.trim())) return "Enter a valid email address.";
+    const first = value.split(",")[0]!.trim();
+    if (!EMAIL_PATTERN.test(first)) return "Enter a valid email address.";
     return undefined;
   }
 
@@ -39,25 +40,17 @@ export function InviteForm() {
   return (
     <div className="stack-4">
       <form onSubmit={handleSubmit} noValidate className="stack-4">
-        <Field
-          label="Email address"
-          htmlFor="invite-email"
-          error={error}
-          helper="They will get an email with a link to join this workspace."
-        >
+        <Field label="Email" htmlFor="invite-email" error={error}>
           <input
             id="invite-email"
             className="field-control"
             type="email"
             autoComplete="email"
-            placeholder="name@sevynlabs.io"
+            placeholder="name@company.com, separate several with commas"
             value={email}
             onChange={(event) => handleEmailChange(event.target.value)}
             aria-invalid={error ? true : undefined}
-            aria-describedby={fieldDescribedBy("invite-email", {
-              helper: "They will get an email with a link to join this workspace.",
-              error,
-            })}
+            aria-describedby={fieldDescribedBy("invite-email", { error })}
           />
         </Field>
         <Field label="Role" htmlFor="invite-role">
@@ -86,7 +79,7 @@ export function InviteForm() {
           <p className="ui-text">
             {sentTo.email} · {sentTo.role}
           </p>
-          <p className="caption">The invite was sent. It will appear with the pending invites below until it is accepted.</p>
+          <p className="caption">Invited just now. The invite expires in 7 days.</p>
         </div>
       ) : null}
     </div>
