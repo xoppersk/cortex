@@ -4,15 +4,12 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Field } from "../../../components/Field";
 
 export interface AuditEntryView {
-  id: string;
+  time: string;
   actor: string;
   sentence: string;
-  time: string;
-  what: string;
-  when: string;
-  who: string;
-  expanded?: boolean;
-  changes?: { before: string; after: string; from: string };
+  category: string;
+  changes?: { before: string; after: string };
+  context?: string;
 }
 
 export interface AuditGroupView {
@@ -20,134 +17,147 @@ export interface AuditGroupView {
   entries: AuditEntryView[];
 }
 
-const ALL = "all";
-
-function unique(values: string[]): string[] {
-  return Array.from(new Set(values));
+export interface AuditFilters {
+  who: string[];
+  what: string[];
+  when: string[];
 }
 
-export function AuditLog({ groups }: { groups: AuditGroupView[] }) {
+const WHAT_TO_CATEGORY: Record<string, string> = {
+  "Members and roles": "Members",
+  "API keys": "API keys",
+  Settings: "Settings",
+  Exports: "Exports",
+};
+
+export function AuditLog({
+  groups,
+  filters,
+  totalEntries,
+}: {
+  groups: AuditGroupView[];
+  filters: AuditFilters;
+  totalEntries: number;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const who = searchParams.get("who") ?? ALL;
-  const what = searchParams.get("what") ?? ALL;
-  const when = searchParams.get("when") ?? ALL;
+  const who = searchParams.get("who") ?? filters.who[0]!;
+  const what = searchParams.get("what") ?? filters.what[0]!;
+  const when = searchParams.get("when") ?? filters.when[0]!;
 
-  const allEntries = groups.flatMap((group) => group.entries);
-  const whoOptions = unique(allEntries.map((entry) => entry.who));
-  const whatOptions = unique(allEntries.map((entry) => entry.what));
-  const whenOptions = unique(allEntries.map((entry) => entry.when));
-
-  function updateFilter(key: "who" | "what" | "when", value: string) {
+  function updateFilter(key: "who" | "what" | "when", value: string, defaultValue: string) {
     const params = new URLSearchParams(searchParams.toString());
-    if (value === ALL) {
-      params.delete(key);
-    } else {
-      params.set(key, value);
-    }
+    if (value === defaultValue) params.delete(key);
+    else params.set(key, value);
     const query = params.toString();
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   }
 
+  function matches(entry: AuditEntryView): boolean {
+    if (who !== filters.who[0]) {
+      if (who === "API keys") {
+        if (entry.category !== "API keys" && !entry.actor.includes("API key")) return false;
+      } else if (entry.actor !== who) return false;
+    }
+    if (what !== filters.what[0]) {
+      if (WHAT_TO_CATEGORY[what] !== entry.category) return false;
+    }
+    return true;
+  }
+
   const filteredGroups = groups
-    .map((group) => ({
-      day: group.day,
-      entries: group.entries.filter(
-        (entry) =>
-          (who === ALL || entry.who === who) &&
-          (what === ALL || entry.what === what) &&
-          (when === ALL || entry.when === when),
-      ),
-    }))
+    .map((group) => ({ day: group.day, entries: group.entries.filter(matches) }))
     .filter((group) => group.entries.length > 0);
 
   return (
     <div className="stack-6">
       <div className="row" style={{ alignItems: "flex-end" }} role="group" aria-label="Audit log filters">
-        <div style={{ minWidth: 180, flex: "1 1 180px" }}>
+        <div style={{ minWidth: 170, flex: "1 1 170px" }}>
           <Field label="Who" htmlFor="audit-who">
             <select
               id="audit-who"
               className="field-control"
               value={who}
-              onChange={(event) => updateFilter("who", event.target.value)}
+              onChange={(event) => updateFilter("who", event.target.value, filters.who[0]!)}
             >
-              <option value={ALL}>Everyone</option>
-              {whoOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
+              {filters.who.map((option) => (
+                <option key={option}>{option}</option>
               ))}
             </select>
           </Field>
         </div>
-        <div style={{ minWidth: 180, flex: "1 1 180px" }}>
+        <div style={{ minWidth: 170, flex: "1 1 170px" }}>
           <Field label="What" htmlFor="audit-what">
             <select
               id="audit-what"
               className="field-control"
               value={what}
-              onChange={(event) => updateFilter("what", event.target.value)}
+              onChange={(event) => updateFilter("what", event.target.value, filters.what[0]!)}
             >
-              <option value={ALL}>Everything</option>
-              {whatOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
+              {filters.what.map((option) => (
+                <option key={option}>{option}</option>
               ))}
             </select>
           </Field>
         </div>
-        <div style={{ minWidth: 180, flex: "1 1 180px" }}>
+        <div style={{ minWidth: 170, flex: "1 1 170px" }}>
           <Field label="When" htmlFor="audit-when">
             <select
               id="audit-when"
               className="field-control"
               value={when}
-              onChange={(event) => updateFilter("when", event.target.value)}
+              onChange={(event) => updateFilter("when", event.target.value, filters.when[0]!)}
             >
-              <option value={ALL}>Any day</option>
-              {whenOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
+              {filters.when.map((option) => (
+                <option key={option}>{option}</option>
               ))}
             </select>
           </Field>
         </div>
+        <p className="caption" style={{ paddingBottom: 10 }}>
+          {totalEntries} entries
+        </p>
       </div>
 
       {filteredGroups.length === 0 ? (
         <p className="ui-text">No audit entries match these filters.</p>
       ) : (
         filteredGroups.map((group) => (
-          <section key={group.day} aria-labelledby={`audit-day-${group.day.replace(/\s+/g, "-")}`}>
-            <h2
-              className="section-label"
-              id={`audit-day-${group.day.replace(/\s+/g, "-")}`}
-              style={{ marginBottom: 12 }}
-            >
+          <section key={group.day} aria-label={group.day}>
+            <h2 className="section-label" style={{ marginBottom: 12, fontSize: 15 }}>
               {group.day}
             </h2>
             <ul className="stack-5" style={{ listStyle: "none", margin: 0, padding: 0 }}>
-              {group.entries.map((entry) => (
-                <li key={entry.id} className="stack-3">
-                  <div className="row-between">
-                    <p className="ui-text">{entry.sentence}</p>
+              {group.entries.map((entry, index) => (
+                <li key={`${entry.time}-${index}`} className="stack-3">
+                  <div className="row-between" style={{ alignItems: "baseline" }}>
+                    <p className="ui-text">
+                      <span className="code muted-3" style={{ marginRight: 12 }}>
+                        {entry.time}
+                      </span>
+                      <span className="ui-strong" style={{ fontSize: 13 }}>
+                        {entry.actor}
+                      </span>{" "}
+                      {entry.sentence}
+                    </p>
                     <span className="caption" style={{ whiteSpace: "nowrap" }}>
-                      {entry.time}
+                      {entry.category}
                     </span>
                   </div>
-                  {entry.expanded && entry.changes ? (
-                    <dl className="definition-grid">
+                  {entry.changes ? (
+                    <dl className="definition-grid" style={{ marginLeft: 76 }}>
                       <dt>Before</dt>
                       <dd>{entry.changes.before}</dd>
                       <dt>After</dt>
                       <dd>{entry.changes.after}</dd>
-                      <dt>From</dt>
-                      <dd>{entry.changes.from}</dd>
+                      {entry.context ? (
+                        <>
+                          <dt>From</dt>
+                          <dd>{entry.context.replace(/^From /, "")}</dd>
+                        </>
+                      ) : null}
                     </dl>
                   ) : null}
                 </li>
