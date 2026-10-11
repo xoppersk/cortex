@@ -7,9 +7,7 @@ export const metadata: Metadata = { title: "How citations work · Docs" };
 /*
  * P-04 Docs — "How citations work". Three-column layout and copy follow the
  * canvas reference (.canvas-ref/screens/P-04-docs/body-clean.html).
- * Nav groups per the task brief: Start here / Knowledge / Working together /
- * Admin, with the canvas's item labels (Teams → Working together, API → Admin
- * groupings are the brief's names for the canvas's third/fourth groups).
+ * Nav groups per the approved design: Start here / Knowledge / Teams / API.
  */
 const navGroups: Array<{ title: string; items: Array<{ label: string; current?: boolean }> }> = [
   {
@@ -26,11 +24,11 @@ const navGroups: Array<{ title: string; items: Array<{ label: string; current?: 
     ],
   },
   {
-    title: "Working together",
+    title: "Teams",
     items: [{ label: "Playbooks" }, { label: "Evaluations" }, { label: "Spending limits" }],
   },
   {
-    title: "Admin",
+    title: "API",
     items: [{ label: "Authentication" }, { label: "Ask endpoint" }, { label: "Errors" }],
   },
 ];
