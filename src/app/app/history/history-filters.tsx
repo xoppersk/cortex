@@ -19,6 +19,10 @@ type FilterId = (typeof FILTERS)[number]["id"];
 const GROUPS: Conversation["group"][] = ["Today", "This week", "Earlier"];
 const DEFAULT_TERM = "interview";
 
+function peopleLabel(people: string[]): string {
+  return people.map((person) => (person === "Sheku Koroma" ? "You" : person.split(" ")[0])).join(", ");
+}
+
 function matchesFilter(conversation: Conversation, filter: FilterId): boolean {
   if (filter === "me") return conversation.startedBy === "me";
   if (filter === "shared") return conversation.shared;
@@ -76,10 +80,7 @@ export function HistoryFilters() {
   const visible = data.conversations.filter((conversation) => {
     if (!matchesFilter(conversation, filter)) return false;
     if (!lowered) return true;
-    return (
-      conversation.title.toLowerCase().includes(lowered) ||
-      conversation.snippet.toLowerCase().includes(lowered)
-    );
+    return conversation.searchText.toLowerCase().includes(lowered);
   });
 
   return (
@@ -106,11 +107,24 @@ export function HistoryFilters() {
             id="history-search"
             className="field-control"
             type="search"
-            placeholder="Search conversations"
+            placeholder="Search titles, people, sources and message text"
             value={searchValue}
             onChange={(event) => onSearchChange(event.target.value)}
           />
         </div>
+      </div>
+
+      <div className="row-between">
+        {term.trim() ? (
+          <p className="ui-text muted-3">
+            {visible.length} conversations mention “{term.trim()}” in a title, message or cited source.
+          </p>
+        ) : (
+          <span />
+        )}
+        <button type="button" className="filter-button" aria-label="Sort conversations">
+          Last edited
+        </button>
       </div>
 
       {visible.length === 0 ? (
@@ -121,7 +135,7 @@ export function HistoryFilters() {
           if (rows.length === 0) return null;
           return (
             <section key={group} className="stack-3">
-              <h2 className="section-label">{group}</h2>
+              <h2 className="section-label">{group === "Earlier" ? "Earlier in October" : group}</h2>
               <div className="table-scroll">
                 <table className="data-table">
                   <thead>
@@ -148,7 +162,7 @@ export function HistoryFilters() {
                           </span>
                         </td>
                         <td>{conversation.sources}</td>
-                        <td>{conversation.people.join(", ")}</td>
+                        <td>{peopleLabel(conversation.people)}</td>
                         <td className="numeric">{formatCost(conversation.cost)}</td>
                         <td>{conversation.edited}</td>
                       </tr>
@@ -160,6 +174,13 @@ export function HistoryFilters() {
           );
         })
       )}
+
+      {term.trim() ? (
+        <p className="ui-text muted-3">
+          Showing {visible.length} of {visible.length} matches. Archived conversations are not
+          searched — <a href="/app/history">include archived</a>.
+        </p>
+      ) : null}
     </div>
   );
 }

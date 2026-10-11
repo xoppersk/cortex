@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
+import { ButtonLink } from "../../../components/Button";
 import { LedgerRow } from "../../../components/LedgerRow";
-import { getStates } from "../../../lib/api";
+import { getConversations, getStates } from "../../../lib/api";
 import { HistoryFilters } from "./history-filters";
 
-export const metadata: Metadata = { title: "History" };
+export const metadata: Metadata = { title: "Conversations" };
 
 export default async function HistoryPage({
   searchParams,
@@ -16,33 +18,50 @@ export default async function HistoryPage({
   if (params.state === "empty") {
     const empty = getStates().emptyHistory;
     return (
-      <div className="stack-6">
+      <div className="stack-6" style={{ maxWidth: "var(--column-doc)" }}>
         <div className="page-head">
-          <p className="caption">{empty.workspace}</p>
+          <p className="caption">{empty.caption}</p>
           <h1 className="page-title">{empty.heading}</h1>
-          <p className="summary-sentence">
-            This workspace has no conversations yet. Start with one of these, or ask your own question
-            of the collections.
-          </p>
+          <p className="summary-sentence">{empty.body}</p>
         </div>
-        <div className="ledger" style={{ maxWidth: "var(--column-doc)" }}>
-          {empty.starters.map((starter) => (
-            <LedgerRow
-              key={starter.label}
-              href="/app/new"
-              title={starter.label}
-              description={starter.text}
-            />
-          ))}
-        </div>
+        <section className="stack-3">
+          <p className="ui-text muted-3">Or start from one of these</p>
+          <div className="ledger">
+            {empty.starters.map((starter) => (
+              <LedgerRow key={starter} href="/app/new" title={starter} />
+            ))}
+          </div>
+          <div>
+            <ButtonLink href="/app/new" variant="primary" size="md">
+              Start a sourced conversation
+            </ButtonLink>
+          </div>
+        </section>
+        <section className="stack-3">
+          <h2 className="section-label">Ready to cite</h2>
+          <div className="ledger">
+            {empty.readyToCite.map((item) => (
+              <LedgerRow key={item} title={item} />
+            ))}
+          </div>
+        </section>
       </div>
     );
   }
 
+  const data = getConversations();
   return (
     <div>
       <div className="page-head">
-        <h1 className="page-title">History</h1>
+        <div className="page-head-row">
+          <h1 className="page-title">Conversations</h1>
+          <p className="meta">
+            {data.conversations.length} conversations · {data.sharedWithYou} shared with you{" "}
+            <Link href="/app/new" style={{ marginLeft: 12 }}>
+              New conversation
+            </Link>
+          </p>
+        </div>
       </div>
       <Suspense fallback={<p className="caption">Loading conversations…</p>}>
         <HistoryFilters />
