@@ -1,30 +1,26 @@
 import { Button } from "../../../components/Button";
-import { getAdminData, getWorkspaceData } from "../../../lib/api";
-import { formatMoney, sum } from "../../../lib/utils";
+import { getAdminData } from "../../../lib/api";
 import { RevealPanel } from "./RevealPanel";
 
 export default function ApiKeysPage() {
   const { apiKeys } = getAdminData();
-  const { workspace } = getWorkspaceData();
-  const keysTotal = sum(apiKeys.rows.map((row) => row.cost));
 
   return (
     <>
       <header className="page-head">
-        <h1 className="page-title">API keys</h1>
-        <p className="summary-sentence">
-          Keys spent {formatMoney(keysTotal)} of the {formatMoney(workspace.spend)} this workspace used
-          this cycle, and every key spends against the monthly limit.
-        </p>
+        <div className="page-head-row">
+          <h1 className="page-title">API keys</h1>
+          <Button variant="primary" size="md">
+            Create key
+          </Button>
+        </div>
+        <p className="summary-sentence">{apiKeys.summary}</p>
       </header>
 
       <div className="stack-6">
-        <RevealPanel apiKey={apiKeys.reveal.key} label={apiKeys.reveal.label} warning={apiKeys.reveal.warning} />
+        <RevealPanel reveal={apiKeys.reveal} />
 
-        <section aria-labelledby="keys-heading">
-          <h2 className="section-label" id="keys-heading" style={{ marginBottom: 16 }}>
-            All keys
-          </h2>
+        <section aria-label="All keys">
           <div className="table-scroll">
             <table className="data-table">
               <thead>
@@ -32,9 +28,6 @@ export default function ApiKeysPage() {
                   <th scope="col">Key</th>
                   <th scope="col">Access</th>
                   <th scope="col">Last used</th>
-                  <th scope="col" className="numeric">
-                    This cycle
-                  </th>
                   <th scope="col">
                     <span className="sr-only">Actions</span>
                   </th>
@@ -47,18 +40,35 @@ export default function ApiKeysPage() {
                       <span className="ui-strong" style={{ fontSize: 13 }}>
                         {row.name}
                       </span>
+                      <br />
+                      <span className="caption">
+                        <span className="code">{row.masked}</span> · {row.createdNote}
+                      </span>
                     </td>
                     <td>
                       {row.access}
-                      {row.flag ? (
+                      {"flag" in row && row.flag ? (
                         <>
                           <br />
                           <span className="warn-text">{row.flag}</span>
                         </>
                       ) : null}
+                      {"expiresNote" in row && row.expiresNote ? (
+                        <>
+                          <br />
+                          <span className="caption">{row.expiresNote}</span>
+                        </>
+                      ) : null}
                     </td>
-                    <td>{row.lastUsed}</td>
-                    <td className="numeric">{formatMoney(row.cost)}</td>
+                    <td>
+                      {row.lastUsed}
+                      {row.cost ? (
+                        <>
+                          <br />
+                          <span className="caption">${row.cost} this cycle</span>
+                        </>
+                      ) : null}
+                    </td>
                     <td>
                       <Button variant="quiet" size="sm">
                         Revoke
@@ -69,6 +79,9 @@ export default function ApiKeysPage() {
               </tbody>
             </table>
           </div>
+          <p className="caption" style={{ marginTop: "var(--space-4)" }}>
+            {apiKeys.footerNote}
+          </p>
         </section>
       </div>
     </>
