@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button, ButtonLink } from "../../components/Button";
-import { Field, fieldDescribedBy } from "../../components/Field";
+import { Field } from "../../components/Field";
 import { RichSegments } from "../../components/Footnote";
-import { getStates } from "../../lib/api";
+import { getStates, getWorkspaceData } from "../../lib/api";
 
 export const metadata: Metadata = { title: "Sign in" };
 
 /* S-01 Login: split layout, sign-in options on the left, footnoted quote on the right. */
 export default function LoginPage() {
   const { auth } = getStates();
+  const { currentUser } = getWorkspaceData();
 
   return (
     <main className="auth-split">
@@ -24,25 +25,21 @@ export default function LoginPage() {
               Continue with Google
             </ButtonLink>
             <ButtonLink href="/app/new" variant="secondary" size="lg" className="btn-block">
-              Continue with SSO
+              Continue with single sign-on
             </ButtonLink>
           </div>
           <p className="ui-text muted-3" style={{ textAlign: "center" }} aria-hidden="true">
-            or
+            or with email
           </p>
-          <form
-            className="stack-4"
-            action="/app/new"
-            method="get"
-          >
-            <Field label="Email" htmlFor="login-email">
+          <form className="stack-4" action="/app/new" method="get">
+            <Field label="Work email" htmlFor="login-email">
               <input
                 id="login-email"
                 name="email"
                 type="email"
                 autoComplete="email"
                 className="field-control"
-                aria-describedby={fieldDescribedBy("login-email", {})}
+                defaultValue={currentUser.email}
               />
             </Field>
             <Button type="submit" variant="primary" size="lg" className="btn-block">
@@ -52,9 +49,11 @@ export default function LoginPage() {
           <p className="ui-text muted-3">
             New to Cortex?{" "}
             <Link href="/signup" style={{ color: "var(--ink)" }}>
-              Start free for 14 days
+              Start a free trial
             </Link>
           </p>
+          <p className="caption">Your workspace admin requires two-step verification after this step.</p>
+          <p className="caption">© 2026 [Company] · Privacy · Terms · Status</p>
         </div>
       </div>
 
