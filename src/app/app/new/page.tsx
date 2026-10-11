@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Button } from "../../../components/Button";
-import { Composer } from "../../../components/Composer";
 import { LedgerRow } from "../../../components/LedgerRow";
-import { Notice } from "../../../components/Notice";
 import { getConversations, getKnowledge, getPlaybooks, getThread, getWorkspaceData } from "../../../lib/api";
-import { formatCost, formatNumber } from "../../../lib/utils";
+import { formatNumber } from "../../../lib/utils";
+import { BlockedView } from "../c/[id]/thread-view";
 
 export const metadata: Metadata = { title: "New conversation" };
 
@@ -14,18 +14,45 @@ export default async function NewConversationPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const params = await searchParams;
-  const isViewer = params.state === "viewer";
+  if (params.state === "viewer") {
+    return <BlockedView thread={getThread()} />;
+  }
 
   const { workspace, models } = getWorkspaceData();
-  const thread = getThread();
   const playbooks = getPlaybooks();
   const conversations = getConversations();
   const knowledge = getKnowledge();
 
   const ceiling = `$${workspace.perAnswerCeiling.toFixed(2)}`;
-  const visibleCollections = knowledge.collections.slice(0, 3);
-  const pickUp = conversations.conversations.filter((conversation) => conversation.pinned).slice(0, 3);
-  const playbookRows = [playbooks.team[0]!, playbooks.team[1]!];
+  const canSee = knowledge.collections.filter((c) =>
+    ["positioning-research", "customer-interviews"].includes(c.id),
+  );
+  const indexing = knowledge.collections.find((c) => c.status.type === "indexing");
+  const pickUp = conversations.conversations.slice(0, 3);
+
+  const playbookCards = [
+    {
+      id: playbooks.featured.id,
+      name: playbooks.featured.name,
+      description: "Audience, promise, proof and risks for a launch, cited.",
+      meta: "6 inputs · Team",
+      value: "Used today",
+    },
+    {
+      id: playbooks.team[0]!.id,
+      name: playbooks.team[0]!.name,
+      description: playbooks.team[0]!.description ?? "",
+      meta: `${playbooks.team[0]!.inputsLabel ?? ""} · Team`,
+      value: playbooks.team[0]!.updated,
+    },
+    {
+      id: playbooks.private[0]!.id,
+      name: playbooks.private[0]!.name,
+      description: playbooks.private[0]!.description ?? "",
+      meta: `${playbooks.private[0]!.inputsLabel ?? ""} · Private`,
+      value: playbooks.private[0]!.updated,
+    },
+  ];
 
   return (
     <div className="stack-6">
@@ -35,85 +62,81 @@ export default async function NewConversationPage({
 
       <div className="doc-margin">
         <div className="doc-column stack-6">
-          {isViewer ? (
-            <Notice
-              headline="You can read this workspace, but you can’t start conversations."
-              actions={
-                <>
-                  <Button variant="primary" size="md">
-                    Request Editor access
-                  </Button>
-                  <Button variant="quiet" size="md">
-                    Leave a comment
-                  </Button>
-                </>
-              }
-            >
-              <p>
-                Your role in {workspace.name} is Viewer. You can read conversations, playbooks and
-                sources, but asking questions and starting conversations needs Editor access.
-              </p>
-            </Notice>
-          ) : null}
-
           <p className="config-sentence">
-            Ask across{" "}
-            <select className="underlined-picker" aria-label="Sources" defaultValue={thread.composer.sources} disabled={isViewer}>
-              <option>{thread.composer.sources}</option>
-              <option>2 collections</option>
-              <option>All 5 collections</option>
-              <option>Customer interviews only</option>
+            Answer using{" "}
+            <select className="underlined-picker" aria-label="First source" defaultValue="Positioning research and">
+              <option>Positioning research and</option>
+              <option>Customer interviews and</option>
+              <option>Product docs and</option>
+            </select>{" "}
+            <select className="underlined-picker" aria-label="Second source" defaultValue="Customer interviews">
+              <option>Customer interviews</option>
+              <option>Positioning research</option>
+              <option>Product docs</option>
             </select>
-            , answered by{" "}
-            <select className="underlined-picker" aria-label="Model" defaultValue={workspace.defaultModel} disabled={isViewer}>
+            , with{" "}
+            <select className="underlined-picker" aria-label="Model" defaultValue={workspace.defaultModel}>
               {models.map((model) => (
                 <option key={model.id}>{model.name}</option>
               ))}
             </select>
-            , with{" "}
-            <select className="underlined-picker" aria-label="Citation rule" defaultValue={workspace.citationRule} disabled={isViewer}>
-              <option>{workspace.citationRule}</option>
-              <option>Key claims cited</option>
-              <option>No citations</option>
+            , citing{" "}
+            <select className="underlined-picker" aria-label="Citation rule" defaultValue="every claim">
+              <option>every claim</option>
+              <option>key claims</option>
             </select>
-            , and spend no more than{" "}
-            <select className="underlined-picker" aria-label="Per-answer ceiling" defaultValue={ceiling} disabled={isViewer}>
+            , and stop any single answer at{" "}
+            <select className="underlined-picker" aria-label="Per-answer ceiling" defaultValue={ceiling}>
               <option>$0.05</option>
               <option>{ceiling}</option>
               <option>$0.15</option>
-              <option>No ceiling</option>
-            </select>{" "}
-            on a single answer.
+            </select>
+            .
           </p>
 
-          <Composer
-            sourcesLabel={thread.composer.sources}
-            playbookLabel={thread.composer.playbook}
-            model={workspace.defaultModel}
-            costSentence={`About $0.012–$0.020 for a reply like this. Nothing is spent until you send.`}
-            disabled={isViewer}
-            pausedMessage={isViewer ? "Viewers can read this workspace but can’t ask questions." : undefined}
-          />
+          <div className="stack-2">
+            <label className="ui-strong" htmlFor="new-question">
+              Your question
+            </label>
+            <form className="composer" action="/app/c/launch-narrative" method="get">
+              <label className="sr-only" htmlFor="new-question">
+                Your question
+              </label>
+              <textarea
+                id="new-question"
+                name="q"
+                placeholder="Type / for a playbook, @ for a source"
+                rows={3}
+              />
+              <div className="composer-row">
+                <span className="composer-links">
+                  <button type="button" className="composer-link">
+                    Attach file
+                  </button>
+                </span>
+                <Button variant="primary" size="md" type="submit">
+                  Start
+                </Button>
+              </div>
+            </form>
+          </div>
 
           <section className="stack-3">
-            <h2 className="section-label">Start from a playbook</h2>
+            <div className="page-head-row">
+              <h2 className="section-label">Start from a playbook</h2>
+              <Link href="/app/playbooks" className="caption">
+                All 7 playbooks
+              </Link>
+            </div>
             <div className="ledger">
-              <LedgerRow
-                featured
-                href="/app/playbooks"
-                title={playbooks.featured.name}
-                description={playbooks.featured.instructions}
-                value={`${formatCost(playbooks.featured.avgCost ?? 0)} avg`}
-                meta={`${playbooks.featured.runs} runs · ${playbooks.featured.passRate}`}
-              />
-              {playbookRows.map((playbook) => (
+              {playbookCards.map((card) => (
                 <LedgerRow
-                  key={playbook.id}
+                  key={card.id}
                   href="/app/playbooks"
-                  title={playbook.name}
-                  description={playbook.passRate}
-                  value={playbook.avgCost ? `${formatCost(playbook.avgCost)} avg` : undefined}
-                  meta={`${playbook.runs} runs · Updated ${playbook.updated}`}
+                  title={card.name}
+                  description={card.description}
+                  value={card.value}
+                  meta={card.meta}
                 />
               ))}
             </div>
@@ -127,9 +150,8 @@ export default async function NewConversationPage({
                   key={conversation.id}
                   href={`/app/c/${conversation.id}`}
                   title={conversation.title}
-                  description={conversation.snippet}
-                  value={formatCost(conversation.cost)}
-                  meta={`${conversation.project} · Edited ${conversation.edited}`}
+                  description={`${conversation.sources} sources`}
+                  value={conversation.edited}
                 />
               ))}
             </div>
@@ -140,36 +162,35 @@ export default async function NewConversationPage({
           <div className="margin-box">
             <h2 className="margin-box-title">What this conversation can see</h2>
             <ul className="stack-2" style={{ listStyle: "none", padding: 0, margin: 0 }}>
-              {visibleCollections.map((collection) => (
+              {canSee.map((collection) => (
                 <li key={collection.id} className="caption" style={{ color: "var(--ink-2)" }}>
                   <span className="ink-text" style={{ fontWeight: 500 }}>
                     {collection.name}
                   </span>
                   <br />
-                  {collection.documents} documents · {formatNumber(collection.passages)} passages
+                  {formatNumber(collection.passages)} passages · newest {collection.newest}
                 </li>
               ))}
             </ul>
-            <p className="caption">
-              Sources are passages from these collections, kept for {workspace.sourceFreshnessDays} days
-              unless a newer version replaces them.
-            </p>
+            {indexing ? (
+              <p className="caption">
+                {indexing.name} is still indexing, {indexing.status.percent}% done. It joins this
+                conversation automatically when ready.
+              </p>
+            ) : null}
           </div>
 
           <div className="margin-box">
             <h2 className="margin-box-title">Cost</h2>
             <p className="caption" style={{ color: "var(--ink-2)" }}>
-              Most answers in this workspace cost $0.012–$0.020. The ceiling stops a single answer at{" "}
-              {ceiling}, and ${workspace.spend} of the ${workspace.monthlyLimit} monthly limit is already
-              spent.
+              Typical answer with these sources: $0.02–0.04. Your limit stops any answer at {ceiling}.
             </p>
           </div>
 
           <div className="margin-box">
-            <h2 className="margin-box-title">Visibility</h2>
+            <h2 className="margin-box-title">Who can see it</h2>
             <p className="caption" style={{ color: "var(--ink-2)" }}>
-              Conversations are visible to the {workspace.name} workspace. Editors can continue a
-              conversation; Viewers can read it and leave comments.
+              Only you, until you share it.
             </p>
           </div>
         </aside>
