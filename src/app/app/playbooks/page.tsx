@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { ButtonLink } from "../../../components/Button";
 import { PlaybooksTabs } from "./playbooks-tabs";
 
-export const metadata: Metadata = { title: "Playbooks" };
+export const metadata: Metadata = { title: { absolute: "Cortex — Playbooks" } };
 
 export default function PlaybooksPage() {
   return (
