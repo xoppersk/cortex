@@ -158,6 +158,7 @@ code,
   height: 1px;
   overflow: hidden;
   clip: rect(0 0 0 0);
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
@@ -538,6 +539,16 @@ textarea.field-control {
   min-width: 0;
   background: var(--paper);
   padding: 40px;
+}
+
+/* Full-width header bar that bleeds to the edges of the padded main column
+   (the designed thread / settings / inspector header band). Vertical padding
+   stays with each screen's inline style. */
+.bleed-head {
+  margin: -40px -40px 0;
+  padding-left: 40px;
+  padding-right: 40px;
+  border-bottom: 1px solid var(--rule);
 }
 
 .sidebar-brand {
@@ -922,6 +933,10 @@ textarea.field-control {
 .table-scroll {
   overflow-x: auto;
   max-width: 100%;
+  /* position: relative makes the wrapper the containing block for
+     absolutely-positioned descendants (e.g. .sr-only cell labels), so the
+     scroller clips them instead of letting them widen the page. */
+  position: relative;
 }
 
 .data-table {
@@ -1680,10 +1695,23 @@ textarea.field-control {
     padding: 16px;
   }
 
+  .bleed-head {
+    margin: -16px -16px 0;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
   .doc-margin,
   .column-heads {
     flex-direction: column;
     gap: var(--space-5);
+  }
+
+  /* In the stacked layout no doc/margin child may size to content wider
+     than the column — wide children (e.g. scroll-wrapped tables) cap at the
+     column width and scroll inside their own wrapper instead. */
+  .doc-margin > * {
+    max-width: 100%;
   }
 
   .doc-column,
@@ -1723,6 +1751,15 @@ textarea.field-control {
     max-width: none;
   }
 
+  /* The login split hand-rolls its panel padding inline (48px sides);
+     at phone width that padding plus the form's widest button exceeds
+     the viewport, so the split's panels narrow their side padding. */
+  .auth-split > section,
+  .auth-split > aside {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
   .auth-quote-side {
     border-left: 0;
     border-top: 1px solid var(--rule);
@@ -1730,6 +1767,18 @@ textarea.field-control {
 
   .docs-layout { padding: 0 16px; }
   .docs-nav, .docs-toc { max-width: none; flex: none; width: 100%; padding-bottom: 0; }
+  .docs-article { flex: none; width: 100%; max-width: none; min-width: 0; }
+
+  /* History toolbar: the search + sort group keeps its desktop floor
+     (search min 220px + button) and wraps the button under the search
+     field instead of overflowing the column. */
+  .history-search-group { flex-wrap: wrap; }
+
+  /* Usage chart: at phone scale the corner value labels converge — give
+     the projection and today labels clear air. Desktop geometry is
+     untouched (these transforms exist only inside this media query). */
+  .chart-label-proj { transform: translate(-2px, -9px); }
+  .chart-label-today { transform: translate(-10px, 7px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
