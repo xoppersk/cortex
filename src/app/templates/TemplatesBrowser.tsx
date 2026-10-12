@@ -3,14 +3,21 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { Button } from "../../components/Button";
+import type { MouseEvent } from "react";
 import { withDottedInputs } from "../app/playbooks/playbooks-tabs";
 import type { TemplateItem, TemplatesData } from "../../lib/types";
 
 /*
  * P-03 Templates: category filters + search (mirrored in the URL query),
  * the featured template expanded with its instructions, the first six rows,
- * and a "Show N more" reveal for the rest.
+ * and a "Show N more" reveal for the rest. Layout follows
+ * screens/Templates.html: grid columns 1fr / 170px / 130px with "Copied"
+ * right-aligned, the featured detail as document + margin side-by-side,
+ * and the instructions as a tint fragment. Rows keep the design's "#"
+ * href; "Copy to my workspace" goes to the PlaybookBuilder route (W-05).
+ * The 17 non-designed fixture entries carry only inputs/sources, so rows
+ * fall back to those fixture fields (expects ← sources, description ←
+ * inputs, copied ← "—") instead of rendering blank cells.
  */
 export function TemplatesBrowser({ data }: { data: TemplatesData }) {
   const router = useRouter();
@@ -27,7 +34,7 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
     const needle = query.trim().toLowerCase();
     const inQuery =
       needle.length === 0 ||
-      [template.name, template.description, template.expects, template.category]
+      [template.name, template.description, template.expects, template.category, template.inputs, template.sources]
         .join(" ")
         .toLowerCase()
         .includes(needle);
@@ -52,10 +59,14 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
     setExpanded(false);
   }
 
+  function rowHover(event: MouseEvent<HTMLAnchorElement>, on: boolean) {
+    event.currentTarget.style.background = on ? "var(--paper-sunk)" : "";
+  }
+
   const featured = data.featured;
   const grid = {
     display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) 220px 110px",
+    gridTemplateColumns: "minmax(0, 1fr) 170px 130px",
     gap: 24,
     alignItems: "baseline",
   } as const;
@@ -78,6 +89,7 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
               key={item.name}
               type="button"
               className="filter-button"
+              style={{ fontSize: 14 }}
               aria-pressed={category === item.name}
               onClick={() => updateParams({ category: item.name })}
             >
@@ -94,7 +106,7 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
             type="search"
             placeholder="Search templates"
             className="field-control"
-            style={{ width: 240, minHeight: 34 }}
+            style={{ width: 240, minHeight: 34, fontSize: 14 }}
             value={query}
             onChange={(event) => updateParams({ q: event.target.value })}
           />
@@ -108,7 +120,9 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
         >
           <span role="columnheader">Template</span>
           <span role="columnheader">Expects</span>
-          <span role="columnheader">Copied</span>
+          <span role="columnheader" style={{ textAlign: "right" }}>
+            Copied
+          </span>
         </div>
 
         {featuredMatches ? (
@@ -123,7 +137,7 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
             }}
           >
             <div style={grid}>
-              <span role="cell" className="stack-2">
+              <span role="cell" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <strong
                   style={{
                     fontFamily: "var(--font-serif)",
@@ -149,25 +163,57 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
               <span role="cell" style={{ fontSize: 14, color: "var(--ink-2)" }}>
                 {featured.expects}
               </span>
-              <span role="cell" style={{ fontSize: 14, color: "var(--ink-2)" }}>
+              <span role="cell" style={{ fontSize: 14, color: "var(--ink)", textAlign: "right" }}>
                 {featured.copied}
               </span>
             </div>
-            {featured.instructions ? (
-              <p className="answer-text" style={{ fontSize: 16, maxWidth: 640 }}>
-                {withDottedInputs(featured.instructions)}
-              </p>
-            ) : null}
-            <dl className="definition-grid" style={{ maxWidth: 640 }}>
-              <dt>Inputs</dt>
-              <dd>{featured.inputs}</dd>
-              <dt>Checks</dt>
-              <dd>{featured.checks}</dd>
-              <dt>Typical run</dt>
-              <dd>{featured.typicalRun}</dd>
-            </dl>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 40 }}>
+              {featured.instructions ? (
+                <p
+                  style={{
+                    flex: "1 1 460px",
+                    maxWidth: 640,
+                    margin: 0,
+                    padding: "18px 20px",
+                    background: "var(--tint)",
+                    borderRadius: "var(--radius-l)",
+                    fontFamily: "var(--font-serif)",
+                    fontSize: 17,
+                    lineHeight: 1.65,
+                    color: "var(--ink-body)",
+                  }}
+                >
+                  {withDottedInputs(featured.instructions)}
+                </p>
+              ) : null}
+              <dl
+                style={{
+                  flex: "1 1 220px",
+                  maxWidth: 280,
+                  margin: 0,
+                  display: "grid",
+                  gridTemplateColumns: "auto minmax(0, 1fr)",
+                  gap: "8px 16px",
+                  fontSize: 13,
+                  lineHeight: 1.45,
+                  color: "var(--ink-2)",
+                  alignContent: "start",
+                }}
+              >
+                <dt style={{ color: "var(--ink-4)" }}>Inputs</dt>
+                <dd style={{ margin: 0 }}>{featured.inputs}</dd>
+                <dt style={{ color: "var(--ink-4)" }}>Checks</dt>
+                <dd style={{ margin: 0 }}>{featured.checks}</dd>
+                <dt style={{ color: "var(--ink-4)" }}>Typical run</dt>
+                <dd style={{ margin: 0 }}>{featured.typicalRun}</dd>
+              </dl>
+            </div>
             <div>
-              <Link href="/app/playbooks" className="btn btn-primary btn-md">
+              <Link
+                href={`/app/playbooks/${featured.id}/edit`}
+                className="btn btn-primary btn-md"
+                style={{ fontSize: 14 }}
+              >
                 Copy to my workspace
               </Link>
             </div>
@@ -178,7 +224,9 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
           <Link
             key={template.id}
             role="row"
-            href="/app/playbooks"
+            href="#"
+            onMouseEnter={(event) => rowHover(event, true)}
+            onMouseLeave={(event) => rowHover(event, false)}
             style={{
               ...grid,
               padding: "18px 0",
@@ -201,14 +249,14 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
                   color: "var(--ink-3)",
                 }}
               >
-                {template.description}
+                {template.description ?? template.inputs}
               </span>
             </span>
             <span role="cell" style={{ fontSize: 14, color: "var(--ink-2)" }}>
-              {template.expects}
+              {template.expects ?? template.sources}
             </span>
-            <span role="cell" style={{ fontSize: 14, color: "var(--ink-2)" }}>
-              {template.copied}
+            <span role="cell" style={{ fontSize: 14, color: "var(--ink)", textAlign: "right" }}>
+              {template.copied ?? "—"}
             </span>
           </Link>
         ))}
@@ -222,9 +270,20 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
 
       {hiddenCount > 0 ? (
         <div style={{ marginTop: 14 }}>
-          <Button variant="quiet" onClick={() => setExpanded(true)}>
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            style={{
+              background: "none",
+              border: 0,
+              padding: 0,
+              fontSize: 14,
+              color: "var(--ink-2)",
+              cursor: "pointer",
+            }}
+          >
             Show {hiddenCount} more
-          </Button>
+          </button>
         </div>
       ) : null}
     </div>

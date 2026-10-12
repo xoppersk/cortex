@@ -4,7 +4,7 @@ import { SiteFooter, SiteHeader } from "../../components/SiteHeader";
 import { getTemplates } from "../../lib/api";
 import { TemplatesBrowser } from "./TemplatesBrowser";
 
-export const metadata: Metadata = { title: "Templates" };
+export const metadata: Metadata = { title: { absolute: "Cortex — Playbook templates" } };
 
 /* P-03 Templates. Headline copy follows the canvas reference exactly. */
 export default function TemplatesPage() {
