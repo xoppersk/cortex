@@ -1,13 +1,21 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Field } from "../../../components/Field";
+import { useState, type ReactNode } from "react";
+
+export interface AuditSegment {
+  text: string;
+  href?: string;
+}
 
 export interface AuditEntryView {
   time: string;
   actor: string;
   sentence: string;
+  segments?: AuditSegment[];
   category: string;
+  date?: string;
   changes?: { before: string; after: string };
   context?: string;
 }
@@ -30,6 +38,40 @@ const WHAT_TO_CATEGORY: Record<string, string> = {
   Exports: "Exports",
 };
 
+function renderSegments(segments: AuditSegment[]): ReactNode {
+  return segments.map((segment, index) =>
+    segment.href ? (
+      <Link key={index} href={segment.href}>
+        {segment.text}
+      </Link>
+    ) : (
+      <span key={index}>{segment.text}</span>
+    ),
+  );
+}
+
+function renderActor(actor: string): ReactNode {
+  const suffix = " (API key)";
+  if (actor.endsWith(suffix)) {
+    return (
+      <>
+        <span style={{ fontWeight: 500, color: "var(--ink)" }}>{actor.slice(0, -suffix.length)}</span>
+        {suffix}
+      </>
+    );
+  }
+  return <span style={{ fontWeight: 500, color: "var(--ink)" }}>{actor}</span>;
+}
+
+const filterSelectStyle = {
+  height: 30,
+  minHeight: 30,
+  padding: "0 8px",
+  width: "auto",
+} as const;
+
+const filterLabelStyle = { fontSize: 12, color: "var(--ink-3)" } as const;
+
 export function AuditLog({
   groups,
   filters,
@@ -42,6 +84,8 @@ export function AuditLog({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [rangeFrom, setRangeFrom] = useState("");
+  const [rangeTo, setRangeTo] = useState("");
 
   const who = searchParams.get("who") ?? filters.who[0]!;
   const what = searchParams.get("what") ?? filters.what[0]!;
@@ -55,6 +99,22 @@ export function AuditLog({
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   }
 
+  const allDates = groups.flatMap((group) => group.entries.map((entry) => entry.date).filter(Boolean) as string[]);
+  const referenceDate = allDates.length ? allDates.sort()[allDates.length - 1]! : "2026-10-06";
+
+  function matchesWhen(entry: AuditEntryView): boolean {
+    if (!entry.date) return true;
+    if (when === "Custom range") {
+      if (rangeFrom && entry.date < rangeFrom) return false;
+      if (rangeTo && entry.date > rangeTo) return false;
+      return true;
+    }
+    const days = when === filters.when[1] ? 30 : 7;
+    const ref = new Date(`${referenceDate}T00:00:00Z`).getTime();
+    const cutoff = ref - (days - 1) * 86_400_000;
+    return new Date(`${entry.date}T00:00:00Z`).getTime() >= cutoff;
+  }
+
   function matches(entry: AuditEntryView): boolean {
     if (who !== filters.who[0]) {
       if (who === "API keys") {
@@ -64,7 +124,7 @@ export function AuditLog({
     if (what !== filters.what[0]) {
       if (WHAT_TO_CATEGORY[what] !== entry.category) return false;
     }
-    return true;
+    return matchesWhen(entry);
   }
 
   const filteredGroups = groups
@@ -73,52 +133,86 @@ export function AuditLog({
 
   return (
     <div className="stack-6">
-      <div className="row" style={{ alignItems: "flex-end" }} role="group" aria-label="Audit log filters">
-        <div style={{ minWidth: 170, flex: "1 1 170px" }}>
-          <Field label="Who" htmlFor="audit-who">
-            <select
-              id="audit-who"
+      <div
+        style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", flexWrap: "wrap" }}
+        role="group"
+        aria-label="Audit log filters"
+      >
+        <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)" }}>
+          <label htmlFor="audit-who" style={filterLabelStyle}>
+            Who
+          </label>
+          <select
+            id="audit-who"
+            className="field-control"
+            style={filterSelectStyle}
+            value={who}
+            onChange={(event) => updateFilter("who", event.target.value, filters.who[0]!)}
+          >
+            {filters.who.map((option) => (
+              <option key={option}>{option}</option>
+            ))}
+          </select>
+        </span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)" }}>
+          <label htmlFor="audit-what" style={filterLabelStyle}>
+            What
+          </label>
+          <select
+            id="audit-what"
+            className="field-control"
+            style={filterSelectStyle}
+            value={what}
+            onChange={(event) => updateFilter("what", event.target.value, filters.what[0]!)}
+          >
+            {filters.what.map((option) => (
+              <option key={option}>{option}</option>
+            ))}
+          </select>
+        </span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)" }}>
+          <label htmlFor="audit-when" style={filterLabelStyle}>
+            When
+          </label>
+          <select
+            id="audit-when"
+            className="field-control"
+            style={filterSelectStyle}
+            value={when}
+            onChange={(event) => updateFilter("when", event.target.value, filters.when[0]!)}
+          >
+            {filters.when.map((option) => (
+              <option key={option}>{option}</option>
+            ))}
+          </select>
+        </span>
+        {when === "Custom range" ? (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)" }}>
+            <label htmlFor="audit-from" style={filterLabelStyle}>
+              From
+            </label>
+            <input
+              id="audit-from"
+              type="date"
               className="field-control"
-              value={who}
-              onChange={(event) => updateFilter("who", event.target.value, filters.who[0]!)}
-            >
-              {filters.who.map((option) => (
-                <option key={option}>{option}</option>
-              ))}
-            </select>
-          </Field>
-        </div>
-        <div style={{ minWidth: 170, flex: "1 1 170px" }}>
-          <Field label="What" htmlFor="audit-what">
-            <select
-              id="audit-what"
+              style={filterSelectStyle}
+              value={rangeFrom}
+              onChange={(event) => setRangeFrom(event.target.value)}
+            />
+            <label htmlFor="audit-to" style={filterLabelStyle}>
+              To
+            </label>
+            <input
+              id="audit-to"
+              type="date"
               className="field-control"
-              value={what}
-              onChange={(event) => updateFilter("what", event.target.value, filters.what[0]!)}
-            >
-              {filters.what.map((option) => (
-                <option key={option}>{option}</option>
-              ))}
-            </select>
-          </Field>
-        </div>
-        <div style={{ minWidth: 170, flex: "1 1 170px" }}>
-          <Field label="When" htmlFor="audit-when">
-            <select
-              id="audit-when"
-              className="field-control"
-              value={when}
-              onChange={(event) => updateFilter("when", event.target.value, filters.when[0]!)}
-            >
-              {filters.when.map((option) => (
-                <option key={option}>{option}</option>
-              ))}
-            </select>
-          </Field>
-        </div>
-        <p className="caption" style={{ paddingBottom: 10 }}>
-          {totalEntries} entries
-        </p>
+              style={filterSelectStyle}
+              value={rangeTo}
+              onChange={(event) => setRangeTo(event.target.value)}
+            />
+          </span>
+        ) : null}
+        <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--ink-3)" }}>{totalEntries} entries</span>
       </div>
 
       {filteredGroups.length === 0 ? (
@@ -126,43 +220,64 @@ export function AuditLog({
       ) : (
         filteredGroups.map((group) => (
           <section key={group.day} aria-label={group.day}>
-            <h2 className="section-label" style={{ marginBottom: 12, fontSize: 15 }}>
-              {group.day}
-            </h2>
-            <ul className="stack-5" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+            <h2 style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", marginBottom: 4 }}>{group.day}</h2>
+            <div>
               {group.entries.map((entry, index) => (
-                <li key={`${entry.time}-${index}`} className="stack-3">
-                  <div className="row-between" style={{ alignItems: "baseline" }}>
-                    <p className="ui-text">
-                      <span className="code muted-3" style={{ marginRight: 12 }}>
-                        {entry.time}
-                      </span>
-                      <span className="ui-strong" style={{ fontSize: 13 }}>
-                        {entry.actor}
-                      </span>{" "}
-                      {entry.sentence}
-                    </p>
-                    <span className="caption" style={{ whiteSpace: "nowrap" }}>
-                      {entry.category}
+                <div key={`${entry.time}-${index}`}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "80px minmax(0, 1fr) 120px",
+                      gap: 18,
+                      alignItems: "baseline",
+                      padding: "12px 0",
+                      borderTop: "1px solid var(--rule)",
+                      fontSize: 14,
+                      lineHeight: 1.45,
+                    }}
+                  >
+                    <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{entry.time}</span>
+                    <span style={{ color: "var(--ink-body)" }}>
+                      {renderActor(entry.actor)}{" "}
+                      {entry.segments ? renderSegments(entry.segments) : entry.sentence}
                     </span>
+                    <span style={{ fontSize: 12, color: "var(--ink-4)", textAlign: "right" }}>{entry.category}</span>
                   </div>
                   {entry.changes ? (
-                    <dl className="definition-grid" style={{ marginLeft: 76 }}>
-                      <dt>Before</dt>
-                      <dd>{entry.changes.before}</dd>
-                      <dt>After</dt>
-                      <dd>{entry.changes.after}</dd>
-                      {entry.context ? (
-                        <>
-                          <dt>From</dt>
-                          <dd>{entry.context.replace(/^From /, "")}</dd>
-                        </>
-                      ) : null}
-                    </dl>
+                    <div
+                      style={{
+                        background: "#FAFAF8",
+                        borderRadius: "var(--radius-m)",
+                        padding: 12,
+                        margin: "0 -12px 12px",
+                      }}
+                    >
+                      <dl
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "70px minmax(0, 1fr)",
+                          gap: "6px 14px",
+                          fontSize: 12,
+                          lineHeight: 1.5,
+                          margin: 0,
+                        }}
+                      >
+                        <dt style={{ color: "var(--ink-4)" }}>Before</dt>
+                        <dd style={{ color: "var(--ink-body)" }}>{entry.changes.before}</dd>
+                        <dt style={{ color: "var(--ink-4)" }}>After</dt>
+                        <dd style={{ color: "var(--ink-body)" }}>{entry.changes.after}</dd>
+                        {entry.context ? (
+                          <>
+                            <dt style={{ color: "var(--ink-4)" }}>From</dt>
+                            <dd style={{ color: "var(--ink-body)" }}>{entry.context.replace(/^From /, "")}</dd>
+                          </>
+                        ) : null}
+                      </dl>
+                    </div>
                   ) : null}
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           </section>
         ))
       )}

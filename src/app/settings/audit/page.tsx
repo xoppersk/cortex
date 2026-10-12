@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { Button } from "../../../components/Button";
 import { getAdminData } from "../../../lib/api";
@@ -12,7 +13,9 @@ export default function AuditPage() {
       time: entry.time,
       actor: entry.actor,
       sentence: entry.sentence,
+      segments: "sentenceSegments" in entry ? entry.sentenceSegments : undefined,
       category: entry.category,
+      date: entry.date,
       changes: "changes" in entry ? entry.changes : undefined,
       context: "context" in entry ? entry.context : undefined,
     })),
@@ -23,25 +26,37 @@ export default function AuditPage() {
       <header className="page-head">
         <div className="page-head-row">
           <h1 className="page-title">Audit log</h1>
-          <Button variant="secondary" size="md">
+          <Button variant="secondary" size="sm">
             Export CSV
           </Button>
         </div>
         <p className="summary-sentence">{audit.summary}</p>
       </header>
 
-      <Suspense fallback={<p className="caption">Loading the audit log.</p>}>
-        <AuditLog groups={groups} filters={audit.filters} totalEntries={audit.totalEntries} />
-      </Suspense>
+      <div className="doc-margin">
+        <div className="doc-column" style={{ maxWidth: 680 }}>
+          <Suspense fallback={<p className="caption">Loading the audit log.</p>}>
+            <AuditLog groups={groups} filters={audit.filters} totalEntries={audit.totalEntries} />
+          </Suspense>
+        </div>
 
-      <section className="stack-3 hairline-top" style={{ paddingTop: "var(--space-6)", marginTop: "var(--space-7)" }}>
-        <h2 className="section-label" style={{ fontSize: 15 }}>
-          Not shown here
-        </h2>
-        <p className="ui-text" style={{ maxWidth: "var(--column-doc)" }}>
-          {audit.notShown}
-        </p>
-      </section>
+        <aside className="margin-column">
+          <div className="margin-box stack-3">
+            <h2 className="margin-box-title">Not shown here</h2>
+            <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>
+              {audit.notShownSegments.map((segment, index) =>
+                "href" in segment && segment.href ? (
+                  <Link key={index} href={segment.href}>
+                    {segment.text}
+                  </Link>
+                ) : (
+                  <span key={index}>{segment.text}</span>
+                ),
+              )}
+            </p>
+          </div>
+        </aside>
+      </div>
     </>
   );
 }
