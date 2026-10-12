@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { getKnowledge } from "../../../../lib/api";
 import { AskForm } from "./AskForm";
+
+export const metadata: Metadata = { title: { absolute: "Cortex — Ask a knowledge base" } };
 
 export default function AskPage() {
   const knowledge = getKnowledge();
