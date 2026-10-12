@@ -30,9 +30,9 @@ export function LedgerRow({
           </>
         ) : null}
       </span>
+      {meta ? <span className="ledger-row-meta">{meta}</span> : <span />}
       {value ? <span className="ledger-row-value">{value}</span> : <span />}
-      {meta ? <span className="ledger-row-meta">{meta}</span> : null}
-      {children ? <span className="ledger-row-meta">{children}</span> : null}
+      {children ? <span className="ledger-row-children">{children}</span> : null}
     </>
   );
 

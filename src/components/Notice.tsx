@@ -9,7 +9,7 @@ export function Notice({
   actions,
 }: {
   variant?: "blocking" | "warning";
-  headline: ReactNode;
+  headline?: ReactNode;
   lead?: ReactNode;
   children?: ReactNode;
   actions?: ReactNode;
@@ -18,12 +18,20 @@ export function Notice({
   return (
     <section
       className={cx("notice", !isBlocking && "notice-warning")}
-      role={isBlocking ? "alert" : undefined}
+      role={isBlocking ? "alert" : "status"}
       aria-label={typeof headline === "string" ? headline : undefined}
     >
-      <h2 className="notice-headline">{headline}</h2>
-      {lead ? <p className="notice-lead ui-strong">{lead}</p> : null}
-      {children ? <div className="ui-text stack-3">{children}</div> : null}
+      {headline ? <h2 className="notice-headline">{headline}</h2> : null}
+      {!isBlocking && lead ? (
+        <p className="notice-body">
+          <span className="notice-lead">{lead}</span> {children}
+        </p>
+      ) : (
+        <>
+          {lead ? <p className="notice-lead ui-strong">{lead}</p> : null}
+          {children ? <div className="notice-body stack-3">{children}</div> : null}
+        </>
+      )}
       {actions ? <div className="row">{actions}</div> : null}
     </section>
   );

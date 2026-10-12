@@ -23,12 +23,12 @@ export function Field({
         {label}
       </label>
       {children}
-      {changedFrom ? <p className="changed-note">changed from {changedFrom}</p> : null}
       {helper ? (
         <p className="field-helper" id={helperId}>
           {helper}
         </p>
       ) : null}
+      {changedFrom ? <p className="changed-note">changed from {changedFrom}</p> : null}
       {error ? (
         <p className="field-error" id={errorId} role="alert">
           {error}

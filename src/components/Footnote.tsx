@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { MouseEvent, ReactNode } from "react";
 import type { MarginNoteData, Segment } from "../lib/types";
 import { cx } from "../lib/utils";
@@ -58,13 +59,17 @@ export function MarginNote({
         <span className="margin-note-meta">{note.meta}</span>
       </p>
       {note.excerpt && note.excerpt.length > 0 ? (
-        <p className="margin-note-excerpt">
+        <p className="margin-note-excerpt" style={{ fontSize: 14 }}>
           <RichSegments segments={note.excerpt} />
         </p>
       ) : null}
-      {note.openPassage ? (
+      {note.passageHref ? (
         <p>
-          <a href="/app/knowledge/documents/customer-interview-synthesis">Open passage</a>
+          <Link href={note.passageHref}>Open passage</Link>
+        </p>
+      ) : note.openPassage ? (
+        <p>
+          <Link href="/app/knowledge/documents/customer-interview-synthesis">Open passage</Link>
         </p>
       ) : null}
       {children}
@@ -72,7 +77,13 @@ export function MarginNote({
   );
 }
 
-export function RichSegments({ segments }: { segments: Segment[] }) {
+export function RichSegments({
+  segments,
+  noteTarget,
+}: {
+  segments: Segment[];
+  noteTarget?: (n: number) => string;
+}) {
   return (
     <>
       {segments.map((segment, index) => {
@@ -81,7 +92,7 @@ export function RichSegments({ segments }: { segments: Segment[] }) {
           <span key={index}>
             {text}
             {segment.footnote ? (
-              <Footnote n={segment.footnote} noteId={`note-${segment.footnote}`} />
+              <Footnote n={segment.footnote} noteId={noteTarget ? noteTarget(segment.footnote) : `note-${segment.footnote}`} />
             ) : null}
           </span>
         );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { Fragment, useId, useState } from "react";
 import { Button } from "./Button";
 
 export function Composer({
@@ -15,6 +15,7 @@ export function Composer({
   usingSentence = false,
   sendLabel = "Send",
   attachLabel,
+  label = "Ask a question",
 }: {
   sourcesLabel?: string;
   playbookLabel?: string;
@@ -27,6 +28,7 @@ export function Composer({
   usingSentence?: boolean;
   sendLabel?: string;
   attachLabel?: string;
+  label?: string;
 }) {
   const [value, setValue] = useState("");
   const textareaId = useId();
@@ -37,18 +39,19 @@ export function Composer({
     setValue("");
   }
 
+  const sourceNames = sourcesLabel.split(",").map((name) => name.trim()).filter(Boolean);
+
   return (
     <div>
       <form
         className="composer"
-        aria-disabled={disabled || undefined}
         onSubmit={(event) => {
           event.preventDefault();
           submit();
         }}
       >
         <label className="sr-only" htmlFor={textareaId}>
-          Ask a question
+          {label}
         </label>
         <textarea
           id={textareaId}
@@ -63,10 +66,22 @@ export function Composer({
         />
         <div className="composer-row">
           {usingSentence ? (
-            <span className="composer-links">
-              <button type="button" className="composer-link" disabled={disabled}>
-                Using {sourcesLabel} · Playbook {playbookLabel}
-              </button>
+            <span className="composer-links" style={{ fontSize: 12, color: "var(--ink-3)" }}>
+              <span>
+                Using{" "}
+                {sourceNames.map((name, index) => (
+                  <Fragment key={name}>
+                    {index > 0 ? ", " : null}
+                    <a href="#" onClick={(event) => event.preventDefault()}>
+                      {name}
+                    </a>
+                  </Fragment>
+                ))}{" "}
+                · Playbook{" "}
+                <a href="#" onClick={(event) => event.preventDefault()}>
+                  {playbookLabel}
+                </a>
+              </span>
             </span>
           ) : (
             <span className="composer-links">
@@ -86,9 +101,9 @@ export function Composer({
               )}
             </span>
           )}
-          <button type="button" className="composer-link" disabled={disabled} aria-label={`Model: ${model}`}>
+          <Button variant="quiet" size="sm" type="button" disabled={disabled} aria-label={`Model: ${model}`}>
             {model}
-          </button>
+          </Button>
           <Button variant="primary" size="md" type="submit" disabled={disabled}>
             {sendLabel}
           </Button>
