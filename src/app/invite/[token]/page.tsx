@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Button, ButtonLink } from "../../../components/Button";
-import { Field } from "../../../components/Field";
-import { LedgerRow } from "../../../components/LedgerRow";
+import { LegalFooter } from "../../../components/SiteHeader";
 import { getStates } from "../../../lib/api";
+import { InviteForm } from "./InviteForm";
 
-export const metadata: Metadata = { title: "You're invited" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { invite } = getStates();
+  return { title: { absolute: `Cortex — Join ${invite.workspace}` } };
+}
 
-/* S-03 Invite: centred card, all details from the states fixture. */
+/*
+ * S-03 Invite, per screens/Invite.html: header (wordmark only) → centred
+ * content row (form column beside a "Waiting for you" aside) → LegalFooter.
+ */
 export default async function InvitePage({
   params,
 }: {
@@ -18,71 +23,128 @@ export default async function InvitePage({
   const { invite } = getStates();
 
   return (
-    <main className="center-shell">
-      <div className="center-card">
-        <Link href="/" className="wordmark">
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "var(--paper)",
+        color: "var(--ink)",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <header style={{ padding: "28px 48px" }}>
+        <Link href="/" className="wordmark" style={{ fontSize: 22 }}>
           Cortex
         </Link>
-        <p className="caption">Invitation · expires {invite.expires}</p>
-        <div className="stack-3">
-          <h1 className="page-title" style={{ fontSize: 26 }}>
+      </header>
+
+      <div
+        style={{
+          flex: 1,
+          padding: "40px 48px 64px",
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          gap: 72,
+        }}
+      >
+        <div
+          style={{
+            flex: "1 1 380px",
+            maxWidth: 420,
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+          }}
+        >
+          <span style={{ fontSize: 13, color: "var(--ink-3)" }}>
+            Invitation · expires {invite.expires}
+          </span>
+          <h1
+            style={{
+              margin: 0,
+              fontFamily: "var(--font-serif)",
+              fontSize: 36,
+              lineHeight: 1.12,
+              fontWeight: 600,
+              letterSpacing: "-0.02em",
+              color: "var(--ink)",
+            }}
+          >
             {invite.inviter} invited you to {invite.workspace}.
           </h1>
-          <p className="serif-lead" style={{ fontSize: 18 }}>
-            You&rsquo;ll join as an {invite.role}: {invite.roleDescription}.
+          <p
+            style={{
+              margin: "0 0 6px",
+              fontFamily: "var(--font-serif)",
+              fontSize: 18,
+              lineHeight: 1.55,
+              fontWeight: 400,
+              color: "var(--ink-body)",
+            }}
+          >
+            You&rsquo;ll join as an <b style={{ fontWeight: 600 }}>{invite.role}</b>:{" "}
+            {invite.roleDescription}.
           </p>
+          <InviteForm email={invite.email} name={invite.name} workspace={invite.workspace} />
         </div>
 
-        <form className="stack-4" action="/app/new" method="get">
-          <Field label="Joining as" htmlFor="invite-email">
-            <input
-              id="invite-email"
-              name="email"
-              type="email"
-              className="field-control"
-              defaultValue={invite.email}
-              readOnly
-            />
-          </Field>
-          <Field label="Your name, as teammates will see it" htmlFor="invite-name">
-            <input
-              id="invite-name"
-              name="name"
-              type="text"
-              autoComplete="name"
-              className="field-control"
-              defaultValue={invite.name}
-            />
-          </Field>
-          <div className="row">
-            <Button type="submit" variant="primary" size="lg">
-              Join {invite.workspace}
-            </Button>
-            <ButtonLink href="/" variant="quiet" size="lg">
-              Decline
-            </ButtonLink>
-          </div>
-        </form>
-
-        <p className="caption">
-          Not you? <Link href="/login">Sign in with another account</Link>. Joining adds a seat to
-          the workspace&rsquo;s bill, not yours.
-        </p>
-
-        <div className="stack-3 hairline-top" style={{ paddingTop: 20 }}>
-          <h2 className="section-label">Waiting for you</h2>
-          <div className="ledger">
-            {invite.waiting.map((item) => (
-              <LedgerRow key={item.label} title={item.label} description={item.detail} />
+        <aside
+          style={{
+            flex: "1 1 320px",
+            maxWidth: 380,
+            paddingTop: 34,
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+          }}
+        >
+          <h2
+            style={{
+              margin: "0 0 8px",
+              fontSize: 13,
+              fontWeight: 400,
+              color: "var(--ink-4)",
+            }}
+          >
+            Waiting for you
+          </h2>
+          <div>
+            {invite.waiting.map((item, index) => (
+              <div
+                key={item.label}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "minmax(0, 1fr) auto",
+                  gap: 12,
+                  padding: "10px 0",
+                  borderTop: "1px solid var(--rule)",
+                  borderBottom:
+                    index === invite.waiting.length - 1 ? "1px solid var(--rule)" : undefined,
+                  fontSize: 14,
+                }}
+              >
+                <span style={{ color: "var(--ink)" }}>{item.label}</span>
+                <span style={{ color: "var(--ink-3)", textAlign: "right" }}>{item.detail}</span>
+              </div>
             ))}
           </div>
-          <blockquote className="pull-quote" style={{ fontSize: 18 }}>
-            {invite.quote.text}
-          </blockquote>
-          <p className="caption">— {invite.quote.author}</p>
-        </div>
-        <p className="caption">© 2026 [Company] · Privacy · Terms · Security · Status · Help</p>
+          <p
+            style={{
+              margin: "12px 0 0",
+              fontFamily: "var(--font-serif)",
+              fontSize: 16,
+              lineHeight: 1.55,
+              fontWeight: 400,
+              color: "var(--ink-2)",
+            }}
+          >
+            {invite.quote.text} — {invite.quote.author}
+          </p>
+        </aside>
       </div>
-    </main>
+
+      <LegalFooter />
+    </div>
   );
 }
