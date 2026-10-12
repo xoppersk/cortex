@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Button } from "../../../components/Button";
 import { LedgerRow } from "../../../components/LedgerRow";
 import { getConversations, getKnowledge, getPlaybooks, getThread, getWorkspaceData } from "../../../lib/api";
 import { formatNumber } from "../../../lib/utils";
 import { BlockedView } from "../c/[id]/thread-view";
+import { ConfigSentence, QuestionForm } from "./new-chat-form";
 
 export const metadata: Metadata = { title: "New conversation" };
 
@@ -28,6 +28,10 @@ export default async function NewConversationPage({
     ["positioning-research", "customer-interviews"].includes(c.id),
   );
   const indexing = knowledge.collections.find((c) => c.status.type === "indexing");
+  const pickerCollections = [
+    ...canSee,
+    ...knowledge.collections.filter((c) => !canSee.some((seen) => seen.id === c.id)),
+  ].map((collection) => collection.name);
   const pickUp = conversations.conversations.slice(0, 3);
 
   const playbookCards = [
@@ -55,76 +59,30 @@ export default async function NewConversationPage({
   ];
 
   return (
-    <div className="stack-6">
-      <div className="page-head">
-        <h1 className="page-title">New conversation</h1>
-      </div>
-
+    <div style={{ paddingTop: 32 }}>
       <div className="doc-margin">
-        <div className="doc-column stack-6">
-          <p className="config-sentence">
-            Answer using{" "}
-            <select className="underlined-picker" aria-label="First source" defaultValue="Positioning research and">
-              <option>Positioning research and</option>
-              <option>Customer interviews and</option>
-              <option>Product docs and</option>
-            </select>{" "}
-            <select className="underlined-picker" aria-label="Second source" defaultValue="Customer interviews">
-              <option>Customer interviews</option>
-              <option>Positioning research</option>
-              <option>Product docs</option>
-            </select>
-            , with{" "}
-            <select className="underlined-picker" aria-label="Model" defaultValue={workspace.defaultModel}>
-              {models.map((model) => (
-                <option key={model.id}>{model.name}</option>
-              ))}
-            </select>
-            , citing{" "}
-            <select className="underlined-picker" aria-label="Citation rule" defaultValue="every claim">
-              <option>every claim</option>
-              <option>key claims</option>
-            </select>
-            , and stop any single answer at{" "}
-            <select className="underlined-picker" aria-label="Per-answer ceiling" defaultValue={ceiling}>
-              <option>$0.05</option>
-              <option>{ceiling}</option>
-              <option>$0.15</option>
-            </select>
-            .
-          </p>
-
-          <div className="stack-2">
-            <label className="ui-strong" htmlFor="new-question">
-              Your question
-            </label>
-            <form className="composer" action="/app/c/launch-narrative" method="get">
-              <label className="sr-only" htmlFor="new-question">
-                Your question
-              </label>
-              <textarea
-                id="new-question"
-                name="q"
-                placeholder="Type / for a playbook, @ for a source"
-                rows={3}
-              />
-              <div className="composer-row">
-                <span className="composer-links">
-                  <button type="button" className="composer-link">
-                    Attach file
-                  </button>
-                </span>
-                <Button variant="primary" size="md" type="submit">
-                  Start
-                </Button>
-              </div>
-            </form>
+        <div
+          className="doc-column"
+          style={{ display: "flex", flexDirection: "column", gap: 40 }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <h1 className="page-title" style={{ fontSize: 34, margin: 0 }}>
+              New conversation
+            </h1>
+            <ConfigSentence
+              collections={pickerCollections}
+              models={models.map((model) => model.name)}
+              defaultModel={workspace.defaultModel}
+              ceiling={ceiling}
+            />
           </div>
+
+          <QuestionForm />
 
           <section className="stack-3">
             <div className="page-head-row">
               <h2 className="section-label">Start from a playbook</h2>
-              <Link href="/app/playbooks" className="caption">
+              <Link href="/app/playbooks" style={{ fontSize: 12, color: "var(--ink-2)" }}>
                 All 7 playbooks
               </Link>
             </div>
@@ -132,7 +90,7 @@ export default async function NewConversationPage({
               {playbookCards.map((card) => (
                 <LedgerRow
                   key={card.id}
-                  href="/app/playbooks"
+                  href={`/app/c/launch-narrative?playbook=${card.id}`}
                   title={card.name}
                   description={card.description}
                   value={card.value}
@@ -150,7 +108,7 @@ export default async function NewConversationPage({
                   key={conversation.id}
                   href={`/app/c/${conversation.id}`}
                   title={conversation.title}
-                  description={`${conversation.sources} sources`}
+                  meta={`${conversation.sources} sources`}
                   value={conversation.edited}
                 />
               ))}
@@ -174,8 +132,9 @@ export default async function NewConversationPage({
             </ul>
             {indexing ? (
               <p className="caption">
-                {indexing.name} is still indexing, {indexing.status.percent}% done. It joins this
-                conversation automatically when ready.
+                <span style={{ fontWeight: 500 }}>{indexing.name}</span> is still indexing,{" "}
+                {indexing.status.percent}% done. It joins this conversation automatically when
+                ready.
               </p>
             ) : null}
           </div>
