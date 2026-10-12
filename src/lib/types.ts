@@ -83,6 +83,7 @@ export interface MarginNoteData {
   expanded?: boolean;
   broken?: boolean;
   openPassage?: boolean;
+  passageHref?: string;
 }
 
 export interface ThreadBlock {
@@ -212,11 +213,13 @@ export interface KnowledgeDocument {
 
 export interface PassageTraceRow {
   cite: number | null;
-  excerpt: string;
+  excerpt: string | Segment[];
   source: string;
   match: number;
   outcome: string;
   setAside?: boolean;
+  id?: string;
+  outcomeTone?: "warn";
 }
 
 export interface KnowledgeData {
