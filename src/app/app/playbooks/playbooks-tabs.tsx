@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Button, ButtonLink } from "../../../components/Button";
 import { LedgerRow } from "../../../components/LedgerRow";
 import { getPlaybooks } from "../../../lib/api";
@@ -10,13 +10,26 @@ import { formatCost } from "../../../lib/utils";
 
 type TabId = "team" | "private" | "archived";
 
+const VAR_STYLE: CSSProperties = {
+  fontFamily: "var(--font-sans)",
+  fontSize: 14,
+  fontWeight: 600,
+};
+
+const DESCRIPTION_STYLE: CSSProperties = {
+  fontFamily: "var(--font-serif)",
+  fontSize: 14,
+  lineHeight: 1.45,
+  color: "var(--ink-3)",
+};
+
 export function withDottedInputs(instructions: string): ReactNode {
   const parts = instructions.split(/(\[[^\]]+\])/g);
   return (
     <>
       {parts.map((part, index) =>
         part.startsWith("[") && part.endsWith("]") ? (
-          <span key={index} className="dotted-input">
+          <span key={index} className="dotted-input" style={VAR_STYLE}>
             {part.slice(1, -1)}
           </span>
         ) : (
@@ -28,15 +41,18 @@ export function withDottedInputs(instructions: string): ReactNode {
 }
 
 function PlaybookLedgerRow({ playbook }: { playbook: PlaybookRow }) {
+  const archived = Boolean(playbook.status);
   return (
     <LedgerRow
       title={playbook.name}
       description={playbook.description}
-      value={playbook.status}
+      value={archived ? playbook.status : undefined}
       meta={
-        playbook.owner
-          ? `${playbook.owner} · ${playbook.runs} runs · ${playbook.updated}`
-          : `${playbook.runs} runs · ${playbook.status ?? playbook.updated}`
+        archived
+          ? `${playbook.runs} runs`
+          : playbook.owner
+            ? `${playbook.owner} · ${playbook.runs} runs · ${playbook.updated}`
+            : `${playbook.runs} runs · ${playbook.updated}`
       }
     />
   );
@@ -83,9 +99,9 @@ export function PlaybooksTabs() {
             </button>
           ))}
         </div>
-        <button type="button" className="filter-button">
+        <Button variant="secondary" size="sm">
           Most used
-        </button>
+        </Button>
       </div>
 
       {tab === "team" ? (
@@ -98,68 +114,122 @@ export function PlaybooksTabs() {
                 <th scope="col" className="numeric">
                   Runs, 30 days
                 </th>
-                <th scope="col">Edited</th>
+                <th scope="col" className="numeric">
+                  Edited
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr className="featured-row">
                 <td>
-                  <span className="ui-strong">{featured.name}</span>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: "var(--ink)" }}>
+                    {featured.name}
+                  </span>
                   <br />
-                  <span className="muted-3">{featured.description}</span>
+                  <span style={DESCRIPTION_STYLE}>{featured.description}</span>
                 </td>
-                <td>{featured.owner}</td>
+                <td style={{ color: "var(--ink-2)" }}>{featured.owner}</td>
                 <td className="numeric">{featured.runs}</td>
-                <td>{featured.updated}</td>
+                <td className="numeric" style={{ color: "var(--ink-3)" }}>
+                  {featured.updated}
+                </td>
               </tr>
               <tr>
                 <td colSpan={4}>
-                  <div className="stack-4" style={{ maxWidth: "var(--column-doc)", padding: "var(--space-4) 0" }}>
-                    <p className="caption" style={{ fontWeight: 600, color: "var(--ink)" }}>
-                      Instructions
-                    </p>
-                    <p className="answer-text" style={{ fontSize: 16 }}>
-                      {withDottedInputs(playbooks.edit.instructions)}
-                    </p>
-                    <dl className="definition-grid">
-                      <dt>Inputs</dt>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 40,
+                      padding: "4px 0 var(--space-4)",
+                    }}
+                  >
+                    <figure
+                      style={{
+                        flex: "1 1 460px",
+                        maxWidth: 620,
+                        margin: 0,
+                        padding: "18px 20px",
+                        background: "var(--tint)",
+                        borderRadius: "var(--radius-l)",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 10,
+                      }}
+                    >
+                      <figcaption style={{ fontSize: 12, color: "var(--ink-4)" }}>
+                        Instructions
+                      </figcaption>
+                      <p
+                        style={{
+                          fontFamily: "var(--font-serif)",
+                          fontSize: 16,
+                          lineHeight: 1.65,
+                          color: "var(--ink-body)",
+                        }}
+                      >
+                        {withDottedInputs(featured.instructions)}
+                      </p>
+                    </figure>
+                    <dl
+                      style={{
+                        flex: "1 1 220px",
+                        maxWidth: 280,
+                        margin: 0,
+                        display: "grid",
+                        gridTemplateColumns: "auto minmax(0, 1fr)",
+                        gap: "10px 16px",
+                        fontSize: 12,
+                        lineHeight: 1.45,
+                        alignContent: "start",
+                      }}
+                    >
+                      <dt style={{ color: "var(--ink-4)" }}>Inputs</dt>
                       <dd>{featured.inputs}</dd>
-                      <dt>Sources</dt>
+                      <dt style={{ color: "var(--ink-4)" }}>Sources</dt>
                       <dd>{featured.sources}</dd>
-                      <dt>Checks</dt>
+                      <dt style={{ color: "var(--ink-4)" }}>Checks</dt>
                       <dd>{featured.checks}</dd>
-                      <dt>Avg. cost</dt>
+                      <dt style={{ color: "var(--ink-4)" }}>Avg. cost</dt>
                       <dd>{formatCost(featured.avgCost ?? 0)} per run</dd>
-                      <dt>Pass rate</dt>
+                      <dt style={{ color: "var(--ink-4)" }}>Pass rate</dt>
                       <dd>{featured.passRate}</dd>
                     </dl>
-                    <div className="row">
-                      <Button variant="primary" size="md">
-                        Run playbook
-                      </Button>
-                      <ButtonLink href={`/app/playbooks/${featured.id}/edit`} variant="secondary" size="md">
-                        Edit
-                      </ButtonLink>
-                      <Button variant="quiet" size="md">
-                        Duplicate
-                      </Button>
-                      <Button variant="quiet" size="md">
-                        View runs
-                      </Button>
-                    </div>
+                  </div>
+                  <div className="row" style={{ gap: 6 }}>
+                    <ButtonLink href="/app/new" variant="primary" size="sm">
+                      Run playbook
+                    </ButtonLink>
+                    <ButtonLink
+                      href={`/app/playbooks/${featured.id}/edit`}
+                      variant="secondary"
+                      size="sm"
+                    >
+                      Edit
+                    </ButtonLink>
+                    <Button variant="secondary" size="sm">
+                      Duplicate
+                    </Button>
+                    <Button variant="secondary" size="sm">
+                      View runs
+                    </Button>
                   </div>
                 </td>
               </tr>
               {playbooks.team.map((playbook) => (
                 <tr key={playbook.id}>
                   <td>
-                    <span className="ui-strong">{playbook.name}</span>
+                    <span style={{ fontSize: 14, fontWeight: 500, color: "var(--ink)" }}>
+                      {playbook.name}
+                    </span>
                     <br />
-                    <span className="muted-3">{playbook.description}</span>
+                    <span style={DESCRIPTION_STYLE}>{playbook.description}</span>
                   </td>
-                  <td>{playbook.owner}</td>
+                  <td style={{ color: "var(--ink-2)" }}>{playbook.owner}</td>
                   <td className="numeric">{playbook.runs}</td>
-                  <td>{playbook.updated}</td>
+                  <td className="numeric" style={{ color: "var(--ink-3)" }}>
+                    {playbook.updated}
+                  </td>
                 </tr>
               ))}
             </tbody>
