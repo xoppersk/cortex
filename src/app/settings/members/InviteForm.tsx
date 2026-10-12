@@ -2,18 +2,19 @@
 
 import { useState } from "react";
 import { Button } from "../../../components/Button";
-import { Field, fieldDescribedBy } from "../../../components/Field";
 import type { Role } from "../../../lib/types";
 
 const ROLES: Role[] = ["Editor", "Viewer", "Admin"];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function InviteForm() {
+export function InviteForm({
+  onInvite,
+}: {
+  onInvite: (invite: { email: string; role: Role }) => void;
+}) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<Role>("Editor");
   const [error, setError] = useState<string | undefined>(undefined);
-  const [submitted, setSubmitted] = useState(false);
-  const [sentTo, setSentTo] = useState<{ email: string; role: Role } | null>(null);
 
   function validateEmail(value: string): string | undefined {
     if (!value.trim()) return "Enter an email address.";
@@ -22,41 +23,46 @@ export function InviteForm() {
     return undefined;
   }
 
-  function handleEmailChange(value: string) {
-    setEmail(value);
-    setSentTo(null);
-    if (submitted) setError(validateEmail(value));
-  }
-
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmitted(true);
     const emailError = validateEmail(email);
     setError(emailError);
     if (emailError) return;
-    setSentTo({ email: email.trim(), role });
+    onInvite({ email: email.trim().split(",")[0]!.trim(), role });
+    setEmail("");
   }
 
   return (
-    <div className="stack-4">
-      <form onSubmit={handleSubmit} noValidate className="stack-4">
-        <Field label="Email" htmlFor="invite-email" error={error}>
+    <form onSubmit={handleSubmit} noValidate>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: "var(--space-3)", flexWrap: "wrap" }}>
+        <div className="field" style={{ flex: "1 1 260px" }}>
+          <label className="field-label" htmlFor="invite-email" style={{ fontSize: 12, color: "var(--ink-3)" }}>
+            Invite by email
+          </label>
           <input
             id="invite-email"
-            className="field-control"
+            className="field-control field-control-32"
+            style={{ height: 34 }}
             type="email"
             autoComplete="email"
             placeholder="name@company.com, separate several with commas"
             value={email}
-            onChange={(event) => handleEmailChange(event.target.value)}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              if (error) setError(validateEmail(event.target.value));
+            }}
             aria-invalid={error ? true : undefined}
-            aria-describedby={fieldDescribedBy("invite-email", { error })}
+            aria-describedby={error ? "invite-email-error" : undefined}
           />
-        </Field>
-        <Field label="Role" htmlFor="invite-role">
+        </div>
+        <div className="field">
+          <label className="field-label" htmlFor="invite-role" style={{ fontSize: 12, color: "var(--ink-3)" }}>
+            Role
+          </label>
           <select
             id="invite-role"
-            className="field-control"
+            className="field-control field-control-32"
+            style={{ height: 34, width: "auto" }}
             value={role}
             onChange={(event) => setRole(event.target.value as Role)}
           >
@@ -66,22 +72,16 @@ export function InviteForm() {
               </option>
             ))}
           </select>
-        </Field>
-        <div>
-          <Button variant="primary" size="md" type="submit">
-            Send invite
-          </Button>
         </div>
-      </form>
-      {sentTo ? (
-        <div className="fragment stack-2" role="status">
-          <p className="ui-strong">Invite pending</p>
-          <p className="ui-text">
-            {sentTo.email} · {sentTo.role}
-          </p>
-          <p className="caption">Invited just now. The invite expires in 7 days.</p>
-        </div>
+        <Button variant="primary" type="submit" style={{ minHeight: 34 }}>
+          Send invite
+        </Button>
+      </div>
+      {error ? (
+        <p className="field-error" id="invite-email-error" role="alert" style={{ marginTop: "var(--space-2)" }}>
+          {error}
+        </p>
       ) : null}
-    </div>
+    </form>
   );
 }

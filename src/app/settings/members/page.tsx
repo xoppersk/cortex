@@ -1,28 +1,85 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
 import { Button } from "../../../components/Button";
 import { getMembers } from "../../../lib/api";
-import type { Role } from "../../../lib/types";
+import type { Member, Role } from "../../../lib/types";
 import { InviteForm } from "./InviteForm";
 
-const ROLES: Role[] = ["Admin", "Editor", "Viewer"];
+const ROLE_CYCLE: Role[] = ["Editor", "Viewer", "Admin"];
+
+function roleOptions(current: Role): Role[] {
+  const start = ROLE_CYCLE.indexOf(current);
+  return [0, 1, 2].map((i) => ROLE_CYCLE[(start + i) % 3]!);
+}
+
+interface PendingInvite {
+  id: string;
+  email: string;
+  role: Role;
+  label: string;
+  status: string;
+}
+
+const quietRowButton = { minHeight: 26, padding: "0 6px" } as const;
 
 export default function MembersPage() {
-  const { summary, members, pendingInvite, roleDefinitions, rolesFooter } = getMembers();
+  const data = getMembers();
+  const [members, setMembers] = useState<Member[]>(data.members);
+  const [invites, setInvites] = useState<PendingInvite[]>([
+    {
+      id: "initial-invite",
+      email: data.pendingInvite.email,
+      role: data.pendingInvite.role,
+      label: data.pendingInvite.label,
+      status: data.pendingInvite.status,
+    },
+  ]);
+  const [resentId, setResentId] = useState<string | null>(null);
+
+  function addInvite({ email, role }: { email: string; role: Role }) {
+    setInvites((previous) => [
+      ...previous,
+      {
+        id: `invite-${email}-${previous.length}`,
+        email,
+        role,
+        label: "Invited by you, Oct 6 · expires Oct 13",
+        status: "Not joined",
+      },
+    ]);
+  }
+
+  function removeMember(id: string) {
+    setMembers((previous) => previous.filter((member) => member.id !== id));
+  }
+
+  function changeRole(id: string, role: Role) {
+    setMembers((previous) => previous.map((member) => (member.id === id ? { ...member, role } : member)));
+  }
+
+  function cancelInvite(id: string) {
+    setInvites((previous) => previous.filter((invite) => invite.id !== id));
+  }
+
+  function resendInvite(id: string) {
+    setResentId(id);
+    window.setTimeout(() => setResentId((current) => (current === id ? null : current)), 2000);
+  }
+
+  const footerParts = data.rolesFooter.split("audit log");
 
   return (
     <>
       <header className="page-head">
         <h1 className="page-title">Members</h1>
-        <p className="summary-sentence">{summary}</p>
+        <p className="summary-sentence">{data.summary}</p>
       </header>
 
       <div className="doc-margin">
-        <div className="doc-column stack-6">
-          <section className="stack-4" aria-labelledby="invite-heading">
-            <h2 className="section-label" id="invite-heading">
-              Invite by email
-            </h2>
-            <InviteForm />
-          </section>
+        <div className="doc-column stack-6" style={{ maxWidth: 680 }}>
+          <InviteForm onInvite={addInvite} />
 
           <section aria-label="Everyone in this workspace">
             <div className="table-scroll">
@@ -39,11 +96,13 @@ export default function MembersPage() {
                 </thead>
                 <tbody>
                   {members.map((member) => (
-                    <tr key={member.id}>
+                    <tr key={member.id} style={member.note ? { background: "#FAFAF8" } : undefined}>
                       <td>
-                        <span className="ui-strong" style={{ fontSize: 13 }}>
+                        <span style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>
                           {member.name}
-                          {member.self ? " (you)" : ""}
+                          {member.self ? (
+                            <span style={{ fontWeight: 400, color: "var(--ink-4)" }}> (you)</span>
+                          ) : null}
                         </span>
                         <br />
                         <span className="caption">{member.detail}</span>
@@ -54,11 +113,12 @@ export default function MembersPage() {
                         ) : (
                           <select
                             className="field-control"
-                            defaultValue={member.role}
+                            value={member.role}
+                            onChange={(event) => changeRole(member.id, event.target.value as Role)}
                             aria-label={`Role for ${member.name}`}
-                            style={{ minWidth: 110 }}
+                            style={{ minHeight: 30, height: 30, padding: "0 8px", width: "auto", minWidth: 110 }}
                           >
-                            {ROLES.map((role) => (
+                            {roleOptions(member.role).map((role) => (
                               <option key={role} value={role}>
                                 {role}
                               </option>
@@ -66,45 +126,39 @@ export default function MembersPage() {
                           </select>
                         )}
                       </td>
-                      <td>
-                        {member.lastActive}
+                      <td>{member.lastActive}</td>
+                      <td style={{ textAlign: "right" }}>
                         {member.note ? (
-                          <>
-                            <br />
-                            <span className="caption">{member.note}</span>
-                          </>
-                        ) : null}
-                      </td>
-                      <td>
-                        {member.removable ? (
-                          <Button variant="quiet" size="sm">
+                          <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{member.note}</span>
+                        ) : member.removable ? (
+                          <Button variant="quiet" size="sm" style={quietRowButton} onClick={() => removeMember(member.id)}>
                             Remove
                           </Button>
                         ) : null}
                       </td>
                     </tr>
                   ))}
-                  <tr>
-                    <td>
-                      <span className="ui-strong" style={{ fontSize: 13 }}>
-                        {pendingInvite.email}
-                      </span>
-                      <br />
-                      <span className="caption">{pendingInvite.label}</span>
-                    </td>
-                    <td>{pendingInvite.role}</td>
-                    <td>{pendingInvite.status}</td>
-                    <td>
-                      <span className="row" style={{ flexWrap: "nowrap" }}>
-                        <Button variant="quiet" size="sm">
-                          Resend
-                        </Button>
-                        <Button variant="quiet" size="sm">
-                          Cancel
-                        </Button>
-                      </span>
-                    </td>
-                  </tr>
+                  {invites.map((invite) => (
+                    <tr key={invite.id}>
+                      <td>
+                        <span style={{ fontSize: 13, fontWeight: 500, color: "var(--ink-2)" }}>{invite.email}</span>
+                        <br />
+                        <span className="caption">{invite.label}</span>
+                      </td>
+                      <td>{invite.role}</td>
+                      <td>{invite.status}</td>
+                      <td>
+                        <span className="row" style={{ flexWrap: "nowrap", gap: "var(--space-1)" }}>
+                          <Button variant="quiet" size="sm" style={quietRowButton} onClick={() => resendInvite(invite.id)}>
+                            {resentId === invite.id ? "Resent" : "Resend"}
+                          </Button>
+                          <Button variant="quiet" size="sm" style={quietRowButton} onClick={() => cancelInvite(invite.id)}>
+                            Cancel
+                          </Button>
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -113,16 +167,20 @@ export default function MembersPage() {
 
         <aside className="margin-column">
           <div className="margin-box">
-            <p className="margin-box-title">What each role can do</p>
-            {roleDefinitions.map((definition) => (
-              <div key={definition.role} className="stack-2">
-                <p className="ui-strong" style={{ fontSize: 13 }}>
-                  {definition.role}
-                </p>
-                <p className="caption">{definition.description}</p>
+            <h2 className="margin-box-title">What each role can do</h2>
+            {data.roleDefinitions.map((definition) => (
+              <div key={definition.role}>
+                <p style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>{definition.role}</p>
+                <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>{definition.description}</p>
               </div>
             ))}
-            <p className="caption">{rolesFooter}</p>
+            <div className="hairline-top" style={{ paddingTop: "var(--space-4)" }}>
+              <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>
+                {footerParts[0]}
+                <Link href="/settings/audit">audit log</Link>
+                {footerParts.slice(1).join("audit log")}
+              </p>
+            </div>
           </div>
         </aside>
       </div>
