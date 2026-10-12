@@ -5,7 +5,19 @@ import { ButtonLink } from "../../../components/Button";
 import { getConversations, getStates } from "../../../lib/api";
 import { HistoryFilters } from "./history-filters";
 
-export const metadata: Metadata = { title: "Conversations" };
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  return {
+    title: {
+      absolute:
+        params.state === "empty" ? "Cortex — Empty conversation" : "Cortex — Conversation history",
+    },
+  };
+}
 
 export default async function HistoryPage({
   searchParams,

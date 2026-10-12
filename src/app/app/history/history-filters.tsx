@@ -114,7 +114,7 @@ export function HistoryFilters() {
             </button>
           ))}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div className="history-search-group" style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ minWidth: 220, flex: "0 1 260px" }}>
             <label className="sr-only" htmlFor="history-search">
               Search titles, people, sources and message text
