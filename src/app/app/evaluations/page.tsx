@@ -1,7 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 import { Button } from "../../../components/Button";
 import { getEvaluations } from "../../../lib/api";
+
+export const metadata: Metadata = { title: { absolute: "Cortex — Evaluations" } };
 
 type FailureExtra = {
   id: string;
