@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+
+export const metadata: Metadata = { title: { absolute: "Cortex — Billing" } };
 import { Button } from "../../../components/Button";
 import { getAdminData } from "../../../lib/api";
 
