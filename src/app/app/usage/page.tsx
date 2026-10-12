@@ -6,7 +6,7 @@ import { getUsage, getWorkspaceData } from "../../../lib/api";
 import { formatMoney, formatNumber } from "../../../lib/utils";
 import { UsageActions } from "./UsageActions";
 
-export const metadata: Metadata = { title: "Usage" };
+export const metadata: Metadata = { title: { absolute: "Cortex — Usage" } };
 
 /** Split the fixture summary so the designed bold segments ($184 / October 8) render in 600. */
 function SummarySentence({ summary }: { summary: string }) {
@@ -131,10 +131,10 @@ export default function UsagePage() {
                   ))}
                 </g>
                 <circle cx={projX} cy={chartY(usage.projection.value)} r="4" fill="var(--paper)" stroke="var(--ink)" strokeWidth="1.5" />
-                <text x="516" y="80" textAnchor="end" fontSize="12" fontWeight="600" fill="var(--ink)">
+                <text className="chart-label-today" x="516" y="80" textAnchor="end" fontSize="12" fontWeight="600" fill="var(--ink)">
                   ${lastPoint.value} today
                 </text>
-                <text x="574" y="30" textAnchor="end" fontSize="11" fill="var(--ink-2)">
+                <text className="chart-label-proj" x="574" y="30" textAnchor="end" fontSize="11" fill="var(--ink-2)">
                   ${usage.projection.value} projected
                 </text>
               </svg>
