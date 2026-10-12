@@ -1,35 +1,36 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { Button } from "../../../components/Button";
+import { SettingsSection } from "../../../components/SettingsSection";
 import type { AdminData } from "../../../lib/types";
 import { cx } from "../../../lib/utils";
 
 type Settings = AdminData["workspaceSettings"];
 
-function Section({
-  title,
-  children,
-  note,
-}: {
-  title: string;
-  children: ReactNode;
-  note?: string;
-}) {
-  return (
-    <section className="stack-4 hairline-top" style={{ paddingTop: "var(--space-6)" }}>
-      <h2 className="section-label" style={{ fontSize: 15 }}>
-        {title}
-      </h2>
-      {children}
-      {note ? <p className="caption">{note}</p> : null}
-    </section>
-  );
+interface FormValues {
+  name: string;
+  slug: string;
+  model: string;
+  citationRule: string;
+  freshness: string;
+  ceiling: string;
+  limit: string;
+  alertAt: string;
+  allowRaise: boolean;
+  keepConversations: string;
+  keepPassages: string;
+  signIn: boolean[];
+}
+
+function MarginNote({ children }: { children: ReactNode }) {
+  return <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>{children}</p>;
 }
 
 function Row({ label, htmlFor, children }: { label: string; htmlFor?: string; children: ReactNode }) {
   return (
-    <div className="settings-grid">
+    <div className="settings-grid" style={{ marginBottom: "var(--space-4)" }}>
       {htmlFor ? (
         <label className="settings-grid-label" htmlFor={htmlFor}>
           {label}
@@ -37,28 +38,30 @@ function Row({ label, htmlFor, children }: { label: string; htmlFor?: string; ch
       ) : (
         <span className="settings-grid-label">{label}</span>
       )}
-      <div className="stack-2">{children}</div>
+      <div>{children}</div>
     </div>
   );
 }
 
-export function WorkspaceForm({ settings }: { settings: Settings }) {
-  const savedCeiling = "$0.10";
-  const [name, setName] = useState(settings.identity.name);
-  const [slug, setSlug] = useState(settings.identity.slug);
-  const [model, setModel] = useState(settings.answerDefaults.model);
-  const [citationRule, setCitationRule] = useState(settings.answerDefaults.citationRule);
-  const [freshness, setFreshness] = useState(String(settings.answerDefaults.sourceFreshnessDays));
-  const [ceiling, setCeiling] = useState(settings.answerDefaults.perAnswerCeiling);
-  const [limit, setLimit] = useState(settings.spending.monthlyLimit);
-  const [alertAt, setAlertAt] = useState(settings.spending.alertThreshold);
-  const [allowRaise, setAllowRaise] = useState(settings.spending.allowEditorsRaise);
-  const [keepConversations, setKeepConversations] = useState(settings.retention.conversations);
-  const [keepPassages, setKeepPassages] = useState(settings.retention.passages);
-  const [signInOptions, setSignInOptions] = useState(settings.signIn.options.map((o) => o.checked));
-  const [savedMessage, setSavedMessage] = useState(false);
+type Segment = { text: string; href?: string };
 
-  const savedValues = {
+function renderSegments(segments: readonly Segment[]): ReactNode {
+  return segments.map((segment, index) =>
+    segment.href ? (
+      <Link key={index} href={segment.href}>
+        {segment.text}
+      </Link>
+    ) : (
+      <span key={index}>{segment.text}</span>
+    ),
+  );
+}
+
+export function WorkspaceForm({ settings }: { settings: Settings }) {
+  // Saved ceiling is carried by the fixture's "changed from $0.10" note — derive it, don't hardcode.
+  const savedCeiling = settings.answerDefaults.perAnswerNote.replace(/^changed from\s*/, "");
+
+  const initialBaseline: FormValues = {
     name: settings.identity.name,
     slug: settings.identity.slug,
     model: settings.answerDefaults.model,
@@ -70,97 +73,93 @@ export function WorkspaceForm({ settings }: { settings: Settings }) {
     allowRaise: settings.spending.allowEditorsRaise,
     keepConversations: settings.retention.conversations,
     keepPassages: settings.retention.passages,
+    signIn: settings.signIn.options.map((o) => o.checked),
   };
-  const currentValues = {
-    name, slug, model, citationRule, freshness, ceiling, limit, alertAt,
-    allowRaise, keepConversations, keepPassages,
-  };
-  const changedCount =
-    (Object.keys(savedValues) as Array<keyof typeof savedValues>).filter(
-      (key) => savedValues[key] !== currentValues[key],
-    ).length +
-    signInOptions.filter((checked, i) => checked !== settings.signIn.options[i]!.checked).length;
+
+  const [baseline, setBaseline] = useState<FormValues>(initialBaseline);
+  const [values, setValues] = useState<FormValues>({
+    ...initialBaseline,
+    ceiling: settings.answerDefaults.perAnswerCeiling,
+  });
+
+  // Count field-level changes: scalar fields individually + each flipped sign-in option.
+  const scalarChanges = (Object.keys(baseline) as Array<keyof FormValues>).filter(
+    (key) => key !== "signIn" && baseline[key] !== values[key],
+  ).length;
+  const signInChanges = values.signIn.filter((checked, i) => checked !== baseline.signIn[i]).length;
+  const totalChanges = scalarChanges + signInChanges;
+
+  function set<K extends keyof FormValues>(key: K, value: FormValues[K]) {
+    setValues((previous) => ({ ...previous, [key]: value }));
+  }
 
   function discard() {
-    setName(savedValues.name);
-    setSlug(savedValues.slug);
-    setModel(savedValues.model);
-    setCitationRule(savedValues.citationRule);
-    setFreshness(savedValues.freshness);
-    setCeiling(savedValues.ceiling);
-    setLimit(savedValues.limit);
-    setAlertAt(savedValues.alertAt);
-    setAllowRaise(savedValues.allowRaise);
-    setKeepConversations(savedValues.keepConversations);
-    setKeepPassages(savedValues.keepPassages);
-    setSignInOptions(settings.signIn.options.map((o) => o.checked));
-    setSavedMessage(false);
+    setValues(baseline);
   }
 
   function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSavedMessage(true);
+    setBaseline(values);
   }
 
-  const changedClass = (key: keyof typeof savedValues) =>
-    cx("field-control", savedValues[key] !== currentValues[key] && "is-changed");
+  const changedClass = (key: keyof FormValues) =>
+    cx("field-control field-control-32", baseline[key] !== values[key] && "is-changed");
+
+  const numericStyle = (width: number) => ({ width, textAlign: "right" as const });
 
   return (
-    <form onSubmit={save} className="stack-6" style={{ maxWidth: "var(--column-doc)" }}>
-      <header className="page-head">
-        <div className="page-head-row">
-          <div className="stack-2">
-            <h1 className="page-title">Workspace settings</h1>
-            <p className="caption" role="status">
-              {changedCount > 0
-                ? `${changedCount} unsaved ${changedCount === 1 ? "change" : "changes"}`
-                : savedMessage
-                  ? "All changes saved"
-                  : "No unsaved changes"}
-            </p>
-          </div>
-          <div className="row">
-            <Button variant="secondary" size="md" onClick={discard} disabled={changedCount === 0}>
+    <form onSubmit={save}>
+      <div
+        style={{
+          margin: "-40px -40px 0",
+          padding: "28px 40px 18px",
+          borderBottom: "1px solid var(--rule)",
+          marginBottom: "var(--space-2)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "var(--space-4)", flexWrap: "wrap" }}>
+          <h1 className="page-title">Workspace settings</h1>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
+            {totalChanges > 0 ? (
+              <span role="status" style={{ fontSize: 12, color: "var(--ink-4)" }}>
+                {totalChanges} unsaved {totalChanges === 1 ? "change" : "changes"}
+              </span>
+            ) : null}
+            <Button variant="quiet" size="sm" onClick={discard}>
               Discard
             </Button>
-            <Button variant="primary" size="md" type="submit">
+            <Button variant="primary" size="sm" type="submit">
               Save
             </Button>
           </div>
         </div>
-      </header>
+      </div>
 
-      <Section title="Identity">
+      <SettingsSection title="Identity" margin={<MarginNote>{settings.identity.addressNote}</MarginNote>}>
         <Row label="Workspace name" htmlFor="ws-name">
           <input
             id="ws-name"
             className={changedClass("name")}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={values.name}
+            onChange={(e) => set("name", e.target.value)}
           />
         </Row>
         <Row label="Address" htmlFor="ws-slug">
-          <div className="row" style={{ alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
             <span className="ui-text muted-3">{settings.identity.addressPrefix}</span>
             <input
               id="ws-slug"
               className={changedClass("slug")}
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
+              value={values.slug}
+              onChange={(e) => set("slug", e.target.value)}
             />
           </div>
-          <p className="field-helper">{settings.identity.addressNote}</p>
         </Row>
-      </Section>
+      </SettingsSection>
 
-      <Section title="Answer defaults" note={settings.answerDefaults.note}>
+      <SettingsSection title="Answer defaults" margin={<MarginNote>{settings.answerDefaults.note}</MarginNote>}>
         <Row label="Default model" htmlFor="ws-model">
-          <select
-            id="ws-model"
-            className={changedClass("model")}
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-          >
+          <select id="ws-model" className={changedClass("model")} value={values.model} onChange={(e) => set("model", e.target.value)}>
             {settings.answerDefaults.modelOptions.map((option) => (
               <option key={option}>{option}</option>
             ))}
@@ -170,8 +169,8 @@ export function WorkspaceForm({ settings }: { settings: Settings }) {
           <select
             id="ws-citations"
             className={changedClass("citationRule")}
-            value={citationRule}
-            onChange={(e) => setCitationRule(e.target.value)}
+            value={values.citationRule}
+            onChange={(e) => set("citationRule", e.target.value)}
           >
             {settings.answerDefaults.citationOptions.map((option) => (
               <option key={option}>{option}</option>
@@ -179,74 +178,80 @@ export function WorkspaceForm({ settings }: { settings: Settings }) {
           </select>
         </Row>
         <Row label="Source freshness" htmlFor="ws-freshness">
-          <div className="row" style={{ alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
             <input
               id="ws-freshness"
               className={changedClass("freshness")}
-              style={{ width: 84 }}
-              type="number"
-              value={freshness}
-              onChange={(e) => setFreshness(e.target.value)}
+              style={numericStyle(64)}
+              type="text"
+              inputMode="numeric"
+              value={values.freshness}
+              onChange={(e) => set("freshness", e.target.value)}
             />
             <span className="ui-text">days</span>
           </div>
         </Row>
         <Row label="Stop an answer at" htmlFor="ws-ceiling">
-          <input
-            id="ws-ceiling"
-            className={changedClass("ceiling")}
-            style={{ width: 120 }}
-            value={ceiling}
-            onChange={(e) => setCeiling(e.target.value)}
-          />
-          {ceiling !== savedCeiling ? (
-            <p className="changed-note">changed from {savedCeiling}</p>
-          ) : null}
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
+            <input
+              id="ws-ceiling"
+              className={changedClass("ceiling")}
+              style={numericStyle(80)}
+              type="text"
+              value={values.ceiling}
+              onChange={(e) => set("ceiling", e.target.value)}
+            />
+            {values.ceiling !== baseline.ceiling ? (
+              <span style={{ fontSize: 12, color: "var(--ink-3)", whiteSpace: "nowrap" }}>
+                changed from {baseline.ceiling}
+              </span>
+            ) : null}
+          </div>
         </Row>
-      </Section>
+      </SettingsSection>
 
-      <Section title="Spending" note={settings.spending.note}>
+      <SettingsSection title="Spending" margin={<MarginNote>{settings.spending.note}</MarginNote>}>
         <Row label="Limit per billing cycle" htmlFor="ws-limit">
           <input
             id="ws-limit"
             className={changedClass("limit")}
-            style={{ width: 120 }}
-            value={limit}
-            onChange={(e) => setLimit(e.target.value)}
+            style={numericStyle(100)}
+            type="text"
+            value={values.limit}
+            onChange={(e) => set("limit", e.target.value)}
           />
         </Row>
         <Row label="Alert admins at" htmlFor="ws-alert">
-          <div className="row" style={{ alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
             <input
               id="ws-alert"
               className={changedClass("alertAt")}
-              style={{ width: 84 }}
-              type="number"
-              value={alertAt}
-              onChange={(e) => setAlertAt(e.target.value)}
+              style={numericStyle(64)}
+              type="text"
+              inputMode="numeric"
+              value={values.alertAt}
+              onChange={(e) => set("alertAt", e.target.value)}
             />
             <span className="ui-text">% of the limit</span>
           </div>
         </Row>
-        <Row label="">
-          <label className="check-row">
-            <input
-              type="checkbox"
-              checked={allowRaise}
-              onChange={(e) => setAllowRaise(e.target.checked)}
-            />
-            <span>{settings.spending.allowEditorsLabel}</span>
-          </label>
-        </Row>
-      </Section>
+        <label className="check-row">
+          <input
+            type="checkbox"
+            checked={values.allowRaise}
+            onChange={(e) => set("allowRaise", e.target.checked)}
+          />
+          <span>{settings.spending.allowEditorsLabel}</span>
+        </label>
+      </SettingsSection>
 
-      <Section title="Retention" note={settings.retention.note}>
+      <SettingsSection title="Retention" margin={<MarginNote>{settings.retention.note}</MarginNote>}>
         <Row label="Keep conversations" htmlFor="ws-keep-conversations">
           <select
             id="ws-keep-conversations"
             className={changedClass("keepConversations")}
-            value={keepConversations}
-            onChange={(e) => setKeepConversations(e.target.value)}
+            value={values.keepConversations}
+            onChange={(e) => set("keepConversations", e.target.value)}
           >
             {settings.retention.conversationsOptions.map((option) => (
               <option key={option}>{option}</option>
@@ -257,45 +262,56 @@ export function WorkspaceForm({ settings }: { settings: Settings }) {
           <select
             id="ws-keep-passages"
             className={changedClass("keepPassages")}
-            value={keepPassages}
-            onChange={(e) => setKeepPassages(e.target.value)}
+            value={values.keepPassages}
+            onChange={(e) => set("keepPassages", e.target.value)}
           >
             {settings.retention.passagesOptions.map((option) => (
               <option key={option}>{option}</option>
             ))}
           </select>
         </Row>
-      </Section>
+      </SettingsSection>
 
-      <Section title="Sign-in" note={settings.signIn.note}>
+      <SettingsSection title="Sign-in" margin={<MarginNote>{settings.signIn.note}</MarginNote>}>
         <div className="stack-3">
           {settings.signIn.options.map((option, index) => (
             <label key={option.label} className="check-row">
               <input
                 type="checkbox"
-                checked={signInOptions[index] ?? false}
+                checked={values.signIn[index] ?? false}
                 disabled={"disabled" in option && Boolean(option.disabled)}
                 onChange={(e) =>
-                  setSignInOptions((previous) =>
-                    previous.map((value, i) => (i === index ? e.target.checked : value)),
+                  set(
+                    "signIn",
+                    values.signIn.map((value, i) => (i === index ? e.target.checked : value)),
                   )
                 }
               />
-              <span>{option.label}</span>
+              <span>
+                {"labelSegments" in option && option.labelSegments
+                  ? renderSegments(option.labelSegments as readonly Segment[])
+                  : option.label}
+              </span>
             </label>
           ))}
         </div>
-      </Section>
+      </SettingsSection>
 
-      <Section title="Delete workspace">
-        <p className="ui-text">{settings.deleteWorkspace.body}</p>
-        <div>
-          <Button variant="destructive" size="md">
+      <SettingsSection
+        title="Delete workspace"
+        margin={
+          <MarginNote>{renderSegments(settings.deleteWorkspace.noteSegments as readonly Segment[])}</MarginNote>
+        }
+      >
+        <p className="ui-text" style={{ marginBottom: "var(--space-4)" }}>
+          {settings.deleteWorkspace.body}
+        </p>
+        <div style={{ display: "flex" }}>
+          <Button variant="destructive" size="sm">
             {settings.deleteWorkspace.buttonLabel}
           </Button>
         </div>
-        <p className="caption">{settings.deleteWorkspace.note}</p>
-      </Section>
+      </SettingsSection>
     </form>
   );
 }
