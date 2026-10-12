@@ -1,36 +1,64 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LegalFooter } from "../../components/SiteHeader";
 import { getStates } from "../../lib/api";
 import { UpgradeForm } from "./UpgradeForm";
 
-export const metadata: Metadata = { title: "Upgrade to Team" };
+export const metadata: Metadata = { title: { absolute: "Cortex — Choose a plan" } };
 
-/* S-08 Upgrade: trial workspace (Sevyn Studios) converting to Team. */
+/*
+ * S-08 Upgrade, per screens/Upgrade.html: full-width header bar (wordmark
+ * is a plain span in the design, not a link; workspace name beside it;
+ * "Back to workspace" right) → centred flex row (form + summary aside)
+ * → LegalFooter.
+ */
 export default function UpgradePage() {
   const { upgrade } = getStates();
 
   return (
-    <main className="center-shell" style={{ alignItems: "flex-start" }}>
-      <div className="center-card" style={{ maxWidth: 560 }}>
-        <div className="row-between">
-          <p className="ui-text">
-            <Link href="/" className="wordmark">
-              Cortex
-            </Link>{" "}
-            · {upgrade.workspace}
-          </p>
-          <Link href="/app/history?state=empty">Back to workspace</Link>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "var(--paper)",
+        color: "var(--ink)",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <header
+        style={{
+          padding: "20px 48px",
+          borderBottom: "1px solid var(--rule)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+          <span className="wordmark" style={{ fontSize: 22 }}>
+            Cortex
+          </span>
+          <span style={{ fontSize: 14, color: "var(--ink-3)" }}>{upgrade.workspace}</span>
         </div>
-        <p className="caption">{upgrade.trialEnds}</p>
-        <div className="stack-2">
-          <h1 className="page-title" style={{ fontSize: 26 }}>
-            {upgrade.heading}
-          </h1>
-          <p className="ui-text muted-3">{upgrade.body}</p>
-        </div>
+        <Link href="/app/history?state=empty" style={{ fontSize: 14, color: "var(--ink-2)" }}>
+          Back to workspace
+        </Link>
+      </header>
+
+      <div
+        style={{
+          flex: 1,
+          padding: "56px 48px 64px",
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          gap: 72,
+        }}
+      >
         <UpgradeForm upgrade={upgrade} />
-        <p className="caption">© 2026 [Company] · Privacy · Terms · Security · Status · Help</p>
       </div>
-    </main>
+
+      <LegalFooter />
+    </div>
   );
 }
