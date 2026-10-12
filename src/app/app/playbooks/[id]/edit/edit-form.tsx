@@ -159,10 +159,10 @@ export function EditPlaybookForm({ playbookName }: { playbookName: string }) {
   return (
     <>
       <header
+        className="bleed-head"
         style={{
-          margin: "-40px -40px 0",
-          padding: "18px 40px 16px",
-          borderBottom: "1px solid var(--rule)",
+          paddingTop: 18,
+          paddingBottom: 16,
           display: "flex",
           flexWrap: "wrap",
           justifyContent: "space-between",
@@ -190,7 +190,7 @@ export function EditPlaybookForm({ playbookName }: { playbookName: string }) {
             {playbookName}
           </h1>
         </div>
-        <div className="row" style={{ gap: 6, alignItems: "center", flexWrap: "nowrap" }}>
+        <div className="row" style={{ gap: 6, alignItems: "center" }}>
           <span style={{ fontSize: 12, color: "var(--ink-4)", marginRight: 6 }}>
             {edit.savedNote} · {edit.liveVersion} is live
           </span>

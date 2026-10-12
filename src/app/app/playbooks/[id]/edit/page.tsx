@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EditPlaybookForm } from "./edit-form";
+
+export const metadata: Metadata = { title: { absolute: "Cortex — Edit playbook" } };
 
 export default async function EditPlaybookPage({
   params,
