@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { SiteFooter, SiteHeader } from "../../components/SiteHeader";
 import { SubscribeForm } from "./SubscribeForm";
 
-export const metadata: Metadata = { title: "Changelog" };
+export const metadata: Metadata = { title: { absolute: "Cortex — Changelog" } };
 
 /* P-05 Changelog. All five entries copy the canvas reference exactly. */
 
@@ -39,7 +39,7 @@ const entries: Entry[] = [
               fontFamily: "var(--font-serif)",
               fontSize: 16,
               lineHeight: 1.6,
-              color: "var(--ink-body)",
+              color: "var(--ink)",
             }}
           >
             Buyers repeatedly asked to <mark>see the document behind an answer</mark> before forwarding it
@@ -182,9 +182,9 @@ export default function ChangelogPage() {
           </article>
         ))}
         <p style={{ marginTop: 24 }}>
-          <Link href="/changelog" style={{ fontSize: 14, color: "var(--ink-2)" }}>
+          <a href="#" style={{ fontSize: 14, color: "var(--ink-2)" }}>
             Older entries
-          </Link>
+          </a>
         </p>
       </section>
 
