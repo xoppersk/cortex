@@ -1,14 +1,20 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, useSyncExternalStore, type ReactNode } from "react";
 import { Button } from "../../../components/Button";
-import { Field } from "../../../components/Field";
+import { SettingsSection } from "../../../components/SettingsSection";
 import type { AdminData } from "../../../lib/types";
 
 type Profile = AdminData["profile"];
 
 const APPEARANCE_OPTIONS = ["Light", "Dark", "Match system"] as const;
 type Appearance = (typeof APPEARANCE_OPTIONS)[number];
+
+const TEXT_SIZE_PX: Record<string, number> = {
+  "Comfortable · 18": 18,
+  "Compact · 16": 16,
+  "Large · 20": 20,
+};
 
 function applyAppearance(appearance: Appearance) {
   const stored = appearance === "Match system" ? "system" : appearance.toLowerCase();
@@ -26,86 +32,139 @@ function applyAppearance(appearance: Appearance) {
   document.documentElement.dataset.theme = effective;
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function subscribeToStorage(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  return () => window.removeEventListener("storage", onChange);
+}
+
+function getStoredTheme(): string | null {
+  try {
+    return window.localStorage.getItem("cortex-theme");
+  } catch {
+    return null;
+  }
+}
+
+function MarginNote({ children }: { children: ReactNode }) {
+  return <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>{children}</p>;
+}
+
+function GridRow({ label, htmlFor, children }: { label: string; htmlFor?: string; children: ReactNode }) {
   return (
-    <section className="stack-4 hairline-top" style={{ paddingTop: "var(--space-6)" }}>
-      <h2 className="section-label" style={{ fontSize: 15 }}>
-        {title}
-      </h2>
-      {children}
-    </section>
+    <div className="settings-grid" style={{ alignItems: "center", marginBottom: "var(--space-4)" }}>
+      {htmlFor ? (
+        <label className="settings-grid-label" htmlFor={htmlFor} style={{ paddingTop: 0 }}>
+          {label}
+        </label>
+      ) : (
+        <span className="settings-grid-label" style={{ paddingTop: 0 }}>
+          {label}
+        </span>
+      )}
+      <div>{children}</div>
+    </div>
   );
+}
+
+function notificationLabel(label: string): ReactNode {
+  const suffix = " · admins only";
+  if (label.endsWith(suffix)) {
+    return (
+      <>
+        {label.slice(0, -suffix.length)}
+        <span style={{ color: "var(--ink-3)" }}>{suffix}</span>
+      </>
+    );
+  }
+  return label;
+}
+
+function sessionName(name: string): ReactNode {
+  const suffix = " · this device";
+  if (name.endsWith(suffix)) {
+    return (
+      <>
+        <span style={{ fontWeight: 500, color: "var(--ink)" }}>{name.slice(0, -suffix.length)}</span>
+        {suffix}
+      </>
+    );
+  }
+  return <span style={{ fontWeight: 500, color: "var(--ink)" }}>{name}</span>;
 }
 
 export function ProfileForm({ profile, email }: { profile: Profile; email: string }) {
   const [name, setName] = useState(profile.name);
   const [teamLabel, setTeamLabel] = useState(profile.teamLabel);
   const [notifications, setNotifications] = useState(profile.notifications.map((n) => n.checked));
-  const [appearance, setAppearance] = useState<Appearance>(
-    APPEARANCE_OPTIONS.includes(profile.reading.appearance as Appearance)
-      ? (profile.reading.appearance as Appearance)
-      : "Light",
-  );
+  const fixtureAppearance: Appearance = APPEARANCE_OPTIONS.includes(
+    profile.reading.appearance as Appearance,
+  )
+    ? (profile.reading.appearance as Appearance)
+    : "Light";
+  const storedTheme = useSyncExternalStore(subscribeToStorage, getStoredTheme, () => null);
+  const storedAppearance: Appearance | null =
+    storedTheme === "dark"
+      ? "Dark"
+      : storedTheme === "light"
+        ? "Light"
+        : storedTheme === "system"
+          ? "Match system"
+          : null;
+  const [chosenAppearance, setChosenAppearance] = useState<Appearance | null>(null);
+  const appearance = chosenAppearance ?? storedAppearance ?? fixtureAppearance;
   const [textSize, setTextSize] = useState(profile.reading.textSize);
   const [placement, setPlacement] = useState(profile.reading.sourcePlacement);
   const [sessions, setSessions] = useState(profile.sessions);
-  const [status, setStatus] = useState<string | null>(null);
-
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem("cortex-theme");
-      if (stored === "dark") setAppearance("Dark");
-      else if (stored === "light") setAppearance("Light");
-      else if (stored === "system") setAppearance("Match system");
-    } catch {
-      // Keep the fixture default when storage is unavailable.
-    }
-  }, []);
 
   function chooseAppearance(next: Appearance) {
-    setAppearance(next);
+    setChosenAppearance(next);
     applyAppearance(next);
   }
 
-  return (
-    <div className="stack-6" style={{ maxWidth: "var(--column-doc)" }}>
-      <header className="page-head">
-        <h1 className="page-title">Profile and preferences</h1>
-        {status ? (
-          <p className="caption" role="status">
-            {status}
-          </p>
-        ) : null}
-      </header>
+  const previewPx = TEXT_SIZE_PX[textSize] ?? 18;
+  const sourcesBelow = placement === "Below each answer";
 
-      <Section title="Profile">
-        <Field label="Name" htmlFor="profile-name">
+  return (
+    <div>
+      <div
+        style={{
+          margin: "-40px -40px 0",
+          padding: "28px 40px 18px",
+          borderBottom: "1px solid var(--rule)",
+          marginBottom: "var(--space-2)",
+        }}
+      >
+        <h1 className="page-title">Profile and preferences</h1>
+      </div>
+
+      <SettingsSection title="Profile" margin={<MarginNote>{profile.profileNote}</MarginNote>}>
+        <GridRow label="Name" htmlFor="profile-name">
           <input
             id="profile-name"
-            className="field-control"
+            className="field-control field-control-32"
             value={name}
             onChange={(event) => setName(event.target.value)}
           />
-        </Field>
-        <Field label="Email" htmlFor="profile-email">
-          <div className="row" style={{ alignItems: "center" }}>
-            <input id="profile-email" className="field-control" value={email} readOnly />
-            <Button variant="quiet" size="sm">
+        </GridRow>
+        <GridRow label="Email" htmlFor="profile-email">
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
+            <input id="profile-email" className="field-control field-control-32" value={email} readOnly />
+            <a href="#" onClick={(event) => event.preventDefault()} style={{ fontSize: 12, whiteSpace: "nowrap" }}>
               Change
-            </Button>
+            </a>
           </div>
-        </Field>
-        <Field label="Team label" htmlFor="profile-team" helper={profile.profileNote}>
+        </GridRow>
+        <GridRow label="Team label" htmlFor="profile-team">
           <input
             id="profile-team"
-            className="field-control"
+            className="field-control field-control-32"
             value={teamLabel}
             onChange={(event) => setTeamLabel(event.target.value)}
           />
-        </Field>
-      </Section>
+        </GridRow>
+      </SettingsSection>
 
-      <Section title="Email me when">
+      <SettingsSection title="Email me when" margin={<MarginNote>{profile.notificationsNote}</MarginNote>}>
         <div className="stack-3">
           {profile.notifications.map((notification, index) => (
             <label key={notification.label} className="check-row">
@@ -118,35 +177,36 @@ export function ProfileForm({ profile, email }: { profile: Profile; email: strin
                   )
                 }
               />
-              <span>{notification.label}</span>
+              <span>{notificationLabel(notification.label)}</span>
             </label>
           ))}
         </div>
-        <p className="caption">{profile.notificationsNote}</p>
-      </Section>
+      </SettingsSection>
 
-      <Section title="Reading">
-        <div className="stack-2">
-          <span className="field-label" id="appearance-label">
-            Appearance
-          </span>
-          <div className="segmented" role="group" aria-labelledby="appearance-label">
+      <SettingsSection
+        title="Reading"
+        margin={<MarginNote>Sources move below each answer automatically on narrow screens.</MarginNote>}
+      >
+        <GridRow label="Appearance">
+          <div className="segmented" role="radiogroup" aria-label="Appearance">
             {APPEARANCE_OPTIONS.map((option) => (
               <button
                 key={option}
                 type="button"
-                aria-pressed={appearance === option}
+                role="radio"
+                aria-checked={appearance === option}
                 onClick={() => chooseAppearance(option)}
               >
                 {option}
               </button>
             ))}
           </div>
-        </div>
-        <Field label="Answer text size" htmlFor="profile-text-size">
+        </GridRow>
+        <GridRow label="Answer text size" htmlFor="profile-text-size">
           <select
             id="profile-text-size"
-            className="field-control"
+            className="field-control field-control-32"
+            style={{ width: 160 }}
             value={textSize}
             onChange={(event) => setTextSize(event.target.value)}
           >
@@ -154,11 +214,12 @@ export function ProfileForm({ profile, email }: { profile: Profile; email: strin
               <option key={option}>{option}</option>
             ))}
           </select>
-        </Field>
-        <Field label="Show sources" htmlFor="profile-sources">
+        </GridRow>
+        <GridRow label="Show sources" htmlFor="profile-sources">
           <select
             id="profile-sources"
-            className="field-control"
+            className="field-control field-control-32"
+            style={{ width: 220 }}
             value={placement}
             onChange={(event) => setPlacement(event.target.value)}
           >
@@ -166,44 +227,57 @@ export function ProfileForm({ profile, email }: { profile: Profile; email: strin
               <option key={option}>{option}</option>
             ))}
           </select>
-        </Field>
-        <p className="caption">
-          Preview: every claim stays attached to its source <sup>1</sup>.
-        </p>
-        <p className="caption">Sources move below each answer automatically on narrow screens.</p>
-      </Section>
+        </GridRow>
+        <div className="tint-box" aria-label="Reading preview">
+          <p
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: previewPx,
+              lineHeight: 1.6,
+              color: "var(--ink-body)",
+            }}
+          >
+            Preview: every claim stays attached to its source
+            {sourcesBelow ? null : <sup style={{ fontSize: 10, fontWeight: 600 }}>1</sup>}
+          </p>
+          {sourcesBelow ? (
+            <p style={{ fontSize: 12, color: "var(--ink-3)", marginTop: "var(--space-2)" }}>
+              <sup style={{ fontSize: 10, fontWeight: 600 }}>1</sup> Source
+            </p>
+          ) : null}
+        </div>
+      </SettingsSection>
 
-      <Section title="Signed in">
-        <div className="ledger">
+      <SettingsSection title="Signed in" margin={<MarginNote>{profile.twoStepNote}</MarginNote>}>
+        <div>
           {sessions.map((session) => (
-            <div key={session.name} className="ledger-row" style={{ gridTemplateColumns: "1fr auto" }}>
-              <div>
-                <p className="ui-strong" style={{ fontSize: 13 }}>
-                  {session.name}
-                </p>
-                <p className="caption">{session.place}</p>
-              </div>
-              <span className="caption">{session.when}</span>
+            <div
+              key={session.name}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 1fr) 140px 90px",
+                gap: "var(--space-4)",
+                alignItems: "baseline",
+                padding: "10px 0",
+                borderTop: "1px solid var(--rule)",
+                fontSize: 13,
+              }}
+            >
+              <span style={{ color: "var(--ink-body)" }}>{sessionName(session.name)}</span>
+              <span style={{ color: "var(--ink-2)" }}>{session.place}</span>
+              <span style={{ color: "var(--ink-3)" }}>{session.when}</span>
             </div>
           ))}
         </div>
-        <div className="row">
-          <Button
-            variant="secondary"
-            size="md"
-            onClick={() => {
-              setSessions((previous) => previous.slice(0, 1));
-              setStatus("Signed out of other devices.");
-            }}
-          >
+        <div className="row" style={{ marginTop: "var(--space-4)" }}>
+          <Button variant="secondary" size="sm" onClick={() => setSessions((previous) => previous.slice(0, 1))}>
             Sign out other devices
           </Button>
-          <Button variant="quiet" size="md">
+          <Button variant="quiet" size="sm">
             Sign out
           </Button>
         </div>
-        <p className="caption">{profile.twoStepNote}</p>
-      </Section>
+      </SettingsSection>
     </div>
   );
 }
