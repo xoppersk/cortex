@@ -1,13 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { CSSProperties, ReactNode } from "react";
 import { ButtonLink } from "../../../components/Button";
+import { SiteFooter } from "../../../components/SiteHeader";
 
-export const metadata: Metadata = { title: "How citations work · Docs" };
+export const metadata: Metadata = { title: { absolute: "Cortex Docs — How citations work" } };
 
 /*
  * P-04 Docs — "How citations work". Three-column layout and copy follow the
  * canvas reference (.canvas-ref/screens/P-04-docs/body-clean.html).
  * Nav groups per the approved design: Start here / Knowledge / Teams / API.
+ * The designs ship this one article only: the other 12 nav items and the
+ * prev/next cards are honest non-link placeholders (spans in the design's
+ * .dn style), not self-links to this page. "API status" and the feedback
+ * link keep the design's "#" hrefs. Brief §7: SiteFooter on Docs too.
  */
 const navGroups: Array<{ title: string; items: Array<{ label: string; current?: boolean }> }> = [
   {
@@ -33,16 +39,30 @@ const navGroups: Array<{ title: string; items: Array<{ label: string; current?: 
   },
 ];
 
-const citationJson = `{
-  "answer": "Seven of nine teams said…[1]",
-  "cost_usd": 0.014,
-  "passages": [
-    { "cite": 1, "document": "Customer interview synthesis",
-      "passage": 118, "match": 0.91, "outcome": "cited" },
-    { "cite": null, "document": "Interview round 1 notes",
-      "passage": 7, "match": 0.72, "outcome": "stale" }
-  ]
-}`;
+/* Design .dn nav-item style (canvas wins over the app NavItem spec). */
+const docsNavItem: CSSProperties = {
+  display: "block",
+  padding: "5px 10px",
+  borderRadius: 5,
+  fontSize: 14,
+  color: "var(--ink-2)",
+  textDecoration: "none",
+};
+
+const docsNavCurrent: CSSProperties = {
+  ...docsNavItem,
+  background: "var(--hover)",
+  color: "var(--ink)",
+  fontWeight: 500,
+};
+
+/* Code-block spans: strings in --highlight, punctuation in the block's base tone. */
+function S({ children }: { children: ReactNode }) {
+  return <span style={{ color: "var(--highlight)" }}>{children}</span>;
+}
+function K({ children }: { children: ReactNode }) {
+  return <span style={{ color: "var(--rule)" }}>{children}</span>;
+}
 
 export default function DocsCitationsPage() {
   return (
@@ -73,16 +93,16 @@ export default function DocsCitationsPage() {
           type="search"
           placeholder="Search the docs  /"
           className="field-control"
-          style={{ flex: "0 1 360px", minHeight: 34 }}
+          style={{ flex: "0 1 360px", minHeight: 34, fontSize: 14 }}
         />
         <nav aria-label="Main" className="site-nav" style={{ gap: 22, alignItems: "center" }}>
           <Link href="/changelog" className="text-link">
             Changelog
           </Link>
-          <Link href="/docs/citations" className="text-link">
+          <a href="#" className="text-link">
             API status
-          </Link>
-          <ButtonLink href="/app/new" variant="primary" size="md">
+          </a>
+          <ButtonLink href="/app/new" variant="primary" size="md" style={{ minHeight: 34, fontSize: 14 }}>
             Open Cortex
           </ButtonLink>
         </nav>
@@ -92,24 +112,28 @@ export default function DocsCitationsPage() {
         <nav aria-label="Documentation" className="docs-nav">
           {navGroups.map((group) => (
             <div key={group.title}>
-              <span className="nav-section-title" style={{ display: "block" }}>
+              <span
+                className="nav-section-title"
+                style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--ink)" }}
+              >
                 {group.title}
               </span>
-              {group.items.map((item) => (
-                <Link
-                  key={item.label}
-                  href="/docs/citations"
-                  className="nav-item"
-                  aria-current={item.current ? "page" : undefined}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {group.items.map((item) =>
+                item.current ? (
+                  <span key={item.label} style={docsNavCurrent} aria-current="page">
+                    {item.label}
+                  </span>
+                ) : (
+                  <span key={item.label} style={docsNavItem}>
+                    {item.label}
+                  </span>
+                ),
+              )}
             </div>
           ))}
         </nav>
 
-        <article className="docs-article" style={{ paddingTop: 44, paddingBottom: 96 }}>
+        <article className="docs-article" style={{ paddingTop: 44, paddingBottom: 96, flex: "999 1 560px" }}>
           <span style={{ fontSize: 13, color: "var(--ink-3)" }}>Knowledge · updated October 6, 2026</span>
           <h1
             style={{
@@ -147,7 +171,25 @@ export default function DocsCitationsPage() {
             The <code>/v1/ask</code> response lists every passage that was read, with its outcome.
           </p>
           <pre className="code-block" aria-label="Example response">
-            {citationJson}
+            <K>{"{"}</K>
+            {"\n  "}
+            <S>&quot;answer&quot;</S>: <S>&quot;Seven of nine teams said…[1]&quot;</S>,
+            {"\n  "}
+            <S>&quot;cost_usd&quot;</S>: 0.014,
+            {"\n  "}
+            <S>&quot;passages&quot;</S>: [
+            {"\n    { "}
+            <S>&quot;cite&quot;</S>: 1, <S>&quot;document&quot;</S>: <S>&quot;Customer interview synthesis&quot;</S>,
+            {"\n      "}
+            <S>&quot;passage&quot;</S>: 118, <S>&quot;match&quot;</S>: 0.91, <S>&quot;outcome&quot;</S>: <S>&quot;cited&quot;</S>
+            {" }"}
+            {"\n    { "}
+            <S>&quot;cite&quot;</S>: null, <S>&quot;document&quot;</S>: <S>&quot;Interview round 1 notes&quot;</S>,
+            {"\n      "}
+            <S>&quot;passage&quot;</S>: 7, <S>&quot;match&quot;</S>: 0.72, <S>&quot;outcome&quot;</S>: <S>&quot;stale&quot;</S>
+            {" }"}
+            {"\n  ]\n"}
+            <K>{"}"}</K>
           </pre>
           <p>
             The <code>outcome</code> field is one of <code>cited</code>, <code>duplicate</code>,{" "}
@@ -166,14 +208,14 @@ export default function DocsCitationsPage() {
               fontSize: 14,
             }}
           >
-            <Link href="/docs/citations" style={{ textDecoration: "none" }}>
+            <span>
               <span style={{ display: "block", fontSize: 12, color: "var(--ink-3)" }}>Previous</span>
               Adding documents
-            </Link>
-            <Link href="/docs/citations" style={{ textDecoration: "none", textAlign: "right" }}>
+            </span>
+            <span style={{ textAlign: "right" }}>
               <span style={{ display: "block", fontSize: 12, color: "var(--ink-3)" }}>Next</span>
               Passages and splitting
-            </Link>
+            </span>
           </div>
         </article>
 
@@ -197,9 +239,13 @@ export default function DocsCitationsPage() {
               lineHeight: 1.5,
             }}
           >
-            Was this page clear? <Link href="/docs/citations">Tell us what was missing</Link>
+            Was this page clear? <a href="#">Tell us what was missing</a>
           </span>
         </aside>
+      </div>
+
+      <div className="hairline-top">
+        <SiteFooter />
       </div>
     </div>
   );
