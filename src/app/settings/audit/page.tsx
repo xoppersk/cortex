@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+
+export const metadata: Metadata = { title: { absolute: "Cortex — Audit log" } };
 import { Button } from "../../../components/Button";
 import { getAdminData } from "../../../lib/api";
 import { AuditLog, type AuditGroupView } from "./AuditLog";
