@@ -110,12 +110,8 @@ export function WorkspaceForm({ settings }: { settings: Settings }) {
   return (
     <form onSubmit={save}>
       <div
-        style={{
-          margin: "-40px -40px 0",
-          padding: "28px 40px 18px",
-          borderBottom: "1px solid var(--rule)",
-          marginBottom: "var(--space-2)",
-        }}
+        className="bleed-head"
+        style={{ paddingTop: 28, paddingBottom: 18, marginBottom: "var(--space-2)" }}
       >
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "var(--space-4)", flexWrap: "wrap" }}>
           <h1 className="page-title">Workspace settings</h1>
