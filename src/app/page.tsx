@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ButtonLink } from "../components/Button";
-import { MarginNote, RichSegments } from "../components/Footnote";
+import { RichSegments } from "../components/Footnote";
 import { Meter } from "../components/Meter";
 import { SiteFooter, SiteHeader } from "../components/SiteHeader";
 import { getPlaybooks, getWorkspaceData } from "../lib/api";
 import type { MarginNoteData } from "../lib/types";
 
 export const metadata: Metadata = {
-  title: "Cortex — Answers that can show their work",
+  title: { absolute: "Cortex — Answers that can show their work" },
 };
 
 /*
@@ -101,7 +101,8 @@ const excerptSegments = [
   { text: "", footnote: 1 },
   { text: ". Legal wants to know which version of a policy was read" },
   { text: "", footnote: 2 },
-  { text: ", and whether it was still current when the answer was written" },
+  { text: ", and whether it was " },
+  { text: "still current when the answer was written", mark: true },
   { text: "", footnote: 3 },
   { text: "." },
 ];
@@ -126,10 +127,15 @@ export default function LandingPage() {
             shows its cost before it is written.
           </p>
           <div className="row" style={{ gap: 10 }}>
-            <ButtonLink href="/signup" variant="primary" size="lg">
+            <ButtonLink href="/app/new" variant="primary" size="lg">
               Start free for 14 days
             </ButtonLink>
-            <ButtonLink href="/app/c/launch-evidence" variant="secondary" size="lg">
+            <ButtonLink
+              href="/app/c/launch-evidence"
+              variant="secondary"
+              size="lg"
+              style={{ padding: "0 18px" }}
+            >
               See a real thread
             </ButtonLink>
             <span className="ui-text muted-3" style={{ marginLeft: 6 }}>
@@ -170,14 +176,43 @@ export default function LandingPage() {
               <RichSegments segments={excerptSegments} />
             </p>
           </div>
-          <div
-            className="margin-stack"
-            style={{ flex: "1 1 240px", maxWidth: 300, paddingTop: 30, fontSize: 13 }}
+          <ol
+            style={{
+              flex: "1 1 240px",
+              maxWidth: 300,
+              margin: 0,
+              padding: "30px 0 0",
+              listStyle: "none",
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+              fontSize: 13,
+              lineHeight: 1.5,
+              color: "var(--ink-2)",
+            }}
           >
             {excerptNotes.map((note) => (
-              <MarginNote key={note.id} note={note} />
+              <li
+                key={note.id}
+                id={note.id}
+                tabIndex={-1}
+                className="margin-note"
+                style={{ fontSize: 13, lineHeight: 1.5 }}
+              >
+                <span>
+                  <span className="margin-note-number">{note.n}</span>{" "}
+                  <span style={{ color: "var(--ink-2)", fontWeight: 400 }}>{note.documentTitle}</span>
+                  <br />
+                  <span style={{ fontSize: 13, color: "var(--ink-4)" }}>{note.meta}</span>
+                </span>
+                {note.excerpt && note.excerpt.length > 0 ? (
+                  <span className="margin-note-excerpt">
+                    <RichSegments segments={note.excerpt} />
+                  </span>
+                ) : null}
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </section>
 
@@ -221,7 +256,7 @@ export default function LandingPage() {
                   gridTemplateColumns: "26px minmax(0, 1fr) 46px",
                   gap: 12,
                   padding: "9px 0",
-                  borderTop: "1px solid var(--rule)",
+                  borderTop: "1px solid #E4E4E0",
                   color: row.aside ? "var(--ink-3)" : undefined,
                 }}
               >
@@ -302,7 +337,11 @@ export default function LandingPage() {
               }
               value={workspace.spend}
               max={workspace.monthlyLimit}
-              caption="About $0.012 for this reply. $0.030 left of this thread’s $0.08 limit."
+              caption={
+                <span style={{ fontSize: 13 }}>
+                  About $0.012 for this reply. $0.030 left of this thread’s $0.08 limit.
+                </span>
+              }
               label={`$${workspace.spend} of $${workspace.monthlyLimit} spent`}
             />
           </div>
@@ -375,14 +414,15 @@ export default function LandingPage() {
             Bring one question and the documents behind it.
           </h2>
           <div className="stack-3" style={{ alignItems: "flex-start" }}>
-            <Link
-              href="/signup"
-              className="btn btn-lg"
+            <ButtonLink
+              href="/app/new"
+              variant="primary"
+              size="lg"
               style={{ background: "var(--on-ink)", borderColor: "var(--on-ink)", color: "var(--ink)" }}
             >
               Start free for 14 days
-            </Link>
-            <span style={{ fontSize: 13 }}>
+            </ButtonLink>
+            <span style={{ fontSize: 13, color: "#C9C9C3" }}>
               $30 per seat after the trial ·{" "}
               <Link href="/pricing" style={{ color: "var(--on-ink)" }}>
                 pricing
