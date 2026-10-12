@@ -6,7 +6,7 @@ import { formatNumber } from "../../../lib/utils";
 import { BlockedView } from "../c/[id]/thread-view";
 import { ConfigSentence, QuestionForm } from "./new-chat-form";
 
-export const metadata: Metadata = { title: "New conversation" };
+export const metadata: Metadata = { title: { absolute: "Cortex — New chat" } };
 
 export default async function NewConversationPage({
   searchParams,
