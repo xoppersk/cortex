@@ -61,7 +61,7 @@ function S({ children }: { children: ReactNode }) {
   return <span style={{ color: "var(--highlight)" }}>{children}</span>;
 }
 function K({ children }: { children: ReactNode }) {
-  return <span style={{ color: "var(--rule)" }}>{children}</span>;
+  return <span style={{ color: "#C9C9C3" }}>{children}</span>;
 }
 
 export default function DocsCitationsPage() {
