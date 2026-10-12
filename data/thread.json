@@ -11,7 +11,7 @@
   "playbook": "Launch brief",
   "model": "Cortex 4",
   "costSentence": "About $0.012 for this reply. $0.030 left of this thread’s $0.08 limit.",
-  "placeholder": "Ask a follow-up"
+  "placeholder": "Ask a follow-up. Type / for a playbook, @ for a source."
  },
  "streamContinuation": "",
  "turns": [
@@ -186,16 +186,17 @@
    "openPassage": true,
    "excerpt": [
     {
-     "text": "Buyers "
+     "text": "“Buyers asked to "
     },
     {
-     "text": "asked to see the document behind an answer before forwarding it to legal",
+     "text": "see the document behind an answer",
      "mark": true
     },
     {
-     "text": ". Seven of nine teams named traceability as the deciding criterion."
+     "text": " before forwarding it to legal. Seven of nine teams named traceability as the deciding criterion.”"
     }
-   ]
+   ],
+   "passageHref": "/app/knowledge/documents/customer-interview-synthesis"
   },
   {
    "id": "note-4",
@@ -238,7 +239,9 @@
   "marginNoteTitle": "Answer",
   "marginNoteStatus": "Not verified",
   "marginNoteText": "Footnotes 1 and 2 pointed to Positioning research and Model governance memo. They’ll reconnect automatically.",
-  "composerNote": "New questions are paused until sources reconnect. Your draft is saved."
+  "composerNote": "New questions are paused until sources reconnect. Your draft is saved.",
+  "bannerHeadline": "The answer is here. Its proof is not.",
+  "bannerBody": "The source catalog stopped responding at 10:14 PM. Your thread and draft are intact, but citations can’t be opened and new answers are paused until it’s back."
  },
  "limitState": {
   "title": "Pricing analysis",

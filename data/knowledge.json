@@ -206,7 +206,8 @@
    "updated": "Oct 2",
    "format": "XLSX · 3 sheets",
    "owner": "Sheku Koroma",
-   "statusDetail": "Merged cells on sheet 2. Split by row and retry"
+   "statusDetail": "Merged cells on sheet 2.",
+   "statusAction": "Split by row and retry"
   },
   {
    "id": "pricing-test-q3",
@@ -217,7 +218,8 @@
    "updated": "Oct 4",
    "format": "PDF · 41 pages",
    "owner": "Priya Shah",
-   "statusDetail": "Indexing, page 25 of 41"
+   "statusDetail": "Indexing, page 25 of 41",
+   "indexPercent": 62
   },
   {
    "id": "onboarding-spec-v2",
@@ -537,13 +539,16 @@
    },
    {
     "number": 117,
-    "text": "Research leads described a familiar loop: copy the answer, paste it into email, then search for the document it came from so the reader could check it. In two teams this loop had become a written procedure."
+    "text": "Research leads described a familiar loop: copy the answer, paste it into email, then search for the document it came from so the reader could check it. In two teams this loop had become a written procedure.",
+    "overlapSuffix": "In two teams this loop had become a written procedure."
    },
    {
     "number": 118,
     "selected": true,
     "overlapPrefix": "In two teams this loop had become a written procedure.",
-    "text": "In two teams this loop had become a written procedure. Buyers repeatedly asked to see the document behind an answer before forwarding it to legal. Seven of nine teams named traceability as the deciding criterion, ahead of answer quality and price. One head of research put it plainly: “If I can’t show where it came from,”"
+    "text": "In two teams this loop had become a written procedure. Buyers repeatedly asked to see the document behind an answer before forwarding it to legal. Seven of nine teams named traceability as the deciding criterion, ahead of answer quality and price. One head of research put it plainly: “If I can’t show where it came from,”",
+    "overlapSuffix": "One head of research put it plainly: “If I can’t show where it came from,”",
+    "highlight": "see the document behind an answer before forwarding it to legal"
    },
    {
     "number": 119,
@@ -560,7 +565,20 @@
    "tokens": 212,
    "page": "14–15",
    "heading": "4.2 Forwarding answers to legal",
-   "usage": "Retrieved for 31 questions and cited in 19 answers. Median match 0.84. Most recent: Launch narrative, Ask: forwarding to legal"
+   "usage": "Retrieved for 31 questions and cited in 19 answers. Median match 0.84. Most recent: Launch narrative, Ask: forwarding to legal",
+   "retrieved": 31,
+   "cited": 19,
+   "medianMatch": "0.84",
+   "recent": [
+    {
+     "label": "Launch narrative",
+     "href": "/app/c/launch-narrative"
+    },
+    {
+     "label": "Ask: forwarding to legal",
+     "href": "/app/knowledge/ask"
+    }
+   ]
   }
  },
  "needsAttention": [

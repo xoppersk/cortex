@@ -51,7 +51,18 @@
    }
   ],
   "footer": "Revoking is immediate and permanent, and is recorded in the audit log. Calls made with a revoked key are refused with a 401 error.",
-  "footerNote": "Revoking is immediate and permanent, and is recorded in the audit log. Calls made with a revoked key are refused with a 401 error."
+  "footerSegments": [
+   {
+    "text": "Revoking is immediate and permanent, and is recorded in the "
+   },
+   {
+    "text": "audit log",
+    "href": "/settings/audit"
+   },
+   {
+    "text": ". Calls made with a revoked key are refused with a 401 error."
+   }
+  ]
  },
  "audit": {
   "summary": "Every change to people, keys, settings and shared work. Entries cannot be edited or deleted and are kept for one year.",
@@ -85,7 +96,20 @@
       "time": "10:41 PM",
       "actor": "Sheku Koroma",
       "sentence": "created API key Zapier sync with ask and read-sources access",
-      "category": "API keys"
+      "category": "API keys",
+      "date": "2026-10-06",
+      "sentenceSegments": [
+       {
+        "text": "created API key "
+       },
+       {
+        "text": "Zapier sync",
+        "href": "/settings/api-keys"
+       },
+       {
+        "text": " with ask and read-sources access"
+       }
+      ]
      },
      {
       "time": "10:12 PM",
@@ -96,25 +120,53 @@
        "before": "Editor",
        "after": "Admin · can now manage members, keys and billing"
       },
-      "context": "From Chrome on macOS · Philadelphia, PA"
+      "context": "From Chrome on macOS · Philadelphia, PA",
+      "date": "2026-10-06",
+      "sentenceSegments": [
+       {
+        "text": "changed "
+       },
+       {
+        "text": "Priya Shah",
+        "href": "/settings/members"
+       },
+       {
+        "text": "’s role"
+       }
+      ]
      },
      {
       "time": "9:58 PM",
       "actor": "Cortex",
       "sentence": "emailed the workspace admin: spending reached 90% of the $200 limit",
-      "category": "Spending"
+      "category": "Spending",
+      "date": "2026-10-06"
      },
      {
       "time": "6:20 PM",
       "actor": "Maya Jordan",
       "sentence": "published Launch brief v4 to the Go-to-market team",
-      "category": "Playbooks"
+      "category": "Playbooks",
+      "date": "2026-10-06",
+      "sentenceSegments": [
+       {
+        "text": "published "
+       },
+       {
+        "text": "Launch brief",
+        "href": "/app/playbooks"
+       },
+       {
+        "text": " v4 to the Go-to-market team"
+       }
+      ]
      },
      {
       "time": "2:14 PM",
       "actor": "Owen Clarke",
       "sentence": "exported Research synthesis as PDF, including 7 cited passages",
-      "category": "Exports"
+      "category": "Exports",
+      "date": "2026-10-06"
      }
     ]
    },
@@ -125,13 +177,27 @@
       "time": "4:02 PM",
       "actor": "Sheku Koroma",
       "sentence": "invited daniel.okafor@sevynlabs.io as Editor",
-      "category": "Members"
+      "category": "Members",
+      "date": "2026-10-05"
      },
      {
       "time": "2:00 AM",
       "actor": "Evaluation runner (API key)",
       "sentence": "ran Launch claims, 47 of 50 passed",
-      "category": "Evaluations"
+      "category": "Evaluations",
+      "date": "2026-10-05",
+      "sentenceSegments": [
+       {
+        "text": "ran "
+       },
+       {
+        "text": "Launch claims",
+        "href": "/app/evaluations"
+       },
+       {
+        "text": ", 47 of 50 passed"
+       }
+      ]
      }
     ]
    },
@@ -142,18 +208,32 @@
       "time": "Oct 3",
       "actor": "Sheku Koroma",
       "sentence": "revoked API key Old staging, last used September 14",
-      "category": "API keys"
+      "category": "API keys",
+      "date": "2026-10-03"
      },
      {
       "time": "Oct 2",
       "actor": "Sheku Koroma",
       "sentence": "changed how long cited passages are kept from 2 years to 7 years",
-      "category": "Settings"
+      "category": "Settings",
+      "date": "2026-10-02"
      }
     ]
    }
   ],
-  "notShown": "Questions and answers themselves. Those stay in each conversation, visible to the people it is shared with. Streaming this log to Splunk or Datadog is part of Enterprise."
+  "notShown": "Questions and answers themselves. Those stay in each conversation, visible to the people it is shared with. Streaming this log to Splunk or Datadog is part of Enterprise.",
+  "notShownSegments": [
+   {
+    "text": "Questions and answers themselves. Those stay in each conversation, visible to the people it is shared with. Streaming this log to Splunk or Datadog is part of "
+   },
+   {
+    "text": "Enterprise",
+    "href": "/settings/billing"
+   },
+   {
+    "text": "."
+   }
+  ]
  },
  "billing": {
   "summary": "Team plan, five seats. The next invoice is on October 9 and will be between $334 and $353, depending on use over the next three days and whether Daniel joins.",
@@ -173,7 +253,16 @@
     {
      "label": "Model use, September 10 – October 9",
      "detail": "Capped at your $200 limit · see usage",
-     "amount": "$184.00"
+     "amount": "$184.00",
+     "detailSegments": [
+      {
+       "text": "Capped at your $200 limit · "
+      },
+      {
+       "text": "see usage",
+       "href": "/app/usage"
+      }
+     ]
     },
     {
      "label": "Daniel Okafor’s seat, if he joins before October 9",
@@ -187,7 +276,23 @@
   "plan": {
    "heading": "Plan",
    "body": "Team · $30 per seat per month, model use at cost up to your limit. Enterprise adds single sign-on, custom retention and audit export. Priced per contract.",
-   "actionLabel": "Talk to sales"
+   "actionLabel": "Talk to sales",
+   "bodySegments": [
+    {
+     "text": "Team",
+     "strong": true
+    },
+    {
+     "text": " · $30 per seat per month, model use at cost up to your limit. "
+    },
+    {
+     "text": "Enterprise",
+     "strong": true
+    },
+    {
+     "text": " adds single sign-on, custom retention and audit export. Priced per contract."
+    }
+   ]
   },
   "pastInvoices": [
    {
@@ -208,6 +313,18 @@
     "amount": "$198.60",
     "status": "Paid"
    }
+  ],
+  "summarySegments": [
+   {
+    "text": "Team plan, five seats. The next invoice is on "
+   },
+   {
+    "text": "October 9",
+    "bold": true
+   },
+   {
+    "text": " and will be between $334 and $353, depending on use over the next three days and whether Daniel joins."
+   }
   ]
  },
  "profile": {
@@ -226,7 +343,7 @@
    },
    {
     "label": "Workspace spending crosses the alert level · admins only",
-    "checked": false
+    "checked": true
    },
    {
     "label": "Every Monday, with last week’s usage and evaluation results",
@@ -325,7 +442,16 @@
     {
      "label": "Single sign-on with Okta, Entra or Google · Enterprise plan",
      "checked": false,
-     "disabled": true
+     "disabled": true,
+     "labelSegments": [
+      {
+       "text": "Single sign-on with Okta, Entra or Google · "
+      },
+      {
+       "text": "Enterprise plan",
+       "href": "/settings/billing"
+      }
+     ]
     }
    ],
    "note": "Domain joins count as seats only once someone is promoted to Editor."
@@ -333,7 +459,19 @@
   "deleteWorkspace": {
    "body": "Removes 24 conversations, 7 playbooks and 32 documents for everyone. Billing stops at the end of the cycle. This cannot be undone after 14 days.",
    "buttonLabel": "Delete Sevyn Labs workspace",
-   "note": "Export first from Audit log or each conversation’s menu."
+   "note": "Export first from Audit log or each conversation’s menu.",
+   "noteSegments": [
+    {
+     "text": "Export first from "
+    },
+    {
+     "text": "Audit log",
+     "href": "/settings/audit"
+    },
+    {
+     "text": " or each conversation’s menu."
+    }
+   ]
   }
  }
 }

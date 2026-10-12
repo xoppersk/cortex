@@ -9,15 +9,15 @@
   },
   {
    "date": "Sep 16",
-   "value": 41
+   "value": 38
   },
   {
    "date": "Sep 23",
-   "value": 89
+   "value": 72
   },
   {
    "date": "Sep 30",
-   "value": 138
+   "value": 126
   },
   {
    "date": "Oct 6",
@@ -35,8 +35,8 @@
    "amount": 71,
    "conversations": 9,
    "tokensK": 3590,
-   "writtenTokens": 1810000,
-   "readTokens": 1780000
+   "writtenTokens": 2262000,
+   "readTokens": 1328000
   },
   {
    "name": "Research synthesis",
@@ -44,8 +44,8 @@
    "amount": 58,
    "conversations": 7,
    "tokensK": 2810,
-   "writtenTokens": 1420000,
-   "readTokens": 1390000
+   "writtenTokens": 1931000,
+   "readTokens": 879000
   },
   {
    "name": "Pricing analysis",
@@ -53,8 +53,8 @@
    "amount": 29,
    "conversations": 4,
    "tokensK": 1420,
-   "writtenTokens": 730000,
-   "readTokens": 690000
+   "writtenTokens": 980000,
+   "readTokens": 440000
   },
   {
    "name": "Unfiled",

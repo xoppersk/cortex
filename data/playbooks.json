@@ -6,7 +6,7 @@
   "runs": 41,
   "updated": "Oct 6",
   "description": "Audience, promise, proof and risks for a launch, every claim cited.",
-  "instructions": "Write a launch brief for product aimed at audience, shipping launch date. State the single promise in one sentence, then the three strongest pieces of proof from knowledge base. List the risks a skeptical buyer role would raise, and end with what we will not claim. Keep it under word limit words.",
+  "instructions": "Write a launch brief for [product] aimed at [audience], shipping [launch date]. State the single promise in one sentence, then the three strongest pieces of proof from [knowledge base]. List the risks a skeptical [buyer role] would raise, and end with what we will not claim. Keep it under [word limit] words.",
   "inputs": "6, of which 4 required",
   "sources": "Positioning research, Customer interviews",
   "checks": "Every claim cited; sources under 30 days old",
@@ -89,7 +89,7 @@
   "version": "v5",
   "liveVersion": "v4",
   "savedNote": "Draft saved 2 min ago",
-  "instructions": "Write a launch brief for [product] aimed at [audience], shipping [launch date]. State the [single promise] in one sentence, then the three strongest pieces of proof from [knowledge base]. List the risks a skeptical [buyer role] would raise, and end with what we will not claim. Keep it under [word limit] words.",
+  "instructions": "Write a launch brief for [product] aimed at [audience], shipping [launch date]. State the single promise in one sentence, then the three strongest pieces of proof from [knowledge base]. List the risks a skeptical [buyer role] would raise, and end with what we will not claim. Keep it under [word limit] words.",
   "inputs": [
    {
     "input": "product",
@@ -131,19 +131,23 @@
   "sources": [
    {
     "label": "Positioning research · 188 passages",
-    "state": "checked"
+    "state": "checked",
+    "bold": "Positioning research"
    },
    {
     "label": "Customer interviews · 426 passages",
-    "state": "checked"
+    "state": "checked",
+    "bold": "Customer interviews"
    },
    {
     "label": "Pricing archive · indexing, 62% · can be added once ready",
-    "state": "disabled"
+    "state": "unchecked",
+    "bold": "Pricing archive"
    },
    {
     "label": "Let the runner swap in a different source through the knowledge base input",
-    "state": "unchecked"
+    "state": "checked",
+    "bold": "knowledge base"
    }
   ],
   "checks": [
