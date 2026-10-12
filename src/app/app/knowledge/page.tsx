@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button, ButtonLink } from "../../../components/Button";
 import { getKnowledge } from "../../../lib/api";
+
+export const metadata: Metadata = { title: { absolute: "Cortex — Knowledge bases" } };
 import { formatNumber } from "../../../lib/utils";
 import type { Collection } from "../../../lib/types";
 
