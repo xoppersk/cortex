@@ -113,6 +113,7 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
         </div>
       </div>
 
+      <div className="table-scroll">
       <div role="table" aria-label="Templates">
         <div
           role="row"
@@ -266,6 +267,7 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
             No templates match that search.
           </p>
         ) : null}
+      </div>
       </div>
 
       {hiddenCount > 0 ? (
