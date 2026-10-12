@@ -22,7 +22,10 @@ export default function LoginPage() {
   const quoteText = auth.quote.segments.map((segment) => segment.text).join("");
 
   return (
-    <main style={{ minHeight: "100vh", display: "flex", flexWrap: "wrap", background: "var(--paper)" }}>
+    <main
+      className="auth-split"
+      style={{ minHeight: "100vh", display: "flex", flexWrap: "wrap", background: "var(--paper)" }}
+    >
       <section
         style={{
           flex: "1 1 520px",
