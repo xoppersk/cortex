@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
+
+export const metadata: Metadata = { title: { absolute: "Cortex — Passage inspector" } };
 import { Button } from "../../../../../components/Button";
 import { getKnowledge } from "../../../../../lib/api";
 
@@ -86,10 +89,10 @@ export default async function PassageInspectorPage(props: {
   return (
     <>
       <header
+        className="bleed-head"
         style={{
-          margin: "-40px -40px 0",
-          padding: "18px 40px 16px",
-          borderBottom: "1px solid var(--rule)",
+          paddingTop: 18,
+          paddingBottom: 16,
           display: "flex",
           flexWrap: "wrap",
           justifyContent: "space-between",
