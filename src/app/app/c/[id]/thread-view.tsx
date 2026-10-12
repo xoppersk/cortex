@@ -333,10 +333,21 @@ function SourcesDownView({
   const firstParagraph = turn.answer.blocks[0]!;
   return (
     <div>
-      <div className="page-head">
+      {/* Designed header (M-3): full-width hairline bar, title + meta
+          stacked (SourcesUnavailable.html). */}
+      <header
+        className="bleed-head"
+        style={{
+          paddingTop: 18,
+          paddingBottom: 16,
+          display: "flex",
+          flexDirection: "column",
+          gap: 6,
+        }}
+      >
         <h1 className="conversation-title">{conversation?.title ?? thread.header.title}</h1>
         <p className="meta">{conversation ? `${conversation.sources} sources · Cortex 4` : sd.meta}</p>
-      </div>
+      </header>
 
       <section
         className="notice"
@@ -347,7 +358,9 @@ function SourcesDownView({
           justifyContent: "space-between",
           alignItems: "center",
           gap: "var(--space-4)",
+          marginTop: 24,
           marginBottom: "var(--space-6)",
+          maxWidth: 980,
         }}
       >
         <div className="stack-2" style={{ maxWidth: 600 }}>
@@ -442,10 +455,13 @@ function LimitView({ thread }: { thread: ThreadData }) {
   const citationNotes = thread.notes.filter((note) => note.n === 1 || note.n === 2);
   return (
     <div>
-      <div className="page-head">
+      {/* Designed header (M-3): full-width hairline bar, title only
+          (BudgetExceeded.html). */}
+      <header className="bleed-head" style={{ paddingTop: 18, paddingBottom: 16 }}>
         <h1 className="conversation-title">{limit.title}</h1>
-      </div>
+      </header>
 
+      <div style={{ marginTop: 32 }}>
       <DocMarginRow
         doc={
           <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
@@ -509,6 +525,7 @@ function LimitView({ thread }: { thread: ThreadData }) {
           </div>
         }
       />
+      </div>
 
       <div style={{ marginTop: "var(--space-6)" }}>
         <PausedComposer note={limit.composerNote} />
@@ -528,10 +545,26 @@ export function BlockedView({
   const notes = thread.notes.filter((note) => note.n === 6 || note.n === 7);
   return (
     <div>
-      <div className="page-head">
-        <h1 className="conversation-title">{conversation?.title ?? thread.header.title}</h1>
-        <p className="meta">{blocked.meta}</p>
-      </div>
+      {/* Designed header (M-3): full-width hairline bar, title + meta
+          column only (Blocked.html). */}
+      <header
+        className="bleed-head"
+        style={{
+          paddingTop: 18,
+          paddingBottom: 16,
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+          gap: 12,
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <h1 className="conversation-title">{conversation?.title ?? thread.header.title}</h1>
+          <p className="meta">{blocked.meta}</p>
+        </div>
+      </header>
+      <div style={{ marginTop: 32 }}>
       <DocMarginRow
         marginOffset={50}
         margin={<NotesStack notes={notes} />}
@@ -544,6 +577,7 @@ export function BlockedView({
           </div>
         }
       />
+      </div>
       <div style={{ maxWidth: "var(--column-doc)", marginTop: "var(--space-6)" }}>
         <Notice
           headline={blocked.noticeHeading}
@@ -594,25 +628,39 @@ export function ThreadView({
 
   return (
     <div>
-      <div className="page-head">
-        <div className="page-head-row">
+      {/* Designed header (M-3): a full-width hairline bar bleeding to the
+          edges of the main column — title + meta stacked left, actions
+          bottom-aligned right (Main.html). */}
+      <header
+        className="bleed-head"
+        style={{
+          paddingTop: 18,
+          paddingBottom: 16,
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "flex-end",
+          justifyContent: "space-between",
+          gap: 14,
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
           <h1 className="conversation-title">{title}</h1>
-          <div className="row">
-            <Button variant="quiet" size="sm">
-              Fork
-            </Button>
-            <Button variant="quiet" size="sm">
-              Save as playbook
-            </Button>
-            <Button variant="primary" size="sm">
-              Share
-            </Button>
-          </div>
+          <p className="meta">{meta}</p>
         </div>
-        <p className="meta">{meta}</p>
-      </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, alignItems: "center" }}>
+          <Button variant="quiet" size="sm">
+            Fork
+          </Button>
+          <Button variant="quiet" size="sm">
+            Save as playbook
+          </Button>
+          <Button variant="primary" size="sm">
+            Share
+          </Button>
+        </div>
+      </header>
 
-      <div className="column-heads">
+      <div className="column-heads" style={{ marginTop: 36 }}>
         <span className="doc-head">Thread</span>
         <span className="margin-head" style={{ display: "flex", justifyContent: "space-between" }}>
           <span>Sources</span>
