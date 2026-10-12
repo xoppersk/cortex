@@ -3,12 +3,14 @@ import type { CSSProperties, ReactNode } from "react";
 import { ButtonLink } from "../../components/Button";
 import { SiteFooter, SiteHeader } from "../../components/SiteHeader";
 
-export const metadata: Metadata = { title: "Pricing" };
+export const metadata: Metadata = { title: { absolute: "Cortex — Pricing" } };
 
 /*
  * P-02 Pricing. Copy follows the canvas reference
  * (.canvas-ref/screens/P-02-pricing/body-clean.html) exactly.
  * Note: the canvas contains four FAQ entries, not five.
+ * Trial CTAs point to /app/new (NewChat) as the design specifies;
+ * "Talk to sales" keeps the design's "#" placeholder.
  */
 
 const planHeading: CSSProperties = {
@@ -69,6 +71,23 @@ const comparisonRows: Array<[string, string, string, string]> = [
   ["Sign-in", "Email", "Email, Google, two-step", "SSO, SCIM"],
 ];
 
+const compareGrid: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 1.4fr) repeat(3, minmax(0, 1fr))",
+  gap: 16,
+  padding: "12px 0",
+  borderTop: "1px solid var(--rule)",
+  fontSize: 14,
+};
+
+const exampleRow: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 1fr) 100px",
+  gap: 16,
+  padding: "12px 0",
+  borderTop: "1px solid var(--rule)",
+};
+
 const faqs = [
   {
     question: "What happens when we hit the monthly limit?",
@@ -119,7 +138,7 @@ export default function PricingPage() {
 
       <section className="site-wrap" style={{ paddingTop: 80, paddingBottom: 56 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-          <h1 className="display-l" style={{ fontSize: 64, maxWidth: "14ch" }}>
+          <h1 className="display-l" style={{ fontSize: 64, lineHeight: 1.04, maxWidth: "14ch" }}>
             Pay for seats. Pay for answers at cost.
           </h1>
           <p className="serif-lead" style={{ fontSize: 21, maxWidth: "34em" }}>
@@ -142,8 +161,8 @@ export default function PricingPage() {
               <li>Two knowledge bases, 25 documents</li>
               <li>Everything in Team</li>
             </ul>
-            <div style={{ marginTop: "auto" }}>
-              <ButtonLink href="/signup" variant="secondary" size="lg">
+            <div style={{ marginTop: "auto", display: "flex" }}>
+              <ButtonLink href="/app/new" variant="secondary" size="lg" className="btn-block" style={{ justifyContent: "center" }}>
                 Start the trial
               </ButtonLink>
             </div>
@@ -165,8 +184,8 @@ export default function PricingPage() {
               <li>Audit log kept one year</li>
               <li>Viewers are free</li>
             </ul>
-            <div style={{ marginTop: "auto" }}>
-              <ButtonLink href="/signup" variant="primary" size="lg">
+            <div style={{ marginTop: "auto", display: "flex" }}>
+              <ButtonLink href="/app/new" variant="primary" size="lg" className="btn-block" style={{ justifyContent: "center" }}>
                 Start with Team
               </ButtonLink>
             </div>
@@ -184,8 +203,8 @@ export default function PricingPage() {
               <li>Data residency in the US or EU</li>
               <li>A named contact and a 99.9% uptime commitment</li>
             </ul>
-            <div style={{ marginTop: "auto" }}>
-              <ButtonLink href="/signup" variant="secondary" size="lg">
+            <div style={{ marginTop: "auto", display: "flex" }}>
+              <ButtonLink href="#" variant="secondary" size="lg" className="btn-block" style={{ justifyContent: "center" }}>
                 Talk to sales
               </ButtonLink>
             </div>
@@ -215,32 +234,29 @@ export default function PricingPage() {
             </p>
           </div>
           <div style={{ flex: "1 1 420px", maxWidth: 520, fontSize: 15 }}>
-            <div className="ledger">
-              <div className="ledger-row" style={{ padding: "12px 0" }}>
-                <span>5 seats × $30</span>
-                <span className="ledger-row-value">$150</span>
-              </div>
-              <div className="ledger-row" style={{ padding: "12px 0" }}>
-                <span>
-                  About 1,300 answers × $0.03
-                  <br />
-                  <span style={{ fontSize: 13, color: "var(--ink-3)" }}>
-                    60 a day for 22 working days
-                  </span>
+            <div style={exampleRow}>
+              <span>5 seats × $30</span>
+              <span style={{ textAlign: "right" }}>$150</span>
+            </div>
+            <div style={exampleRow}>
+              <span>
+                About 1,300 answers × $0.03
+                <br />
+                <span style={{ fontSize: 13, color: "var(--ink-3)" }}>
+                  60 a day for 22 working days
                 </span>
-                <span className="ledger-row-value">$40</span>
-              </div>
-              <div className="ledger-row" style={{ padding: "12px 0" }}>
-                <span>Indexing 30 new documents</span>
-                <span className="ledger-row-value">$4</span>
-              </div>
-              <div
-                className="ledger-row"
-                style={{ padding: "12px 0", borderTop: "1px solid var(--ink)", fontWeight: 600 }}
-              >
-                <span>About</span>
-                <span className="ledger-row-value">$194 a month</span>
-              </div>
+              </span>
+              <span style={{ textAlign: "right" }}>$40</span>
+            </div>
+            <div style={exampleRow}>
+              <span>Indexing 30 new documents</span>
+              <span style={{ textAlign: "right" }}>$4</span>
+            </div>
+            <div
+              style={{ ...exampleRow, borderTop: "1px solid var(--ink)", fontWeight: 600 }}
+            >
+              <span>About</span>
+              <span style={{ textAlign: "right" }}>$194 a month</span>
             </div>
           </div>
         </div>
@@ -260,29 +276,36 @@ export default function PricingPage() {
           >
             Compare plans
           </h2>
-          <div className="table-scroll">
-            <table className="data-table" aria-label="Plan comparison" style={{ minWidth: 640 }}>
-              <thead>
-                <tr>
-                  <th scope="col">
-                    <span className="sr-only">Feature</span>
-                  </th>
-                  <th scope="col">Trial</th>
-                  <th scope="col">Team</th>
-                  <th scope="col">Enterprise</th>
-                </tr>
-              </thead>
-              <tbody>
-                {comparisonRows.map((row) => (
-                  <tr key={row[0]} style={{ fontSize: 14 }}>
-                    <td style={{ color: "var(--ink)" }}>{row[0]}</td>
-                    <td style={{ color: "var(--ink-2)" }}>{row[1]}</td>
-                    <td style={{ color: "var(--ink-2)" }}>{row[2]}</td>
-                    <td style={{ color: "var(--ink-2)" }}>{row[3]}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div style={{ overflowX: "auto" }}>
+            <div role="table" aria-label="Plan comparison" style={{ minWidth: 640 }}>
+              <div
+                role="row"
+                style={{ ...compareGrid, borderTop: 0, fontSize: 13, color: "var(--ink-4)" }}
+              >
+                <span role="columnheader">
+                  <span className="sr-only">Feature</span>
+                </span>
+                <span role="columnheader">Trial</span>
+                <span role="columnheader">Team</span>
+                <span role="columnheader">Enterprise</span>
+              </div>
+              {comparisonRows.map((row, index) => (
+                <div
+                  key={row[0]}
+                  role="row"
+                  style={{
+                    ...compareGrid,
+                    borderBottom:
+                      index === comparisonRows.length - 1 ? "1px solid var(--rule)" : undefined,
+                  }}
+                >
+                  <span role="cell" style={{ color: "var(--ink)" }}>{row[0]}</span>
+                  <span role="cell" style={{ color: "var(--ink-2)" }}>{row[1]}</span>
+                  <span role="cell" style={{ color: "var(--ink-2)" }}>{row[2]}</span>
+                  <span role="cell" style={{ color: "var(--ink-2)" }}>{row[3]}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
