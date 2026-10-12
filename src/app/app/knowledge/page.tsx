@@ -1,31 +1,32 @@
 import Link from "next/link";
-import { Button } from "../../../components/Button";
+import { Button, ButtonLink } from "../../../components/Button";
 import { getKnowledge } from "../../../lib/api";
 import { formatNumber } from "../../../lib/utils";
 import type { Collection } from "../../../lib/types";
+
+const ROW_GRID = "minmax(0, 1fr) 80px 90px 110px 100px 170px";
 
 function CollectionStatus({ collection }: { collection: Collection }) {
   const { status } = collection;
   if (status.type === "indexing") {
     const percent = status.percent ?? 0;
     return (
-      <div className="stack-2">
+      <span style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <span>{status.label}</span>
-        <div className="progress-track" role="img" aria-label={`Indexing ${percent}% complete`}>
-          <div className="progress-fill" style={{ width: `${percent}%` }} />
-        </div>
-        {status.note ? <span className="caption">{status.note}</span> : null}
-      </div>
+        <span className="progress-track" role="img" aria-label={`Indexing ${percent}% complete`}>
+          <span className="progress-fill" style={{ display: "block", width: `${percent}%` }} />
+        </span>
+        {status.note ? (
+          <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{status.note}</span>
+        ) : null}
+      </span>
     );
   }
   return (
-    <span>
-      {status.label}
+    <span style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <span>{status.label}</span>
       {status.note ? (
-        <>
-          <br />
-          <span className="caption">{status.note}</span>
-        </>
+        <span style={{ fontSize: 12, color: "var(--warn)" }}>{status.note}</span>
       ) : null}
     </span>
   );
@@ -36,93 +37,143 @@ export default function KnowledgePage() {
   const { collections } = knowledge;
 
   return (
-    <>
-      <div className="page-head">
-        <h1 className="page-title">Knowledge bases</h1>
-        <p className="summary-sentence">{knowledge.summary}</p>
-        <div className="row-between" style={{ marginTop: "var(--space-4)" }}>
-          <Link href="/app/knowledge/documents">Upload documents</Link>
-          <Button variant="primary" size="md">
+    <div style={{ maxWidth: 1080 }}>
+      <div
+        className="page-head"
+        style={{
+          flexDirection: "row",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+          gap: "var(--space-4)",
+        }}
+      >
+        <div className="stack-3" style={{ maxWidth: 620 }}>
+          <h1 className="page-title">Knowledge bases</h1>
+          <p className="summary-sentence">{knowledge.summary}</p>
+        </div>
+        <div className="row" style={{ gap: 6, flexWrap: "nowrap" }}>
+          <ButtonLink href="/app/knowledge/documents" variant="secondary" size="sm">
+            Upload documents
+          </ButtonLink>
+          <Button variant="primary" size="sm">
             New knowledge base
           </Button>
         </div>
       </div>
 
       <div className="doc-margin">
-        <div className="doc-column">
-          <div className="table-scroll">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th scope="col">Collection</th>
-                  <th scope="col" className="numeric">
-                    Documents
-                  </th>
-                  <th scope="col" className="numeric">
-                    Passages
-                  </th>
-                  <th scope="col">Newest</th>
-                  <th scope="col" className="numeric">
-                    Cited, 30 d
-                  </th>
-                  <th scope="col">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {collections.map((collection) => (
-                  <tr key={collection.id}>
-                    <td>
-                      <Link
-                        href={`/app/knowledge/documents?collection=${collection.id}`}
-                        style={{ fontWeight: 500, color: "var(--ink)" }}
-                      >
-                        {collection.name}
-                      </Link>
-                      <br />
-                      <span className="muted-3">
-                        {collection.description} · {collection.owner}
-                      </span>
-                    </td>
-                    <td className="numeric">{collection.documents}</td>
-                    <td className="numeric">{formatNumber(collection.passages)}</td>
-                    <td>{collection.newest}</td>
-                    <td className="numeric">{collection.cited30d ?? "—"}</td>
-                    <td>
-                      <CollectionStatus collection={collection} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div role="table" aria-label="Knowledge bases" style={{ flex: "1 1 640px", minWidth: 0, overflowX: "auto" }}>
+          <div style={{ minWidth: 760 }}>
+            <div
+              role="row"
+              style={{
+                display: "grid",
+                gridTemplateColumns: ROW_GRID,
+                gap: 18,
+                padding: "0 0 8px",
+                fontSize: 12,
+                color: "var(--ink-4)",
+              }}
+            >
+              <span role="columnheader">Collection</span>
+              <span role="columnheader" style={{ textAlign: "right" }}>
+                Documents
+              </span>
+              <span role="columnheader" style={{ textAlign: "right" }}>
+                Passages
+              </span>
+              <span role="columnheader">Newest</span>
+              <span role="columnheader" style={{ textAlign: "right" }}>
+                Cited, 30 d
+              </span>
+              <span role="columnheader">Status</span>
+            </div>
+            {collections.map((collection, index) => (
+              <Link
+                key={collection.id}
+                role="row"
+                href="/app/knowledge/documents"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: ROW_GRID,
+                  gap: 18,
+                  alignItems: "start",
+                  padding: "13px 0",
+                  borderTop: "1px solid var(--rule)",
+                  borderBottom: index === collections.length - 1 ? "1px solid var(--rule)" : undefined,
+                  textDecoration: "none",
+                  color: "var(--ink)",
+                  fontSize: 13,
+                }}
+              >
+                <span role="cell" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <b style={{ fontSize: 14, fontWeight: 500 }}>{collection.name}</b>
+                  <span style={{ fontSize: 12, color: "var(--ink-3)" }}>
+                    {collection.description} · {collection.owner}
+                  </span>
+                </span>
+                <span role="cell" style={{ textAlign: "right" }}>
+                  {collection.documents}
+                </span>
+                <span role="cell" style={{ textAlign: "right" }}>
+                  {formatNumber(collection.passages)}
+                </span>
+                <span role="cell">{collection.newest}</span>
+                <span
+                  role="cell"
+                  style={{
+                    textAlign: "right",
+                    color: collection.cited30d == null ? "var(--ink-4)" : undefined,
+                  }}
+                >
+                  {collection.cited30d ?? "—"}
+                </span>
+                <span role="cell">
+                  <CollectionStatus collection={collection} />
+                </span>
+              </Link>
+            ))}
           </div>
         </div>
 
-        <div className="margin-column">
-          <div className="margin-box">
-            <h2 className="margin-box-title">Needs attention</h2>
-            <div className="stack-4">
-              {knowledge.needsAttention.map((item) => (
-                <div key={item.label} className="stack-2">
-                  <p className="section-label">{item.label}</p>
-                  <p className="caption">{item.detail}</p>
-                  {item.actionLabel ? (
-                    <p>
-                      <Link href="/app/knowledge/documents">{item.actionLabel}</Link>
-                    </p>
-                  ) : null}
-                </div>
-              ))}
-              <div className="stack-2">
-                <p className="section-label">{knowledge.evaluationLine.label}</p>
-                <p className="caption">{knowledge.evaluationLine.detail}</p>
-                <p>
-                  <Link href="/app/evaluations">{knowledge.evaluationLine.actionLabel}</Link>
+        <aside aria-label="Needs attention" className="margin-column" style={{ gap: 18 }}>
+          <h2 className="margin-box-title">Needs attention</h2>
+          {knowledge.needsAttention.map((item, index) => (
+            <section
+              key={item.label}
+              className="stack-2"
+              style={
+                index > 0
+                  ? { borderTop: "1px solid var(--rule)", paddingTop: "var(--space-4)" }
+                  : undefined
+              }
+            >
+              <p style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>{item.label}</p>
+              <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>{item.detail}</p>
+              {item.actionLabel ? (
+                <p style={{ fontSize: 12, lineHeight: 1.5 }}>
+                  <Link href="/app/knowledge/documents">{item.actionLabel}</Link>
                 </p>
-              </div>
-            </div>
-          </div>
-        </div>
+              ) : null}
+            </section>
+          ))}
+          <section
+            className="stack-2"
+            style={{ borderTop: "1px solid var(--rule)", paddingTop: "var(--space-4)" }}
+          >
+            <p style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>
+              {knowledge.evaluationLine.label}
+            </p>
+            <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>
+              {knowledge.evaluationLine.detail}
+            </p>
+            <p style={{ fontSize: 12, lineHeight: 1.5 }}>
+              <Link href="/app/evaluations">{knowledge.evaluationLine.actionLabel}</Link>
+            </p>
+          </section>
+        </aside>
       </div>
-    </>
+    </div>
   );
 }
