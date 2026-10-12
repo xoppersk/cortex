@@ -127,12 +127,8 @@ export function ProfileForm({ profile, email }: { profile: Profile; email: strin
   return (
     <div>
       <div
-        style={{
-          margin: "-40px -40px 0",
-          padding: "28px 40px 18px",
-          borderBottom: "1px solid var(--rule)",
-          marginBottom: "var(--space-2)",
-        }}
+        className="bleed-head"
+        style={{ paddingTop: 28, paddingBottom: 18, marginBottom: "var(--space-2)" }}
       >
         <h1 className="page-title">Profile and preferences</h1>
       </div>
