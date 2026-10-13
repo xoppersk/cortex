@@ -395,13 +395,13 @@ export function UpgradeForm({ upgrade }: { upgrade: Upgrade }) {
         >
           Team plan
         </h2>
-        <div style={summaryRow}>
+        <div style={summaryRow} className="upgrade-summary-row">
           <span>
             {seats} seats × ${upgrade.perSeat}
           </span>
           <span style={{ textAlign: "right" }}>{money(seatsTotal)}</span>
         </div>
-        <div style={{ ...summaryRow, borderTop: "1px solid var(--rule)" }}>
+        <div style={{ ...summaryRow, borderTop: "1px solid var(--rule)" }} className="upgrade-summary-row">
           <span>
             Model use at cost
             <br />
@@ -412,6 +412,7 @@ export function UpgradeForm({ upgrade }: { upgrade: Upgrade }) {
           <span style={{ textAlign: "right", color: "var(--ink-3)" }}>up to {limitLabel}</span>
         </div>
         <div
+          className="upgrade-summary-row"
           style={{
             ...summaryRow,
             borderTop: "1px solid var(--ink)",
