@@ -150,7 +150,7 @@ export function HistoryFilters() {
         <p className="summary-sentence">No conversations match this search.</p>
       ) : (
         <div className="table-scroll">
-          <table className="data-table">
+          <table className="data-table history-table">
             <thead>
               <tr>
                 <th scope="col">Conversation</th>
