@@ -237,7 +237,7 @@ export function EditPlaybookForm({ playbookName }: { playbookName: string }) {
           <section style={SECTION_STYLE}>
             <SectionHeading number="2" title="Inputs" subtitle="What the person running it fills in" />
             <div className="table-scroll">
-              <table className="data-table">
+              <table className="data-table inputs-table">
                 <thead>
                   <tr>
                     <th scope="col">Name</th>
