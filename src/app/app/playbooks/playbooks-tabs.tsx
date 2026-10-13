@@ -106,7 +106,7 @@ export function PlaybooksTabs() {
 
       {tab === "team" ? (
         <div role="tabpanel" id="panel-team" aria-labelledby="tab-team" className="table-scroll">
-          <table className="data-table">
+          <table className="data-table playbooks-table">
             <thead>
               <tr>
                 <th scope="col">Playbook</th>
