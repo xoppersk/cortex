@@ -83,7 +83,7 @@ export default function MembersPage() {
 
           <section aria-label="Everyone in this workspace">
             <div className="table-scroll">
-              <table className="data-table">
+              <table className="data-table members-table">
                 <thead>
                   <tr>
                     <th scope="col">Person</th>
