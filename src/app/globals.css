@@ -1669,18 +1669,32 @@ textarea.field-control {
   }
 
   .sidebar-nav {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: var(--space-2) var(--space-4);
+    gap: var(--space-4);
   }
 
+  /* The sidebar renders as a top block on phones: each nav group becomes
+     a two-column grid so links and their counts align in even rows
+     (label left, count right) instead of wrapping raggedly inline. */
   .sidebar-nav-group {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px var(--space-2);
+    align-items: stretch;
   }
 
-  .nav-section-title { padding: 0 4px 0 0; }
+  .nav-section-title {
+    grid-column: 1 / -1;
+    padding: 0 10px 2px;
+  }
+
+  .app-sidebar .nav-item,
+  .settings-sidebar .nav-item {
+    min-width: 0;
+  }
+
+  .nav-item > span:first-child { min-width: 0; }
+
+  .nav-item-count { flex: none; }
 
   .sidebar-footer {
     margin-top: 0;
@@ -1774,11 +1788,357 @@ textarea.field-control {
      field instead of overflowing the column. */
   .history-search-group { flex-wrap: wrap; }
 
-  /* Usage chart: at phone scale the corner value labels converge — give
-     the projection and today labels clear air. Desktop geometry is
-     untouched (these transforms exist only inside this media query). */
-  .chart-label-proj { transform: translate(-2px, -9px); }
-  .chart-label-today { transform: translate(-10px, 7px); }
+  /* Usage chart: at phone scale the corner value labels converge — pull
+     the projection label up and away from the "$200 limit" label and drop
+     the today label clear of the line. Desktop geometry is untouched
+     (these transforms exist only inside this media query). */
+  .chart-label-proj { transform: translate(-52px, -18px); }
+  .chart-label-today { transform: translate(-30px, 30px); }
+  .chart-label-limit { transform: translate(0, -16px); }
+
+  /* Marketing header (F2): wordmark and the Sign in / Start free actions
+     share the first row; the link nav takes its own full-width row
+     beneath instead of wrapping into three crammed rows. */
+  .site-header { row-gap: var(--space-3); }
+
+  .site-header .site-nav {
+    order: 3;
+    flex: 1 1 100%;
+    gap: 12px 22px;
+  }
+
+  .site-header > .row { flex-wrap: nowrap; }
+
+  /* Marketing footer (F12): stack, with the links in an even
+     three-column grid instead of a 5 + 1 wrap. */
+  .site-footer {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .site-footer .site-nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px 18px;
+    width: 100%;
+  }
+
+  /* Landing CTA band (F1): the action block becomes a column so the
+     price note stacks under the button instead of pressing against
+     its right edge and wrapping mid-phrase. */
+  .cta-band .stack-3 {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  /* Landing evidence trace (F13): balance the passage lines so single
+     words are not stranded on their own line. */
+  .evidence-trace > div > span:nth-child(2) { text-wrap: pretty; }
+
+  /* Templates (F3): the three-column grid row becomes the template name
+     and description on their own full-width line, with Expects left and
+     Copied right on the line beneath — nothing overlaps or squeezes. */
+  .templates-row {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 6px 16px !important;
+  }
+
+  .templates-row > *:nth-child(1) { grid-column: 1 / -1; }
+  .templates-row > *:nth-child(2) { grid-column: 1; }
+  .templates-row > *:nth-child(3) { grid-column: 2; }
+
+  /* Pricing compare plans (F4): the table leaves its hint-less scroller
+     and stacks — one feature per block, each plan's value on its own
+     line, labelled with the plan name from the table's own header. */
+  .compare-scroll { overflow-x: visible !important; }
+
+  .compare-table { min-width: 0 !important; }
+
+  .compare-table > [role="row"] { display: block !important; }
+
+  .compare-table > [role="row"]:first-child { display: none !important; }
+
+  .compare-table [role="cell"] { display: block; }
+
+  .compare-table [role="cell"]:first-child { margin-bottom: 4px; }
+
+  .compare-table [role="cell"]:nth-child(2)::before { content: "Trial — "; }
+  .compare-table [role="cell"]:nth-child(3)::before { content: "Team — "; }
+  .compare-table [role="cell"]:nth-child(4)::before { content: "Enterprise — "; }
+
+  .compare-table [role="cell"]:nth-child(n + 2)::before {
+    font-weight: 600;
+    color: var(--ink-4);
+  }
+
+  /* Pricing cost example (F14): the value column sizes to its content
+     so the total never breaks mid-phrase ("$194 a / month"). */
+  .cost-rows > div { grid-template-columns: minmax(0, 1fr) auto !important; }
+
+  .cost-rows > div > span:last-child { white-space: nowrap; }
+
+  /* Stacked data tables (F5, F8, F9, F10, F18): the identifying cell
+     takes its own full-width line and the remaining cells form a stat
+     row beneath it, each wearing its column header as a small label.
+     The thead is hidden — its text lives on in the cell labels. */
+  .history-table thead,
+  .playbooks-table thead,
+  .inputs-table thead,
+  .members-table thead { display: none; }
+
+  .history-table tr,
+  .documents-table tbody tr,
+  .playbooks-table tr,
+  .inputs-table tr,
+  .members-table tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    column-gap: 20px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .history-table td,
+  .documents-table td,
+  .playbooks-table td,
+  .inputs-table td,
+  .members-table td {
+    border-bottom: 0;
+    padding: 0;
+  }
+
+  .history-table tr:has(> td[colspan]) {
+    padding: 0;
+    border-bottom: 0;
+  }
+
+  .history-table tbody tr:hover,
+  .documents-table tbody tr:hover,
+  .playbooks-table tbody tr:hover,
+  .inputs-table tbody tr:hover,
+  .members-table tbody tr:hover { background: var(--paper-sunk); }
+
+  .history-table tbody tr:hover td,
+  .documents-table tbody tr:hover td,
+  .playbooks-table tbody tr:hover td,
+  .inputs-table tbody tr:hover td,
+  .members-table tbody tr:hover td { background: transparent; }
+
+  .documents-table tr.row-warning { background: var(--warn-tint); }
+
+  .documents-table tr.row-warning td { background: transparent; }
+
+  .documents-table tbody tr.row-warning:hover { background: var(--warn-tint); }
+
+  .history-table td:nth-child(1),
+  .playbooks-table td:nth-child(1),
+  .inputs-table td:nth-child(1),
+  .members-table td:nth-child(1) {
+    flex: 1 1 100%;
+    padding-bottom: 8px;
+  }
+
+  .history-table td:nth-child(n + 2),
+  .documents-table td:nth-child(n + 3),
+  .playbooks-table td:nth-child(n + 2),
+  .inputs-table td:nth-child(n + 2),
+  .members-table td:nth-child(n + 2) {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    text-align: left;
+  }
+
+  .history-table td::before,
+  .documents-table td::before,
+  .playbooks-table td::before,
+  .inputs-table td::before,
+  .members-table td::before {
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--ink-4);
+  }
+
+  .history-table td:nth-child(2)::before { content: "Sources"; }
+  .history-table td:nth-child(3)::before { content: "People"; }
+  .history-table td:nth-child(4)::before { content: "Cost"; }
+  .history-table td:nth-child(5)::before { content: "Edited"; }
+
+  .documents-table td:nth-child(3)::before { content: "Collection"; }
+  .documents-table td:nth-child(4)::before { content: "Owner"; }
+  .documents-table td:nth-child(5)::before { content: "Passages"; }
+  .documents-table td:nth-child(6)::before { content: "Updated"; }
+  .documents-table td:nth-child(7)::before { content: "Status"; }
+
+  .playbooks-table td:nth-child(2)::before { content: "Owner"; }
+  .playbooks-table td:nth-child(3)::before { content: "Runs, 30 days"; }
+  .playbooks-table td:nth-child(4)::before { content: "Edited"; }
+
+  .inputs-table td:nth-child(2)::before { content: "Type"; }
+  .inputs-table td:nth-child(3)::before { content: "Required"; }
+  .inputs-table td:nth-child(4)::before { content: "Example shown to the runner"; }
+
+  .members-table td:nth-child(2)::before { content: "Role"; }
+  .members-table td:nth-child(3)::before { content: "Last active"; }
+
+  .members-table td:nth-child(4) { margin-left: auto; }
+
+  .inputs-table td:nth-child(4) { flex: 1 1 100%; }
+
+  /* Documents keeps its select-all checkbox: the thead collapses to
+     just that one control above the stacked rows. */
+  .documents-table thead { display: block; }
+
+  .documents-table thead tr {
+    display: flex;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 8px;
+  }
+
+  .documents-table thead th { display: none; }
+
+  .documents-table thead th:first-child {
+    display: block;
+    border-bottom: 0;
+    padding: 0;
+  }
+
+  .documents-table td:nth-child(1) {
+    flex: 0 0 28px;
+    padding-top: 2px;
+  }
+
+  .documents-table td:nth-child(2) {
+    /* Claim the whole first line beside the checkbox (28px + 20px gap)
+       so the first stat cell cannot float up next to the title. */
+    flex: 1 1 calc(100% - 48px);
+    min-width: 0;
+  }
+
+  .documents-table td:nth-child(7) { flex: 1 1 100%; }
+
+  /* Knowledge bases (F7): the 760px-min table becomes a card — the
+     collection on its own line, a Documents / Passages / Cited stat
+     row, then Newest and Status. No column is sliced off-screen. */
+  .kb-table { min-width: 0 !important; }
+
+  .kb-row-head { display: none !important; }
+
+  .kb-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px 14px !important;
+  }
+
+  .kb-row > *:nth-child(1) { grid-column: 1 / -1; }
+
+  .kb-row > *:nth-child(n + 2) {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    text-align: left !important;
+    min-width: 0;
+  }
+
+  .kb-row > *:nth-child(5) { grid-row: 2; grid-column: 3; }
+  .kb-row > *:nth-child(4) { grid-row: 3; grid-column: 1; }
+  .kb-row > *:nth-child(6) { grid-row: 3; grid-column: 2 / -1; }
+
+  .kb-row > *:nth-child(n + 2)::before {
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--ink-4);
+  }
+
+  .kb-row > *:nth-child(2)::before { content: "Documents"; }
+  .kb-row > *:nth-child(3)::before { content: "Passages"; }
+  .kb-row > *:nth-child(5)::before { content: "Cited, 30 d"; }
+  .kb-row > *:nth-child(4)::before { content: "Newest"; }
+  .kb-row > *:nth-child(6)::before { content: "Status"; }
+
+  /* Docs (F22): the section nav becomes a compact two-column grid so
+     the article starts near the top, and the "On this page" contents
+     moves up between the nav and the article where it can navigate. */
+  .docs-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    align-content: start;
+    order: 1;
+  }
+
+  .docs-toc {
+    order: 2;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 18px;
+    padding: 20px 0 0;
+  }
+
+  .docs-toc > span:last-child { flex: 1 1 100%; }
+
+  .docs-article { order: 3; }
+
+  /* Docs code block (F11): long JSON lines wrap inside the card
+     instead of running off its right edge into a hint-less scroller. */
+  .code-block {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    overflow-x: visible;
+  }
+
+  /* Audit log (F24): time and category share a meta line and the entry
+     sentence gets the full width instead of a narrow middle column. */
+  .audit-entry {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 3px 14px !important;
+  }
+
+  .audit-entry > span:nth-child(1) { grid-column: 1; grid-row: 1; }
+  .audit-entry > span:nth-child(3) { grid-column: 2; grid-row: 1; }
+  .audit-entry > span:nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
+
+  /* Signup header (F20): phone-width padding and room to wrap, so the
+     "Already have a workspace? Sign in" line no longer crowds the
+     wordmark or runs to the screen edge. */
+  .signup-topbar {
+    padding: 20px 16px !important;
+    flex-wrap: wrap;
+    column-gap: 16px;
+  }
+
+  /* Upgrade summary card (F15): the value column sizes to its content
+     and never wraps, so "Charged October 13" and its amount share a
+     line and every row reads as a clean two-column table. */
+  .upgrade-summary-row { grid-template-columns: minmax(0, 1fr) auto !important; }
+
+  .upgrade-summary-row > span:last-child { white-space: nowrap; }
+
+  /* Ledger rows with descriptions (F19): on phones the title and
+     description take the full width and the meta / value pair drops
+     to a second line, instead of the description wrapping in the
+     left ~60% beside the reserved meta column. */
+  .ledger-row:has(.ledger-row-description) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .ledger-row:has(.ledger-row-description) > span:first-child {
+    grid-column: 1 / -1;
+  }
+
+  /* Ask answer meta (F21): balance the two lines so the closing link
+     is not orphaned as "as a conversation" on its own line. */
+  .ask-answer-meta { text-wrap: balance; }
+
+  /* Past invoices (F23): dates never break mid-value. */
+  .invoices-table td { padding-right: 12px; }
+
+  .invoices-table td:last-child { padding-right: 0; }
+
+  .invoices-table td:first-child { white-space: nowrap; }
 }
 
 @media (prefers-reduced-motion: reduce) {

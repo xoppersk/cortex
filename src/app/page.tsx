@@ -229,7 +229,7 @@ export default function LandingPage() {
             </p>
           </div>
           <div
-            className="fragment"
+            className="fragment evidence-trace"
             role="img"
             aria-label="Retrieval trace: four passages cited, one set aside because it was over 30 days old, one below the match minimum."
             style={{ flex: "1 1 420px", maxWidth: 520, alignSelf: "flex-start", fontSize: 13 }}
