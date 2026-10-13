@@ -117,6 +117,7 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
       <div role="table" aria-label="Templates">
         <div
           role="row"
+          className="templates-row"
           style={{ ...grid, padding: "0 0 10px", fontSize: 13, color: "var(--ink-4)" }}
         >
           <span role="columnheader">Template</span>
@@ -137,7 +138,7 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
               gap: 18,
             }}
           >
-            <div style={grid}>
+            <div style={grid} className="templates-row">
               <span role="cell" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <strong
                   style={{
@@ -225,6 +226,7 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
           <Link
             key={template.id}
             role="row"
+            className="templates-row"
             href="#"
             onMouseEnter={(event) => rowHover(event, true)}
             onMouseLeave={(event) => rowHover(event, false)}
