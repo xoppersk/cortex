@@ -98,7 +98,7 @@ export default function UsagePage() {
                   <line x1="40" y1="125" x2="600" y2="125" />
                 </g>
                 <line x1="40" y1="50" x2="600" y2="50" stroke="var(--ink)" strokeWidth="1" strokeDasharray="3 4" />
-                <text x="600" y="42" textAnchor="end" fontSize="11" fill="var(--ink)">
+                <text className="chart-label-limit" x="600" y="42" textAnchor="end" fontSize="11" fill="var(--ink)">
                   ${limit} limit
                 </text>
                 <g fontSize="11" fill="var(--ink-4)">
