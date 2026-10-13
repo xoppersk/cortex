@@ -112,6 +112,7 @@ export function AskForm({
             </p>
           ))}
           <p
+            className="ask-answer-meta"
             style={{
               fontSize: 12,
               lineHeight: 1.45,
