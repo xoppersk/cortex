@@ -225,6 +225,7 @@ export function AuditLog({
               {group.entries.map((entry, index) => (
                 <div key={`${entry.time}-${index}`}>
                   <div
+                    className="audit-entry"
                     style={{
                       display: "grid",
                       gridTemplateColumns: "80px minmax(0, 1fr) 120px",
