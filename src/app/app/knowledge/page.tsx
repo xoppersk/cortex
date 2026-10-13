@@ -67,9 +67,10 @@ export default function KnowledgePage() {
 
       <div className="doc-margin">
         <div role="table" aria-label="Knowledge bases" style={{ flex: "1 1 640px", minWidth: 0, overflowX: "auto" }}>
-          <div style={{ minWidth: 760 }}>
+          <div style={{ minWidth: 760 }} className="kb-table">
             <div
               role="row"
+              className="kb-row kb-row-head"
               style={{
                 display: "grid",
                 gridTemplateColumns: ROW_GRID,
@@ -96,6 +97,7 @@ export default function KnowledgePage() {
               <Link
                 key={collection.id}
                 role="row"
+                className="kb-row"
                 href="/app/knowledge/documents"
                 style={{
                   display: "grid",
