@@ -233,7 +233,7 @@ export default function PricingPage() {
               about 60 questions each working day.
             </p>
           </div>
-          <div style={{ flex: "1 1 420px", maxWidth: 520, fontSize: 15 }}>
+          <div style={{ flex: "1 1 420px", maxWidth: 520, fontSize: 15 }} className="cost-rows">
             <div style={exampleRow}>
               <span>5 seats × $30</span>
               <span style={{ textAlign: "right" }}>$150</span>
@@ -276,8 +276,8 @@ export default function PricingPage() {
           >
             Compare plans
           </h2>
-          <div style={{ overflowX: "auto" }}>
-            <div role="table" aria-label="Plan comparison" style={{ minWidth: 640 }}>
+          <div style={{ overflowX: "auto" }} className="compare-scroll">
+            <div role="table" aria-label="Plan comparison" style={{ minWidth: 640 }} className="compare-table">
               <div
                 role="row"
                 style={{ ...compareGrid, borderTop: 0, fontSize: 13, color: "var(--ink-4)" }}
