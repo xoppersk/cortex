@@ -33,6 +33,7 @@ async function SignupInner({ searchParams }: { searchParams: SearchParams }) {
       }}
     >
       <header
+        className="signup-topbar"
         style={{
           padding: "28px 48px",
           display: "flex",
