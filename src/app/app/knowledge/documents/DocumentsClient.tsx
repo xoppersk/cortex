@@ -233,7 +233,7 @@ export function DocumentsClient() {
         ) : null}
 
         <div className="table-scroll">
-          <table className="data-table">
+          <table className="data-table documents-table">
             <thead>
               <tr>
                 <th scope="col" style={{ width: 32 }}>
