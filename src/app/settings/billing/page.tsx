@@ -148,7 +148,7 @@ export default function BillingPage() {
           Past invoices
         </h2>
         <div className="table-scroll">
-          <table className="data-table">
+          <table className="data-table invoices-table">
             <thead>
               <tr>
                 <th scope="col">Date</th>
