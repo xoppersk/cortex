@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import type { CSSProperties, ReactNode } from "react";
-import { Button } from "../../../components/Button";
+import type { ReactNode } from "react";
+import { Button, ButtonLink } from "../../../components/Button";
+import { Icon } from "../../../components/Icon";
 import { getEvaluations } from "../../../lib/api";
 
 export const metadata: Metadata = { title: { absolute: "Cortex — Evaluations" } };
@@ -19,21 +19,6 @@ type FailureExtra = {
   gotDoc?: string;
 };
 
-const TB_LINK_STYLE: CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  minHeight: 30,
-  padding: "0 12px",
-  border: "1px solid var(--ink)",
-  borderRadius: "var(--radius-m)",
-  background: "var(--paper)",
-  color: "var(--ink)",
-  fontSize: 13,
-  fontWeight: 500,
-  textDecoration: "none",
-  whiteSpace: "nowrap",
-};
-
 function withDocTitle(text: string, doc?: string): ReactNode {
   if (!doc || !text.includes(doc)) return text;
   const [before, after] = text.split(doc);
@@ -49,202 +34,165 @@ function withDocTitle(text: string, doc?: string): ReactNode {
 function FailureActions({ failure }: { failure: FailureExtra }) {
   if (failure.id === "Q17") {
     return (
-      <div className="row" style={{ gap: 6 }}>
-        <Button variant="secondary" size="sm" style={{ borderColor: "var(--ink)" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <Button variant="primary" size="sm">
           {failure.actions[0]}
         </Button>
-        <Link href="/app/knowledge/documents/customer-interview-synthesis" style={TB_LINK_STYLE}>
+        <ButtonLink href="/app/knowledge/documents/customer-interview-synthesis" variant="secondary" size="sm">
           Inspect passage
-        </Link>
+        </ButtonLink>
       </div>
     );
   }
   // Q31 and Q42: the fix action is a link to Documents, per the design.
   return (
-    <div className="row" style={{ gap: 6 }}>
-      <Link href="/app/knowledge/documents" style={TB_LINK_STYLE}>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+      <ButtonLink href="/app/knowledge/documents" variant="primary" size="sm">
         {failure.fixLabel}
-      </Link>
+      </ButtonLink>
     </div>
   );
 }
+
+function Summary({ text }: { text: string }) {
+  const match = /(\d+ of \d+)/.exec(text);
+  if (!match) return <p className="pv-lede">{text}</p>;
+  const [before, after] = [text.slice(0, match.index), text.slice(match.index + match[0].length)];
+  return (
+    <p className="pv-lede">
+      {before}
+      <mark className="pv-usage-mark">{match[0]}</mark>
+      {after}
+    </p>
+  );
+}
+
+const MONTHS: Record<string, string> = { Sep: "September", Oct: "October" };
 
 export default function EvaluationsPage() {
   const evaluations = getEvaluations();
   const { set, runs, otherSets } = evaluations;
   const failures = evaluations.failures as FailureExtra[];
+  const [month, day] = (runs[0]?.date ?? "").split(" ");
+  const latestLabel = `${(month && MONTHS[month]) ?? month} ${day}`;
 
   return (
-    <div style={{ maxWidth: 1000 }}>
-      <div
-        className="page-head"
-        style={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          gap: "var(--space-4)",
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 640 }}>
-          <p style={{ fontSize: 12, color: "var(--ink-3)" }}>
+    <>
+      <header className="pv-ph" style={{ alignItems: "flex-end", padding: "24px 28px" }}>
+        <div className="pv-ph-title" style={{ gap: 10, maxWidth: 700 }}>
+          <span className="pv-ph-sub">
             {set.name} · {set.questions} questions · {set.schedule}
-          </p>
-          <h1 className="page-title">Evaluations</h1>
-          <p className="summary-sentence">{evaluations.summary}</p>
+          </span>
+          <h1>Evaluations</h1>
+          <Summary text={evaluations.summary} />
         </div>
-        <div className="row" style={{ gap: 6, flexWrap: "nowrap" }}>
-          <Button variant="secondary" size="sm">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <Button variant="secondary">
+            <Icon name="pencil" style={{ color: "var(--ink-2)" }} />
             Edit questions
           </Button>
-          <Button variant="primary" size="sm">
+          <Button variant="primary">
+            <Icon name="playWide" style={{ color: "currentColor", width: 13, height: 13 }} />
             Run now · about ${evaluations.runCost.toFixed(2)}
           </Button>
         </div>
-      </div>
+      </header>
 
-      <div className="doc-margin">
-        <section style={{ flex: "1 1 480px", maxWidth: 660, minWidth: 0 }}>
-          <h2 className="section-label" style={{ marginBottom: 4 }}>
-            Failures, October 5
+      <div className="pv-split pv-split-320">
+        <section aria-labelledby="failures-heading" className="pv-evals-main">
+          <h2 id="failures-heading" className="pv-sec-title" style={{ margin: "0 0 2px" }}>
+            Failures, {latestLabel}
           </h2>
-          <div>
-            {failures.map((failure, index) => (
-              <article
-                key={failure.id}
-                className="failure-card"
-                style={{
-                  padding: "20px 0",
-                  borderBottom:
-                    index === failures.length - 1 ? "1px solid var(--rule)" : undefined,
-                }}
-              >
-                <div className="row-between" style={{ flexWrap: "nowrap", alignItems: "baseline" }}>
-                  <p style={{ fontSize: 15, fontWeight: 500, color: "var(--ink)" }}>
-                    {failure.id} · {failure.question}
-                  </p>
-                  <span
-                    style={{
-                      fontSize: 12,
-                      color: "var(--danger)",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {failure.tag}
-                  </span>
-                </div>
-                <dl
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "80px minmax(0, 1fr)",
-                    gap: "var(--space-2) var(--space-4)",
-                    fontSize: 13,
-                    lineHeight: 1.5,
-                  }}
-                >
-                  <dt style={{ color: "var(--ink-4)" }}>Expected</dt>
-                  <dd style={{ color: "var(--ink-body)" }}>
-                    {withDocTitle(failure.expected, failure.expectedDoc)}
-                  </dd>
-                  <dt style={{ color: "var(--ink-4)" }}>Got</dt>
-                  <dd style={{ color: "var(--ink-body)" }}>
-                    {withDocTitle(failure.got, failure.gotDoc)}
-                  </dd>
-                  <dt style={{ color: "var(--ink-4)" }}>Why</dt>
-                  <dd style={{ color: "var(--ink-body)" }}>{failure.why}</dd>
-                </dl>
-                <FailureActions failure={failure} />
-              </article>
-            ))}
-          </div>
+          {failures.map((failure) => (
+            <article key={failure.id} className="pv-card pv-fl" aria-labelledby={`failure-${failure.id}`}>
+              <div className="pv-fl-q">
+                <b id={`failure-${failure.id}`}>
+                  <span>{failure.id}</span>
+                  {failure.question}
+                </b>
+                <span className="pv-tag pv-tag-bad">{failure.tag}</span>
+              </div>
+              <dl className="pv-cmp">
+                <dt>Expected</dt>
+                <dd>{withDocTitle(failure.expected, failure.expectedDoc)}</dd>
+                <dt>Got</dt>
+                <dd>{withDocTitle(failure.got, failure.gotDoc)}</dd>
+                <dt>Why</dt>
+                <dd>{withScores(failure.why)}</dd>
+              </dl>
+              <FailureActions failure={failure} />
+            </article>
+          ))}
         </section>
 
-        <aside aria-label="Run history" className="margin-column" style={{ maxWidth: 300, gap: 22 }}>
-          <section>
-            <h2 className="section-label" style={{ marginBottom: 6 }}>
-              Recent runs
-            </h2>
+        <aside className="pv-side" aria-label="Run history" style={{ paddingTop: 26, gap: 14 }}>
+          <h2 className="pv-lbl">Recent runs</h2>
+          <section className="pv-card" style={{ padding: 0, gap: 0, overflow: "hidden", boxShadow: "var(--shadow-lift)" }}>
             <div role="table" aria-label="Recent runs">
-              <div
-                role="row"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "54px minmax(0, 1fr) 44px",
-                  gap: 14,
-                  padding: "10px 0",
-                  fontSize: 12,
-                  color: "var(--ink-4)",
-                }}
-              >
+              <div role="row" className="pv-rr pv-th pv-row-head">
                 <span role="columnheader">Date</span>
                 <span role="columnheader">Passed of {set.questions}</span>
                 <span role="columnheader" style={{ textAlign: "right" }}>
                   Cost
                 </span>
               </div>
-              {runs.map((run) => {
-                const percent = Math.round((run.passed / set.questions) * 100);
-                return (
-                  <div
-                    key={run.date}
-                    role="row"
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "54px minmax(0, 1fr) 44px",
-                      gap: 14,
-                      padding: "10px 0",
-                      borderTop: "1px solid var(--rule)",
-                      fontSize: 13,
-                      alignItems: "baseline",
-                    }}
-                  >
-                    <span role="cell">{run.date}</span>
-                    <span role="cell" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span
-                        style={{ flex: 1, height: 6, background: "var(--rule)", display: "block" }}
-                        role="img"
-                        aria-label={`${percent}% passed`}
-                      >
-                        <span
-                          style={{
-                            display: "block",
-                            width: `${percent}%`,
-                            height: 6,
-                            background: "var(--ink)",
-                          }}
-                        />
-                      </span>
+              {runs.map((run, index) => (
+                <div role="row" key={run.date} className="pv-rr">
+                  <span role="cell" style={index === 0 ? { fontWeight: 600, color: "var(--ink)" } : { color: "var(--ink)" }}>
+                    {run.date}
+                  </span>
+                  <span role="cell" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span className="pv-bar pv-rr-bar" aria-hidden="true">
+                      <i style={{ width: `${(run.passed / set.questions) * 100}%`, background: index === 0 ? undefined : "var(--ink-4)" }} />
+                    </span>
+                    <span className="pv-mono" style={{ fontWeight: index === 0 ? 500 : 400, color: "var(--ink)" }}>
                       {run.passed}
                     </span>
-                    <span role="cell" style={{ textAlign: "right", color: "var(--ink-2)" }}>
-                      ${run.cost.toFixed(2)}
-                    </span>
-                  </div>
-                );
-              })}
+                  </span>
+                  <span role="cell" className="pv-mono" style={{ textAlign: "right", color: "var(--ink-2)", fontSize: 12 }}>
+                    ${run.cost.toFixed(2)}
+                  </span>
+                </div>
+              ))}
             </div>
-            <p className="caption" style={{ marginTop: 8, color: "var(--ink-3)" }}>
+            <p style={{ margin: 0, padding: "12px 16px", borderTop: "1px solid var(--rule-soft)", fontSize: 12, lineHeight: 1.5, color: "var(--ink-3)" }}>
               {evaluations.runsNote}
             </p>
           </section>
-
-          <section
-            className="stack-2"
-            style={{ borderTop: "1px solid var(--rule)", paddingTop: 18 }}
-          >
-            <h2 className="margin-box-title">Other question sets</h2>
+          <div style={{ height: 1, background: "var(--rule)", margin: "8px 0" }} aria-hidden="true" />
+          <h2 className="pv-lbl">Other question sets</h2>
+          <section className="pv-card" style={{ padding: "4px 16px", gap: 0 }}>
             {otherSets.map((other) => (
-              <p key={other.name} style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>
-                <b style={{ color: "var(--ink)", fontWeight: 500 }}>{other.name}</b> ·{" "}
-                {other.questions} questions · {other.latest}
-              </p>
+              <span key={other.name} className="pv-otherset">
+                <span>
+                  <b>{other.name}</b> · {other.questions} questions
+                </span>
+                <span style={{ color: "var(--ink-3)", whiteSpace: "nowrap" }}>{other.latest}</span>
+              </span>
             ))}
-            <p style={{ fontSize: 12, lineHeight: 1.5 }}>
-              <Link href="#">New question set</Link>
-            </p>
+            <a href="#" style={{ padding: "12px 0" }}>
+              New question set
+            </a>
           </section>
         </aside>
       </div>
-    </div>
+    </>
+  );
+}
+
+function withScores(text: string): ReactNode {
+  const parts = text.split(/(\d\.\d\d)/g);
+  return (
+    <>
+      {parts.map((part, index) =>
+        /^\d\.\d\d$/.test(part) ? (
+          <span key={index} className="pv-mono">
+            {part}
+          </span>
+        ) : (
+          <span key={index}>{part}</span>
+        ),
+      )}
+    </>
   );
 }

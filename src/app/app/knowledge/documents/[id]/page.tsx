@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
+import { Button } from "../../../../../components/Button";
+import { Icon } from "../../../../../components/Icon";
+import { KnowledgeSubnav } from "../../../../../components/KnowledgeSubnav";
+import { getKnowledge } from "../../../../../lib/api";
 
 export const metadata: Metadata = { title: { absolute: "Cortex — Passage inspector" } };
-import { Button } from "../../../../../components/Button";
-import { getKnowledge } from "../../../../../lib/api";
 
 type Passage = {
   number: number;
@@ -36,7 +38,7 @@ function PassageText({ passage }: { passage: Passage }) {
 
   if (overlapPrefix && rest.startsWith(overlapPrefix)) {
     nodes.push(
-      <span key={key++} className="overlap-shade">
+      <span key={key++} className="pv-ov">
         {overlapPrefix}
       </span>,
     );
@@ -61,7 +63,7 @@ function PassageText({ passage }: { passage: Passage }) {
   }
   if (tail) {
     nodes.push(
-      <span key={key++} className="overlap-shade">
+      <span key={key++} className="pv-ov">
         {tail}
       </span>,
     );
@@ -88,162 +90,93 @@ export default async function PassageInspectorPage(props: {
 
   return (
     <>
-      <header
-        className="bleed-head"
-        style={{
-          paddingTop: 18,
-          paddingBottom: 16,
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          gap: 14,
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <p style={{ fontSize: 12, color: "var(--ink-3)" }}>
-            <Link href="/app/knowledge/documents" style={{ color: "var(--ink-3)" }}>
+      <KnowledgeSubnav current="/app/knowledge/documents" />
+      <header className="pv-ph" style={{ alignItems: "flex-end" }}>
+        <div className="pv-ph-title">
+          <span className="pv-ph-sub">
+            <Link href="/app/knowledge/documents" style={{ textDecoration: "underline" }}>
               Documents
-            </Link>{" "}
-            / {inspector.collectionName}
-          </p>
-          <h1
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: 24,
-              lineHeight: 1.15,
-              fontWeight: 600,
-              letterSpacing: "-0.015em",
-              color: "var(--ink)",
-            }}
-          >
-            {inspector.documentTitle}
-          </h1>
-          <p className="meta">
-            {inspector.totalPassages} passages · {inspector.splitting} · {inspector.indexedLabel}
-          </p>
+            </Link>
+            <span className="pv-crumb-sep" aria-hidden="true">
+              /
+            </span>
+            {inspector.collectionName}
+          </span>
+          <h1>{inspector.documentTitle}</h1>
+          <span style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginTop: 4, fontSize: 12.5, color: "var(--ink-3)" }}>
+            <span className="pv-chip pv-chip-sm">{inspector.totalPassages} passages</span>
+            {inspector.splitting} · {inspector.indexedLabel}
+          </span>
         </div>
-        <div className="row" style={{ gap: 6, alignItems: "center", flexWrap: "nowrap" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
           <label htmlFor="go-to-passage" style={{ fontSize: 12, color: "var(--ink-3)" }}>
             Go to passage
           </label>
           <input
             id="go-to-passage"
-            className="field-control"
-            style={{ width: 56, height: 30, minHeight: 30, padding: "0 8px", textAlign: "right" }}
+            className="pv-inp pv-mono"
+            style={{ width: 64, height: 32, textAlign: "right" }}
             defaultValue={selected.number}
           />
-          <Button variant="secondary" size="sm">
-            Change splitting
-          </Button>
+          <Button variant="secondary">Change splitting</Button>
         </div>
       </header>
 
-      <div className="doc-margin" style={{ marginTop: 24 }}>
-        <div style={{ flex: "1 1 480px", maxWidth: 660, minWidth: 0 }}>
-          <h2
-            className="section-label"
-            style={{ fontSize: 13, marginLeft: 60, marginBottom: 4 }}
-          >
-            {inspector.sectionHeading}
-          </h2>
-          <div className="passage-list">
-            {passages.map((passage) =>
-              passage.selected ? (
-                <div
-                  key={passage.number}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "44px minmax(0, 1fr)",
-                    gap: "var(--space-4)",
-                    margin: "0 -16px",
-                    padding: 16,
-                    border: "1px solid var(--ink)",
-                    borderRadius: "var(--radius-m)",
-                    background: "var(--paper)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 12,
-                      color: "var(--ink)",
-                      fontWeight: 600,
-                      paddingTop: 3,
-                    }}
-                  >
-                    {passage.number}
-                  </span>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-serif)",
-                      fontSize: 16,
-                      lineHeight: 1.65,
-                      color: "var(--ink)",
-                    }}
-                  >
-                    <PassageText passage={passage} />
-                  </p>
-                </div>
-              ) : (
-                <div key={passage.number} className="passage-row">
-                  <span className="passage-number" style={{ textAlign: "left" }}>
-                    {passage.number}
-                  </span>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-serif)",
-                      fontSize: 16,
-                      lineHeight: 1.65,
-                      color: "var(--ink-2)",
-                    }}
-                  >
-                    <PassageText passage={passage} />
-                  </p>
-                </div>
-              ),
-            )}
-          </div>
-          <p
-            className="caption"
-            style={{ marginLeft: 60, marginTop: 12, color: "var(--ink-4)" }}
-          >
+      <div className="pv-split">
+        <section aria-label="Document passages" className="pv-chunk-main">
+          <h2 className="pv-sec-title pv-chunk-heading">{inspector.sectionHeading}</h2>
+          {passages.map((passage, index) => (
+            <div
+              key={passage.number}
+              className={passage.selected ? "pv-ps pv-ps-selected" : "pv-ps"}
+              aria-current={passage.selected ? "true" : undefined}
+              style={
+                !passage.selected && passages[index - 1]?.selected
+                  ? { borderTop: 0 }
+                  : index === passages.length - 1
+                    ? { borderBottom: "1px dashed var(--control)" }
+                    : undefined
+              }
+            >
+              <span className="pv-ps-n">
+                {passage.selected ? <span className="pv-ps-badge">{passage.number}</span> : passage.number}
+              </span>
+              <p>
+                <PassageText passage={passage} />
+              </p>
+            </div>
+          ))}
+          <p className="pv-chunk-legend">
+            <span aria-hidden="true" />
             Grey shading marks text shared with the neighbouring passage.
           </p>
-        </div>
+        </section>
 
-        <div className="margin-column">
-          <div>
-            <h2 style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)", marginBottom: 8 }}>
-              Passage {selected.number}
-            </h2>
-            <dl
-              style={{
-                display: "grid",
-                gridTemplateColumns: "auto minmax(0, 1fr)",
-                gap: "6px 14px",
-                fontSize: 12,
-                lineHeight: 1.5,
-              }}
-            >
-              <dt style={{ color: "var(--ink-4)" }}>Length</dt>
-              <dd style={{ color: "var(--ink-2)" }}>{selected.tokens} tokens</dd>
-              <dt style={{ color: "var(--ink-4)" }}>Pages</dt>
-              <dd style={{ color: "var(--ink-2)" }}>{selected.page}</dd>
-              <dt style={{ color: "var(--ink-4)" }}>Heading</dt>
-              <dd style={{ color: "var(--ink-2)" }}>{selected.heading}</dd>
+        <aside className="pv-side" aria-label={`Passage ${selected.number}`} style={{ paddingTop: 30, gap: 14 }}>
+          <section className="pv-card" style={{ boxShadow: "var(--shadow-lift)", gap: 12 }}>
+            <h2 className="pv-card-title">Passage {selected.number}</h2>
+            <dl className="pv-dl">
+              <dt>Length</dt>
+              <dd className="pv-mono">{selected.tokens} tokens</dd>
+              <dt>Pages</dt>
+              <dd className="pv-mono">{selected.page}</dd>
+              <dt>Heading</dt>
+              <dd>{selected.heading}</dd>
             </dl>
-          </div>
-
-          <div className="margin-box">
-            <h2 className="margin-box-title">Last 30 days</h2>
-            <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>
-              Retrieved for{" "}
-              <b style={{ color: "var(--ink)" }}>{selected.retrieved}</b> questions and cited in{" "}
-              <b style={{ color: "var(--ink)" }}>{selected.cited}</b> answers. Median match{" "}
-              {selected.medianMatch}.
-            </p>
+          </section>
+          <section className="pv-card">
+            <h2 className="pv-lbl" style={{ fontSize: 11 }}>
+              Last 30 days
+            </h2>
+            <span>
+              Retrieved for <b>{selected.retrieved}</b> questions and cited in <b>{selected.cited}</b> answers. Median match{" "}
+              <span className="pv-mono" style={{ color: "var(--ink)" }}>
+                {selected.medianMatch}
+              </span>
+              .
+            </span>
             {selected.recent ? (
-              <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>
+              <span>
                 Most recent:{" "}
                 {selected.recent.map((item, index) => (
                   <span key={item.label}>
@@ -251,34 +184,28 @@ export default async function PassageInspectorPage(props: {
                     <Link href={item.href}>{item.label}</Link>
                   </span>
                 ))}
-              </p>
+              </span>
             ) : null}
-          </div>
-
-          <div className="margin-box">
-            <h2 className="margin-box-title">Adjust</h2>
-            <div className="stack-2">
-              <div>
-                <Button variant="secondary" size="sm">
-                  Split after &ldquo;deciding criterion&rdquo;
-                </Button>
-              </div>
-              <div>
-                <Button variant="secondary" size="sm">
-                  Merge with 119
-                </Button>
-              </div>
-              <div>
-                <Button variant="secondary" size="sm">
-                  Keep out of answers
-                </Button>
-              </div>
-            </div>
-            <p className="caption" style={{ color: "var(--ink-4)" }}>
-              Changes re-index this document only and take about 20 seconds.
-            </p>
-          </div>
-        </div>
+          </section>
+          <section className="pv-card pv-adjust">
+            <h2 className="pv-lbl" style={{ fontSize: 11, marginBottom: 2 }}>
+              Adjust
+            </h2>
+            <Button variant="secondary">
+              <Icon name="split" style={{ color: "var(--ink-2)" }} />
+              Split after &ldquo;deciding criterion&rdquo;
+            </Button>
+            <Button variant="secondary">
+              <Icon name="merge" style={{ color: "var(--ink-2)" }} />
+              Merge with {selected.number + 1}
+            </Button>
+            <Button variant="secondary">
+              <Icon name="ban" style={{ color: "var(--ink-2)" }} />
+              Keep out of answers
+            </Button>
+            <span style={{ color: "var(--ink-4)", paddingTop: 2 }}>Changes re-index this document only and take about 20 seconds.</span>
+          </section>
+        </aside>
       </div>
     </>
   );

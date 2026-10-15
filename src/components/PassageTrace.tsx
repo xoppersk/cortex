@@ -3,14 +3,15 @@ import { cx } from "../lib/utils";
 import { RichSegments } from "./Footnote";
 
 /*
- * PassageTrace (design-system component): cite number (or —), passage excerpt
- * in serif with its document and passage number below, match score
- * right-aligned, outcome. Set-aside rows are dimmed so cited rows read first.
- * The highlight appears only in cited rows (segments with mark: true).
+ * PassageTrace (Premium v2): cite pill (or a hollow dash), the passage in
+ * serif with its document and passage number below, an inline match bar with
+ * the score, and the outcome. Cited rows wear a dark "Cited" tag; set-aside
+ * rows sit on a quieter ground with the reason in place of the tag. The
+ * highlight appears only in cited rows (segments with mark: true).
  */
 export function PassageTrace({ rows, caption }: { rows: PassageTraceRow[]; caption?: string }) {
   return (
-    <div className="passage-trace" role="table" aria-label={caption ?? "Passage trace"}>
+    <div className="passage-trace pv-card" role="table" aria-label={caption ?? "Passage trace"} style={{ overflow: "hidden" }}>
       <div className="passage-trace-head" role="row">
         <span role="columnheader">Cite</span>
         <span role="columnheader">Passage</span>
@@ -27,19 +28,32 @@ export function PassageTrace({ rows, caption }: { rows: PassageTraceRow[]; capti
           className={cx("passage-trace-row", row.setAside && "set-aside")}
           role="row"
         >
-          <span role="cell">{row.cite ?? "—"}</span>
           <span role="cell">
-            <span className="excerpt">
+            <span
+              className={cx("passage-trace-cite", row.cite == null && "passage-trace-cite-off")}
+              aria-label={row.cite == null ? "Not cited" : `Citation ${row.cite}`}
+            >
+              {row.cite ?? "—"}
+            </span>
+          </span>
+          <span role="cell" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <span className="passage-trace-excerpt">
               {typeof row.excerpt === "string" ? row.excerpt : <RichSegments segments={row.excerpt} />}
             </span>
-            <br />
             <span className="trace-source">{row.source}</span>
           </span>
           <span role="cell" className="passage-trace-match">
+            <span className="pv-bar" aria-hidden="true">
+              <i style={{ width: `${Math.round(row.match * 100)}%` }} />
+            </span>
             {row.match.toFixed(2)}
           </span>
           <span role="cell" className="passage-trace-outcome">
-            {row.outcomeTone === "warn" ? <span className="warn-text">{row.outcome}</span> : row.outcome}
+            {row.setAside ? (
+              <span className={row.outcomeTone === "warn" ? "pv-warn" : undefined}>{row.outcome}</span>
+            ) : (
+              <span className="pv-tag pv-tag-dk">{row.outcome}</span>
+            )}
           </span>
         </div>
       ))}

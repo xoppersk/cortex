@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { KnowledgeSubnav } from "../../../../components/KnowledgeSubnav";
 import { getKnowledge } from "../../../../lib/api";
 import { AskForm } from "./AskForm";
 
@@ -10,10 +11,13 @@ export default function AskPage() {
   const collection = knowledge.collections.find((entry) => entry.id === ask.collectionId);
 
   return (
-    <AskForm
-      ask={ask}
-      collectionName={collection?.name ?? ask.collectionId}
-      inspectorDocumentId={knowledge.inspector.documentId}
-    />
+    <>
+      <KnowledgeSubnav current="/app/knowledge/ask" />
+      <AskForm
+        ask={ask}
+        collectionName={collection?.name ?? ask.collectionId}
+        inspectorDocumentId={knowledge.inspector.documentId}
+      />
+    </>
   );
 }

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Button } from "../../../../components/Button";
+import { Icon } from "../../../../components/Icon";
+import { KnowledgeSubnav } from "../../../../components/KnowledgeSubnav";
 import { getKnowledge } from "../../../../lib/api";
 import type { KnowledgeDocument } from "../../../../lib/types";
 import { cx } from "../../../../lib/utils";
@@ -13,18 +14,22 @@ function DocumentStatus({ document }: { document: KnowledgeDocument }) {
   const extra = document as DocumentExtra;
   if (document.status === "failed") {
     return (
-      <span>
-        <span style={{ color: "var(--danger)", fontWeight: 500 }}>Couldn&rsquo;t split</span>
+      <span className="pv-dst">
+        <span>
+          <span className="pv-dot pv-dot-bad" aria-hidden="true" />
+          <b className="pv-bad" style={{ fontWeight: 600 }}>
+            Couldn&rsquo;t split
+          </b>
+        </span>
         {document.statusDetail ? (
-          <>
-            <br />
-            <span style={{ fontSize: 12, lineHeight: 1.4, color: "var(--ink-2)" }}>
-              {document.statusDetail}{" "}
-              {extra.statusAction ? (
-                <Link href="/app/knowledge/documents">{extra.statusAction}</Link>
-              ) : null}
-            </span>
-          </>
+          <span>
+            {document.statusDetail}{" "}
+            {extra.statusAction ? (
+              <Link href="/app/knowledge/documents" style={{ fontWeight: 500 }}>
+                {extra.statusAction}
+              </Link>
+            ) : null}
+          </span>
         ) : null}
       </span>
     );
@@ -32,30 +37,38 @@ function DocumentStatus({ document }: { document: KnowledgeDocument }) {
   if (document.status === "indexing") {
     const percent = extra.indexPercent ?? 62;
     return (
-      <span style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        <span>{document.statusDetail ?? "Indexing"}</span>
-        <span className="progress-track" role="img" aria-label={`Indexing ${percent}% complete`}>
-          <span className="progress-fill" style={{ display: "block", width: `${percent}%` }} />
+      <span className="pv-dst" style={{ gap: 7 }}>
+        <span>
+          <span className="pv-dot pv-dot-hollow" aria-hidden="true" />
+          {document.statusDetail ?? "Indexing"}
+        </span>
+        <span className="pv-bar" role="img" aria-label={`Indexing ${percent}% complete`}>
+          <i style={{ width: `${percent}%` }} />
         </span>
       </span>
     );
   }
   if (document.status === "stale") {
     return (
-      <span>
-        <span className="warn-text" style={{ fontWeight: 500 }}>
-          Stale
+      <span className="pv-dst">
+        <span>
+          <span className="pv-dot pv-dot-warn" aria-hidden="true" />
+          <b className="pv-warn" style={{ fontWeight: 600 }}>
+            Stale
+          </b>
         </span>
-        {document.statusNote ? (
-          <>
-            <br />
-            <span style={{ fontSize: 12, color: "var(--ink-2)" }}>{document.statusNote}</span>
-          </>
-        ) : null}
+        {document.statusNote ? <span>{document.statusNote}</span> : null}
       </span>
     );
   }
-  return <span>Indexed</span>;
+  return (
+    <span className="pv-dst">
+      <span>
+        <span className="pv-dot" aria-hidden="true" />
+        Indexed
+      </span>
+    </span>
+  );
 }
 
 type Filter =
@@ -126,59 +139,73 @@ export function DocumentsClient() {
   );
   const chipCollections = showAllCollections ? orderedCollections : orderedCollections.slice(0, 2);
 
-  return (
-    <div style={{ maxWidth: 1080 }}>
-      <div className="page-head" style={{ marginBottom: "var(--space-5)" }}>
-        <h1 className="page-title">Documents</h1>
-        <p style={{ fontSize: 13, color: "var(--ink-3)" }}>
-          {totalDocuments} documents · 1 failed · 1 indexing · 2 stale
-        </p>
-      </div>
+  const failed = documents.filter((d) => d.status === "failed").length;
+  const indexingCount = documents.filter((d) => d.status === "indexing").length;
+  const stale = documents.filter((d) => d.status === "stale").length;
 
-      <div className="stack-5">
-        <label
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 12,
-            padding: "14px 16px",
-            border: "1px dashed #C9C9C3",
-            borderRadius: "var(--radius-l)",
-            cursor: "pointer",
-          }}
-        >
-          <span style={{ fontSize: 13, color: "var(--ink-2)" }}>
-            Drop PDF, Word, Markdown or call transcripts here. Each file is split into passages
-            and checked before answers can cite it.
+  return (
+    <>
+      <KnowledgeSubnav current="/app/knowledge/documents" />
+      <header className="pv-ph" style={{ alignItems: "flex-end", padding: "22px 28px" }}>
+        <div className="pv-ph-title" style={{ gap: 10 }}>
+          <h1>Documents</h1>
+          <p className="pv-doc-counts">
+            <span>{totalDocuments} documents</span>
+            <span className="pv-doc-sep" aria-hidden="true">
+              ·
+            </span>
+            <span>
+              <span className="pv-dot pv-dot-bad" aria-hidden="true" />
+              {failed} failed
+            </span>
+            <span className="pv-doc-sep" aria-hidden="true">
+              ·
+            </span>
+            <span>
+              <span className="pv-dot pv-dot-hollow" aria-hidden="true" />
+              {indexingCount} indexing
+            </span>
+            <span className="pv-doc-sep" aria-hidden="true">
+              ·
+            </span>
+            <span>
+              <span className="pv-dot pv-dot-warn" aria-hidden="true" />
+              {stale} stale
+            </span>
+          </p>
+        </div>
+      </header>
+
+      <div className="pv-body" style={{ paddingTop: 24, paddingBottom: 36, gap: 18 }}>
+        <label className="pv-drop">
+          <span style={{ display: "flex", alignItems: "center", gap: 14, maxWidth: 760 }}>
+            <span className="pv-ib pv-drop-icon" aria-hidden="true">
+              <Icon name="upload" />
+            </span>
+            <span style={{ fontSize: 13, lineHeight: 1.5, color: "var(--ink-2)" }}>
+              Drop PDF, Word, Markdown or call transcripts here. Each file is split into passages and checked before
+              answers can cite it.
+            </span>
           </span>
-          <span
-            className="btn btn-secondary btn-sm"
-            style={{ borderColor: "var(--ink)", pointerEvents: "none" }}
-          >
+          <span className="btn btn-secondary btn-md" aria-hidden="true">
             Choose files
           </span>
           <input type="file" className="sr-only" multiple aria-label="Upload documents" />
         </label>
 
-        <div className="row-between" style={{ flexWrap: "wrap", gap: 12 }}>
+        <div className="pv-toolbar">
           <div className="filter-row" role="group" aria-label="Filter documents">
-            <button
-              type="button"
-              className="filter-button"
-              aria-pressed={filter.kind === "all"}
-              onClick={() => setFilter({ kind: "all" })}
-            >
-              All {totalDocuments}
+            <button type="button" className="filter-button" aria-pressed={filter.kind === "all"} onClick={() => setFilter({ kind: "all" })}>
+              All{" "}
+              <span className="pv-mono" style={{ fontSize: 11.5, color: "var(--ink-4)" }}>
+                {totalDocuments}
+              </span>
             </button>
-            <button
-              type="button"
-              className="filter-button"
-              aria-pressed={filter.kind === "action"}
-              onClick={() => setFilter({ kind: "action" })}
-            >
-              Needs action {needsAction}
+            <button type="button" className="filter-button" aria-pressed={filter.kind === "action"} onClick={() => setFilter({ kind: "action" })}>
+              Needs action{" "}
+              <span className="pv-mono" style={{ fontSize: 11.5, color: "var(--warn)" }}>
+                {needsAction}
+              </span>
             </button>
             {chipCollections.map((collection) => (
               <button
@@ -192,132 +219,142 @@ export function DocumentsClient() {
               </button>
             ))}
             {!showAllCollections ? (
-              <button
-                type="button"
-                className="filter-button"
-                onClick={() => setShowAllCollections(true)}
-              >
+              <button type="button" className="filter-button" onClick={() => setShowAllCollections(true)}>
                 More collections
               </button>
             ) : null}
           </div>
-          <div>
-            <label className="sr-only" htmlFor="document-filter">
-              Filter documents
-            </label>
+          <label className="pv-search pv-doc-filter" htmlFor="document-filter">
+            <Icon name="search" />
+            <span className="sr-only">Filter documents</span>
             <input
               id="document-filter"
-              className="field-control field-control-32"
               type="search"
               placeholder="Filter by title or owner"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              style={{ width: 240 }}
             />
-          </div>
+          </label>
         </div>
 
-        {selected.size > 0 ? (
-          <div className="action-bar" role="region" aria-label="Actions for selected documents">
-            <span>{selected.size} selected</span>
-            <Button variant="quiet" size="sm">
-              Re-index
-            </Button>
-            <Button variant="quiet" size="sm">
-              Move to…
-            </Button>
-            <Button variant="quiet" size="sm">
-              Exclude from answers
-            </Button>
-          </div>
-        ) : null}
-
-        <div className="table-scroll">
-          <table className="data-table documents-table">
-            <thead>
-              <tr>
-                <th scope="col" style={{ width: 32 }}>
-                  <input
-                    type="checkbox"
-                    aria-label="Select all"
-                    checked={allFilteredSelected}
-                    onChange={(event) => toggleAll(event.target.checked)}
-                  />
-                </th>
-                <th scope="col">Title</th>
-                <th scope="col">Collection</th>
-                <th scope="col">Owner</th>
-                <th scope="col" className="numeric">
+        <div className="pv-card" style={{ overflow: "hidden" }}>
+          {selected.size > 0 ? (
+            <div className="pv-selbar" role="region" aria-label="Actions for selected documents">
+              <span style={{ flex: 1, display: "flex", alignItems: "center", gap: 10 }}>
+                <Icon name="check" strokeWidth={1.8} style={{ color: "currentColor", width: 14, height: 14 }} />
+                <b style={{ fontWeight: 500 }}>{selected.size} selected</b>
+              </span>
+              <button type="button" className="btn btn-sm pv-selbar-btn">
+                Re-index
+              </button>
+              <button type="button" className="btn btn-sm pv-selbar-btn">
+                Move to…
+              </button>
+              <button type="button" className="btn btn-sm pv-selbar-btn pv-selbar-primary">
+                Exclude from answers
+              </button>
+            </div>
+          ) : null}
+          <div className="pv-doc-scroll">
+            <div role="table" aria-label="Documents" className="pv-doc-table">
+              <div role="row" className="pv-dr pv-th pv-row-head">
+                <span role="columnheader">
+                  <input type="checkbox" aria-label="Select all" checked={allFilteredSelected} onChange={(event) => toggleAll(event.target.checked)} />
+                </span>
+                <span role="columnheader">Title</span>
+                <span role="columnheader">Collection</span>
+                <span role="columnheader">Owner</span>
+                <span role="columnheader" style={{ textAlign: "right" }}>
                   Passages
-                </th>
-                <th scope="col">Updated</th>
-                <th scope="col">Status</th>
-              </tr>
-            </thead>
-            <tbody>
+                </span>
+                <span role="columnheader">Updated</span>
+                <span role="columnheader">Status</span>
+              </div>
               {visibleRows.map((document) => {
                 const isSelected = selected.has(document.id);
                 return (
-                  <tr
+                  <div
+                    role="row"
                     key={document.id}
-                    className={cx(document.status === "failed" && "row-warning")}
-                    style={
-                      document.status === "stale" ? { background: "#FAFAF8" } : undefined
-                    }
+                    className={cx("pv-dr", document.status === "failed" && "pv-dr-failed", (document.status === "stale" || isSelected) && "pv-dr-soft")}
                   >
-                    <td>
+                    <span role="cell">
                       <input
                         type="checkbox"
                         aria-label={`Select ${document.title}`}
                         checked={isSelected}
                         onChange={(event) => toggleDocument(document.id, event.target.checked)}
                       />
-                    </td>
-                    <td>
-                      {document.id === "customer-interview-synthesis" ? (
-                        <Link
-                          href={`/app/knowledge/documents/${document.id}`}
-                          style={{ fontWeight: 500, color: "var(--ink)", textDecoration: "none" }}
-                        >
-                          {document.title}
-                        </Link>
-                      ) : (
-                        <span style={{ fontWeight: 500, color: "var(--ink)" }}>
-                          {document.title}
-                        </span>
-                      )}
-                      <br />
-                      <span style={{ fontSize: 12, color: "var(--ink-4)" }}>{document.format}</span>
-                    </td>
-                    <td style={{ color: "var(--ink-2)" }}>{document.collection}</td>
-                    <td style={{ color: "var(--ink-2)" }}>{document.owner}</td>
-                    <td
-                      className="numeric"
-                      style={document.passages == null ? { color: "var(--ink-4)" } : undefined}
+                    </span>
+                    <span role="cell" className="pv-dr-title">
+                      <span className="pv-fi" aria-hidden="true">
+                        {fileBadge(document.format)}
+                      </span>
+                      <span style={{ display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
+                        {document.id === "customer-interview-synthesis" ? (
+                          <Link href={`/app/knowledge/documents/${document.id}`}>{document.title}</Link>
+                        ) : (
+                          <b>{document.title}</b>
+                        )}
+                        <span className="pv-dr-meta">{document.format}</span>
+                      </span>
+                    </span>
+                    <span role="cell" style={{ color: "var(--ink-2)" }}>
+                      {document.collection}
+                    </span>
+                    <span role="cell" className="pv-ppl" style={{ fontSize: 13 }}>
+                      <span className={`pv-av pv-av-sm ${ownerTone(document.owner)}`} aria-hidden="true">
+                        {initialsOf(document.owner)}
+                      </span>
+                      {document.owner}
+                    </span>
+                    <span
+                      role="cell"
+                      className={document.passages == null ? undefined : "pv-mono"}
+                      style={{ textAlign: "right", color: document.passages == null ? "var(--ink-4)" : undefined }}
                     >
                       {document.passages ?? "—"}
-                    </td>
-                    <td
-                      style={{
-                        color: document.status === "stale" ? "var(--warn)" : "var(--ink-2)",
-                      }}
-                    >
+                    </span>
+                    <span role="cell" style={{ color: document.status === "stale" ? "var(--warn)" : "var(--ink-2)" }}>
                       {document.updated}
-                    </td>
-                    <td>
+                    </span>
+                    <span role="cell">
                       <DocumentStatus document={document} />
-                    </td>
-                  </tr>
+                    </span>
+                  </div>
                 );
               })}
-            </tbody>
-          </table>
+            </div>
+          </div>
+          <p className="pv-doc-foot">
+            Showing {visibleRows.length} of {totalDocuments}. Problems are listed first.
+          </p>
         </div>
-
-        <p className="caption" style={{ color: "var(--ink-4)" }}>
-          Showing {visibleRows.length} of {totalDocuments}. Problems are listed first.
-        </p>
       </div>
-    </div>
+    </>
   );
+}
+
+function fileBadge(format: string) {
+  const kind = format.split(" · ")[0] ?? "";
+  if (kind.startsWith("XLS")) return "XLS";
+  if (kind === "Markdown") return "MD";
+  if (kind.startsWith("PDF")) return "PDF";
+  return "DOC";
+}
+
+function initialsOf(name: string) {
+  return name
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+function ownerTone(name: string) {
+  if (name === "Sheku Koroma") return "pv-av-ink";
+  if (name.startsWith("Maya")) return "pv-av-1";
+  if (name.startsWith("Owen")) return "pv-av-2";
+  return "pv-av-3";
 }

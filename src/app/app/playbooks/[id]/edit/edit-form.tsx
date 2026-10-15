@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Button } from "../../../../../components/Button";
+import { Icon } from "../../../../../components/Icon";
 import { getPlaybooks } from "../../../../../lib/api";
 import { withDottedInputs } from "../../playbooks-tabs";
 
@@ -15,7 +16,7 @@ function boldSegment(text: string, segment?: string): ReactNode {
   return (
     <>
       {before}
-      <b style={{ fontWeight: 500 }}>{segment}</b>
+      <b style={{ fontWeight: 600 }}>{segment}</b>
       {after}
     </>
   );
@@ -31,38 +32,13 @@ function SectionHeading({
   subtitle?: string;
 }) {
   return (
-    <h2 className="section-label">
-      {number} {title}
-      {subtitle ? (
-        <span style={{ fontSize: 13, fontWeight: 400, color: "var(--ink-4)", marginLeft: 10 }}>
-          {subtitle}
-        </span>
-      ) : null}
+    <h2 className="pv-sh">
+      <i aria-hidden="true">{number}</i>
+      {title}
+      {subtitle ? <span>{subtitle}</span> : null}
     </h2>
   );
 }
-
-const SECTION_STYLE: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 14,
-  borderTop: "1px solid var(--rule)",
-  paddingTop: 22,
-};
-
-const FIRST_SECTION_STYLE: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 14,
-};
-
-const EXAMPLE_INPUT_STYLE: CSSProperties = {
-  height: 30,
-  minHeight: 30,
-  padding: "0 10px",
-  borderColor: "#DCDCD7",
-  borderRadius: 5,
-};
 
 function CheckValueInput({
   id,
@@ -82,17 +58,8 @@ function CheckValueInput({
       <input
         id={id}
         aria-label={label}
-        className="field-control"
-        style={{
-          width,
-          height: 26,
-          minHeight: 26,
-          padding: "0 6px",
-          textAlign: "right",
-          display: "inline-block",
-          borderColor: "#DCDCD7",
-          borderRadius: 5,
-        }}
+        className="pv-inp pv-mono"
+        style={{ width, height: 26, padding: "0 6px", textAlign: "right", display: "inline-block" }}
         value={value}
         onChange={(event) => onChange(event.target.value)}
       />
@@ -158,270 +125,190 @@ export function EditPlaybookForm({ playbookName }: { playbookName: string }) {
 
   return (
     <>
-      <header
-        className="bleed-head"
-        style={{
-          paddingTop: 18,
-          paddingBottom: 16,
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          gap: 14,
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <p style={{ fontSize: 12, color: "var(--ink-3)" }}>
-            <Link href="/app/playbooks" style={{ color: "var(--ink-3)" }}>
+      <header className="pv-ph">
+        <div className="pv-ph-title">
+          <span className="pv-ph-sub">
+            <Link href="/app/playbooks" style={{ textDecoration: "underline" }}>
               Playbooks
-            </Link>{" "}
-            / Editing
-          </p>
-          <h1
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: 24,
-              lineHeight: 1.15,
-              fontWeight: 600,
-              letterSpacing: "-0.015em",
-              color: "var(--ink)",
-            }}
-          >
-            {playbookName}
-          </h1>
+            </Link>
+            <span className="pv-crumb-sep" aria-hidden="true">
+              /
+            </span>
+            Editing
+          </span>
+          <h1>{playbookName}</h1>
         </div>
-        <div className="row" style={{ gap: 6, alignItems: "center" }}>
-          <span style={{ fontSize: 12, color: "var(--ink-4)", marginRight: 6 }}>
+        <div className="pv-ph-actions" style={{ gap: 8 }}>
+          <span style={{ fontSize: 12, color: "var(--ink-4)", marginRight: 6, display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <span className="pv-writing-dot" aria-hidden="true" />
             {edit.savedNote} · {edit.liveVersion} is live
           </span>
-          <Button variant="quiet" size="sm" onClick={discard}>
+          <Button variant="quiet" onClick={discard}>
             Discard changes
           </Button>
-          <Button variant="primary" size="sm">
-            Publish {edit.version} to team
-          </Button>
+          <Button variant="primary">Publish {edit.version} to team</Button>
         </div>
       </header>
 
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 48,
-          marginTop: 32,
-          maxWidth: 1000,
-        }}
-      >
-        <div style={{ flex: "1 1 480px", maxWidth: 640, minWidth: 0, display: "flex", flexDirection: "column", gap: 30 }}>
-          <section style={FIRST_SECTION_STYLE}>
+      <div className="pv-split pv-builder">
+        <form className="pv-builder-form" onSubmit={(event) => event.preventDefault()}>
+          <section className="pv-sec">
             <SectionHeading number="1" title="Instructions" subtitle="What Cortex should do each run" />
-            <span className="sr-only">Instructions</span>
-            <div
-              style={{
-                padding: "16px 18px",
-                border: "1px solid var(--rule-strong)",
-                borderRadius: "var(--radius-l)",
-                fontFamily: "var(--font-serif)",
-                fontSize: 16,
-                lineHeight: 1.65,
-                color: "var(--ink-body)",
-              }}
-            >
+            <span className="sr-only" id="instructions-label">
+              Instructions
+            </span>
+            <div className="pv-builder-instructions" role="group" aria-labelledby="instructions-label">
               {withDottedInputs(edit.instructions)}
             </div>
-            <p style={{ fontSize: 12, color: "var(--ink-3)" }}>
-              Type [ to insert an input. {edit.inputs.length} inputs used.
-            </p>
+            <span style={{ marginTop: 8, fontSize: 12, color: "var(--ink-3)" }}>
+              Type <span className="pv-kbd">[</span> to insert an input. {edit.inputs.length} inputs used.
+            </span>
           </section>
 
-          <section style={SECTION_STYLE}>
+          <section className="pv-sec">
             <SectionHeading number="2" title="Inputs" subtitle="What the person running it fills in" />
-            <div className="table-scroll">
-              <table className="data-table inputs-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Type</th>
-                    <th scope="col">Required</th>
-                    <th scope="col">Example shown to the runner</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {edit.inputs.map((input, index) => (
-                    <tr key={input.input}>
-                      <td style={{ fontWeight: 500, color: "var(--ink)" }}>{input.input}</td>
-                      <td>{input.type}</td>
-                      <td>{input.required ? "Yes" : "No"}</td>
-                      <td>
-                        <label className="sr-only" htmlFor={`input-example-${index}`}>
-                          Example for {input.input}
-                        </label>
-                        <input
-                          id={`input-example-${index}`}
-                          className="field-control"
-                          style={EXAMPLE_INPUT_STYLE}
-                          value={examples[index] ?? ""}
-                          onChange={(event) =>
-                            setExamples((previous) =>
-                              previous.map((value, i) => (i === index ? event.target.value : value)),
-                            )
-                          }
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section style={SECTION_STYLE}>
-            <SectionHeading number="3" title="Sources" subtitle="Where answers may come from" />
-            <div className="stack-3">
-              {sources.map((source, index) => (
-                <label key={source.label} className="check-row" htmlFor={`source-${index}`}>
-                  <input
-                    id={`source-${index}`}
-                    type="checkbox"
-                    checked={sourceStates[index] ?? false}
-                    onChange={(event) =>
-                      setSourceStates((previous) =>
-                        previous.map((value, i) => (i === index ? event.target.checked : value)),
-                      )
-                    }
-                  />
-                  <span>{boldSegment(source.label, source.bold)}</span>
-                </label>
+            <div role="table" aria-label="Inputs">
+              <div role="row" className="pv-vr pv-th pv-vr-head">
+                <span role="columnheader">Name</span>
+                <span role="columnheader">Type</span>
+                <span role="columnheader">Required</span>
+                <span role="columnheader">Example shown to the runner</span>
+              </div>
+              {edit.inputs.map((input, index) => (
+                <div role="row" className="pv-vr" key={input.input}>
+                  <b role="cell" style={{ fontWeight: 600 }}>
+                    {input.input}
+                  </b>
+                  <span role="cell">
+                    <span className="pv-tag">{input.type}</span>
+                  </span>
+                  <span role="cell" style={input.required ? undefined : { color: "var(--ink-4)" }}>
+                    {input.required ? "Yes" : "No"}
+                  </span>
+                  <span role="cell">
+                    <label className="sr-only" htmlFor={`input-example-${index}`}>
+                      Example for {input.input}
+                    </label>
+                    <input
+                      id={`input-example-${index}`}
+                      className="pv-inp"
+                      value={examples[index] ?? ""}
+                      onChange={(event) =>
+                        setExamples((previous) => previous.map((value, i) => (i === index ? event.target.value : value)))
+                      }
+                    />
+                  </span>
+                </div>
               ))}
             </div>
           </section>
 
-          <section style={SECTION_STYLE}>
+          <section className="pv-sec">
+            <SectionHeading number="3" title="Sources" subtitle="Where answers may come from" />
+            {sources.map((source, index) => (
+              <label key={source.label} className="pv-ck" htmlFor={`source-${index}`}>
+                <input
+                  id={`source-${index}`}
+                  type="checkbox"
+                  checked={sourceStates[index] ?? false}
+                  onChange={(event) =>
+                    setSourceStates((previous) => previous.map((value, i) => (i === index ? event.target.checked : value)))
+                  }
+                />
+                <span>{boldSegment(source.label, source.bold)}</span>
+              </label>
+            ))}
+          </section>
+
+          <section className="pv-sec">
             <SectionHeading number="4" title="Checks" subtitle="A run that fails these is marked, not hidden" />
-            <div className="stack-4">
-              {edit.checks.map((check, index) => {
-                const state = checks[index]!;
+            {edit.checks.map((check, index) => {
+              const state = checks[index]!;
+              return (
+                <label key={check.label} className="pv-ck" htmlFor={`check-${index}`}>
+                  <input
+                    id={`check-${index}`}
+                    type="checkbox"
+                    checked={state.checked}
+                    onChange={(event) =>
+                      setChecks((previous) =>
+                        previous.map((item, i) => (i === index ? { ...item, checked: event.target.checked } : item)),
+                      )
+                    }
+                  />
+                  <span>
+                    {check.label}{" "}
+                    {check.inputValue !== undefined ? (
+                      <>
+                        <CheckValueInput
+                          id={`check-value-${index}`}
+                          label={`Value for ${check.label}`}
+                          value={state.inputValue}
+                          width={check.inputValue.startsWith("$") ? 66 : 48}
+                          onChange={(value) =>
+                            setChecks((previous) =>
+                              previous.map((item, i) => (i === index ? { ...item, inputValue: value } : item)),
+                            )
+                          }
+                        />
+                        {check.inputSuffix ? <> {check.inputSuffix}</> : null}
+                      </>
+                    ) : null}
+                  </span>
+                </label>
+              );
+            })}
+          </section>
+
+          <section className="pv-sec">
+            <SectionHeading number="5" title="Sharing" />
+            <fieldset style={{ margin: 0, padding: 0, border: 0, display: "flex", flexDirection: "column" }}>
+              <legend className="sr-only">Who can run this playbook</legend>
+              {edit.sharing.options.map((option) => {
+                const [boldPart] = option.label.split(" · ");
                 return (
-                  <div key={check.label}>
-                    <label className="check-row" htmlFor={`check-${index}`}>
-                      <input
-                        id={`check-${index}`}
-                        type="checkbox"
-                        checked={state.checked}
-                        onChange={(event) =>
-                          setChecks((previous) =>
-                            previous.map((item, i) =>
-                              i === index ? { ...item, checked: event.target.checked } : item,
-                            ),
-                          )
-                        }
-                      />
-                      <span>
-                        {check.label}{" "}
-                        {check.inputValue !== undefined ? (
-                          <>
-                            <CheckValueInput
-                              id={`check-value-${index}`}
-                              label={`Value for ${check.label}`}
-                              value={state.inputValue}
-                              width={check.inputValue.startsWith("$") ? 64 : 48}
-                              onChange={(value) =>
-                                setChecks((previous) =>
-                                  previous.map((item, i) =>
-                                    i === index ? { ...item, inputValue: value } : item,
-                                  ),
-                                )
-                              }
-                            />
-                            {check.inputSuffix ? <> {check.inputSuffix}</> : null}
-                          </>
-                        ) : null}
-                      </span>
-                    </label>
-                  </div>
+                  <label key={option.value} className="pv-ck" htmlFor={`sharing-${option.value}`}>
+                    <input
+                      id={`sharing-${option.value}`}
+                      type="radio"
+                      name="sharing"
+                      value={option.value}
+                      checked={sharing === option.value}
+                      onChange={() => setSharing(option.value)}
+                    />
+                    <span>{boldSegment(option.label, boldPart)}</span>
+                  </label>
                 );
               })}
-            </div>
-          </section>
-
-          <section style={SECTION_STYLE}>
-            <SectionHeading number="5" title="Sharing" />
-            <fieldset style={{ margin: 0, padding: 0, border: 0 }}>
-              <legend className="sr-only">Who can run this playbook</legend>
-              <div className="stack-3" role="radiogroup" aria-label="Sharing">
-                {edit.sharing.options.map((option) => {
-                  const boldPart =
-                    option.value === "team" ? "Go-to-market team" : option.label;
-                  return (
-                    <label key={option.value} className="radio-row" htmlFor={`sharing-${option.value}`}>
-                      <input
-                        id={`sharing-${option.value}`}
-                        type="radio"
-                        name="sharing"
-                        value={option.value}
-                        checked={sharing === option.value}
-                        onChange={() => setSharing(option.value)}
-                      />
-                      <span>{boldSegment(option.label, boldPart)}</span>
-                    </label>
-                  );
-                })}
-              </div>
             </fieldset>
           </section>
-        </div>
+        </form>
 
-        <aside
-          aria-label="Preview"
-          style={{
-            flex: "1 1 240px",
-            maxWidth: 300,
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: 16,
-          }}
-        >
-          <h2 className="margin-box-title">Preview with example inputs</h2>
-          <p
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: 15,
-              lineHeight: 1.6,
-              color: "var(--ink-body)",
-            }}
-          >
-            {renderPreview()}
-          </p>
-          <div
-            className="stack-3"
-            style={{
-              borderTop: "1px solid var(--rule)",
-              paddingTop: 14,
-              fontSize: 12,
-              lineHeight: 1.45,
-              color: "var(--ink-2)",
-            }}
-          >
-            <p>
-              A test run uses these examples and is not shared. Estimated cost $
-              {edit.testRunCost.toFixed(2)}.
-            </p>
-            <div>
-              <Button variant="secondary" size="sm" style={{ borderColor: "var(--ink)" }}>
-                Test run
-              </Button>
-            </div>
+        <aside aria-label="Preview" className="pv-side pv-builder-side">
+          <h2 className="pv-lbl">Preview with example inputs</h2>
+          <div className="pv-builder-preview">
+            <p>{renderPreview()}</p>
           </div>
-          <div
-            className="stack-2"
-            style={{ borderTop: "1px solid var(--rule)", paddingTop: 14 }}
-          >
-            <h2 className="margin-box-title">Changes since {edit.liveVersion}</h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <span>
+              A test run uses these examples and is not shared. Estimated cost{" "}
+              <span className="pv-mono" style={{ color: "var(--ink)" }}>
+                ${edit.testRunCost.toFixed(2)}
+              </span>
+              .
+            </span>
+            <Button variant="secondary" style={{ alignSelf: "flex-start" }}>
+              <Icon name="play" style={{ color: "currentColor", width: 12, height: 12 }} />
+              Test run
+            </Button>
+          </div>
+          <div className="pv-side-sec" style={{ gap: 10 }}>
+            <h2 className="pv-lbl">Changes since {edit.liveVersion}</h2>
             {edit.changesSincePrevious.map((change) => (
-              <p key={change} style={{ fontSize: 12, lineHeight: 1.45, color: "var(--ink-2)" }}>
-                {boldSegment(change, "buyer role")}
-              </p>
+              <span key={change} style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
+                <span className="pv-bullet" aria-hidden="true" />
+                <span>{boldSegment(change, "buyer role")}</span>
+              </span>
             ))}
           </div>
         </aside>

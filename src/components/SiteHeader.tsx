@@ -12,8 +12,9 @@ const links = [
 export function SiteHeader({ current }: { current?: string }) {
   return (
     <header className="site-wrap site-header">
-      <Link href="/" className="wordmark">
-        Cortex
+      <Link href="/" className="pv-site-brand" aria-label="Cortex home">
+        <i aria-hidden="true">C</i>
+        <b>Cortex</b>
       </Link>
       <nav aria-label="Main" className="site-nav">
         {links.map((link) => (

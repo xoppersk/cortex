@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LedgerRow } from "../../../components/LedgerRow";
+import { Icon } from "../../../components/Icon";
 import { getConversations, getKnowledge, getPlaybooks, getThread, getWorkspaceData } from "../../../lib/api";
 import { formatNumber } from "../../../lib/utils";
 import { BlockedView } from "../c/[id]/thread-view";
@@ -24,9 +24,9 @@ export default async function NewConversationPage({
   const knowledge = getKnowledge();
 
   const ceiling = `$${workspace.perAnswerCeiling.toFixed(2)}`;
-  const canSee = knowledge.collections.filter((c) =>
-    ["positioning-research", "customer-interviews"].includes(c.id),
-  );
+  const canSee = ["positioning-research", "customer-interviews"]
+    .map((id) => knowledge.collections.find((c) => c.id === id))
+    .filter((c): c is NonNullable<typeof c> => Boolean(c));
   const indexing = knowledge.collections.find((c) => c.status.type === "indexing");
   const pickerCollections = [
     ...canSee,
@@ -59,101 +59,126 @@ export default async function NewConversationPage({
   ];
 
   return (
-    <div style={{ paddingTop: 32 }}>
-      <div className="doc-margin">
-        <div
-          className="doc-column"
-          style={{ display: "flex", flexDirection: "column", gap: 40 }}
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <h1 className="page-title" style={{ fontSize: 34, margin: 0 }}>
-              New conversation
-            </h1>
+    <>
+      <header className="pv-ph" style={{ paddingTop: 14, paddingBottom: 14 }}>
+        <span className="pv-ph-sub" style={{ fontSize: 12.5 }}>
+          <Link href="/app/history">Conversations</Link>
+          <span className="pv-crumb-sep" aria-hidden="true">
+            /
+          </span>
+          <span style={{ color: "var(--ink)" }}>New conversation</span>
+        </span>
+        <span style={{ display: "flex", gap: 8 }}>
+          <span className="pv-chip">{workspace.defaultModel}</span>
+          <span className="pv-chip">
+            <Icon name="lock" />
+            Only you
+          </span>
+        </span>
+      </header>
+
+      <div className="pv-split">
+        <div className="pv-new-main">
+          <header style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <h1 className="pv-display-title">New conversation</h1>
             <ConfigSentence
               collections={pickerCollections}
               models={models.map((model) => model.name)}
               defaultModel={workspace.defaultModel}
               ceiling={ceiling}
             />
-          </div>
+          </header>
 
           <QuestionForm />
 
-          <section className="stack-3">
-            <div className="page-head-row">
-              <h2 className="section-label">Start from a playbook</h2>
-              <Link href="/app/playbooks" style={{ fontSize: 12, color: "var(--ink-2)" }}>
-                All 7 playbooks
-              </Link>
+          <section aria-labelledby="new-playbooks" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div className="pv-sources-head">
+              <h2 id="new-playbooks" className="pv-lbl">
+                Start from a playbook
+              </h2>
+              <Link href="/app/playbooks">All 7 playbooks</Link>
             </div>
-            <div className="ledger">
+            <div className="pv-pbc-grid">
               {playbookCards.map((card) => (
-                <LedgerRow
-                  key={card.id}
-                  href={`/app/c/launch-narrative?playbook=${card.id}`}
-                  title={card.name}
-                  description={card.description}
-                  value={card.value}
-                  meta={card.meta}
-                />
+                <Link key={card.id} href={`/app/c/launch-narrative?playbook=${card.id}`} className="pv-pbc pv-card pv-card-hover">
+                  <span className="pv-pbc-top">
+                    <Icon name="book" style={{ color: "var(--ink)" }} />
+                    <span>{card.value}</span>
+                  </span>
+                  <b className="pv-pbc-name">{card.name}</b>
+                  <span className="pv-pbc-desc">{card.description}</span>
+                  <span className={card.meta.endsWith("Private") ? "pv-tag pv-tag-ln" : "pv-tag"} style={{ alignSelf: "flex-start", marginTop: "auto" }}>
+                    {card.meta}
+                  </span>
+                </Link>
               ))}
             </div>
           </section>
 
-          <section className="stack-3">
-            <h2 className="section-label">Pick up where you left off</h2>
-            <div className="ledger">
+          <section aria-labelledby="new-recent" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <h2 id="new-recent" className="pv-lbl">
+              Pick up where you left off
+            </h2>
+            <div className="pv-card pv-rows" style={{ overflow: "hidden" }}>
               {pickUp.map((conversation) => (
-                <LedgerRow
-                  key={conversation.id}
-                  href={`/app/c/${conversation.id}`}
-                  title={conversation.title}
-                  meta={`${conversation.sources} sources`}
-                  value={conversation.edited}
-                />
+                <Link key={conversation.id} href={`/app/c/${conversation.id}`} className="pv-row pv-rec-row">
+                  <b>
+                    <Icon name="chat" style={{ color: "var(--ink-3)" }} />
+                    {conversation.title}
+                  </b>
+                  <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{conversation.sources} sources</span>
+                  <span className="pv-mono" style={{ fontSize: 12, color: "var(--ink-4)", textAlign: "right" }}>
+                    {conversation.edited}
+                  </span>
+                </Link>
               ))}
             </div>
           </section>
         </div>
 
-        <aside className="margin-column">
-          <div className="margin-box">
-            <h2 className="margin-box-title">What this conversation can see</h2>
-            <ul className="stack-2" style={{ listStyle: "none", padding: 0, margin: 0 }}>
-              {canSee.map((collection) => (
-                <li key={collection.id} className="caption" style={{ color: "var(--ink-2)" }}>
-                  <span className="ink-text" style={{ fontWeight: 500 }}>
-                    {collection.name}
-                  </span>
+        <aside className="pv-side" aria-label="What this conversation can see" style={{ paddingTop: 56, gap: 22 }}>
+          <section style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <h2 className="pv-lbl">What this conversation can see</h2>
+            {canSee.map((collection) => (
+              <div key={collection.id} className="margin-note">
+                <span className="margin-note-number" style={{ background: "var(--ink)", color: "var(--on-ink)" }} aria-hidden="true">
+                  ✓
+                </span>
+                <span>
+                  <span className="margin-note-title">{collection.name}</span>
                   <br />
                   {formatNumber(collection.passages)} passages · newest {collection.newest}
-                </li>
-              ))}
-            </ul>
+                </span>
+              </div>
+            ))}
             {indexing ? (
-              <p className="caption">
-                <span style={{ fontWeight: 500 }}>{indexing.name}</span> is still indexing,{" "}
-                {indexing.status.percent}% done. It joins this conversation automatically when
-                ready.
-              </p>
+              <div className="pv-card" style={{ margin: "0 -8px", padding: "12px 14px", gap: 8, color: "var(--ink-3)" }}>
+                <span>
+                  <b>{indexing.name}</b> is still indexing, {indexing.status.percent}% done. It joins this conversation
+                  automatically when ready.
+                </span>
+                <span className="pv-bar" role="img" aria-label={`${indexing.status.percent}% indexed`}>
+                  <i style={{ width: `${indexing.status.percent}%` }} />
+                </span>
+              </div>
             ) : null}
-          </div>
-
-          <div className="margin-box">
-            <h2 className="margin-box-title">Cost</h2>
-            <p className="caption" style={{ color: "var(--ink-2)" }}>
-              Typical answer with these sources: $0.02–0.04. Your limit stops any answer at {ceiling}.
-            </p>
-          </div>
-
-          <div className="margin-box">
-            <h2 className="margin-box-title">Who can see it</h2>
-            <p className="caption" style={{ color: "var(--ink-2)" }}>
-              Only you, until you share it.
-            </p>
-          </div>
+          </section>
+          <section className="pv-side-sec">
+            <h2 className="pv-lbl">Cost</h2>
+            <span>
+              Typical answer with these sources:{" "}
+              <span className="pv-mono" style={{ color: "var(--ink)", whiteSpace: "nowrap" }}>
+                $0.02–0.04
+              </span>
+              . Your limit stops any answer at <span className="pv-mono" style={{ color: "var(--ink)" }}>{ceiling}</span>.
+            </span>
+          </section>
+          <section className="pv-side-sec">
+            <h2 className="pv-lbl">Who can see it</h2>
+            <span>Only you, until you share it.</span>
+          </section>
         </aside>
       </div>
-    </div>
+    </>
   );
 }

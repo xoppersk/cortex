@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ButtonLink } from "../../../components/Button";
+import { Icon } from "../../../components/Icon";
 import { getConversations, getStates } from "../../../lib/api";
 import { HistoryFilters } from "./history-filters";
 
@@ -28,117 +29,82 @@ export default async function HistoryPage({
 
   if (params.state === "empty") {
     const empty = getStates().emptyHistory;
+    const ready = empty.readyToCite.filter((item) => item !== "Add your own documents");
     return (
-      <div style={{ paddingTop: 80 }}>
-        <div className="doc-margin">
-          <div className="doc-column" style={{ maxWidth: 620 }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-              <p className="caption" style={{ color: "var(--ink-4)", margin: 0 }}>
-                {empty.caption}
-              </p>
-              <h1
-                className="page-title"
-                style={{ fontSize: 40, lineHeight: 1.1, letterSpacing: "-0.025em", margin: 0 }}
-              >
-                {empty.heading}
-              </h1>
-              <p className="summary-sentence" style={{ fontSize: 19, margin: 0 }}>
-                {empty.body}
-              </p>
-            </div>
-            <div style={{ marginTop: 36 }}>
-              <p style={{ fontSize: 12, color: "var(--ink-4)", paddingBottom: 8, margin: 0 }}>
-                Or start from one of these
-              </p>
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                {empty.starters.map((starter, index) => (
-                  <Link
-                    key={starter}
-                    href="/app/new"
-                    style={{
-                      fontFamily: "var(--font-serif)",
-                      fontSize: 17,
-                      lineHeight: 1.5,
-                      color: "var(--ink)",
-                      textDecoration: "none",
-                      padding: "14px 0",
-                      borderTop: "1px solid var(--rule)",
-                      borderBottom:
-                        index === empty.starters.length - 1 ? "1px solid var(--rule)" : undefined,
-                    }}
-                  >
-                    {starter}
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <div style={{ marginTop: 30 }}>
-              <ButtonLink
-                href="/app/new"
-                variant="primary"
-                size="lg"
-                style={{ minHeight: 40, fontSize: 14 }}
-              >
-                Start a sourced conversation
-              </ButtonLink>
+      <div className="pv-split">
+        <div className="pv-empty-main">
+          <span className="pv-tag pv-tag-ln">
+            <Icon name="chat" style={{ width: 12, height: 12, color: "var(--ink-3)" }} />
+            {empty.caption}
+          </span>
+          <h1 className="pv-display-title" style={{ margin: "4px 0 0", fontSize: 44, lineHeight: 1.08, letterSpacing: "-0.028em" }}>
+            {empty.heading}
+          </h1>
+          <p className="pv-config" style={{ lineHeight: 1.65 }}>
+            {empty.body}
+          </p>
+          <div style={{ alignSelf: "stretch", display: "flex", flexDirection: "column", gap: 12, marginTop: 22 }}>
+            <h2 className="pv-lbl">Or start from one of these</h2>
+            <div className="pv-card pv-rows" style={{ overflow: "hidden" }}>
+              {empty.starters.map((starter) => (
+                <Link key={starter} href="/app/new" className="pv-row pv-starter">
+                  <span className="pv-ib" aria-hidden="true">
+                    <Icon name="chat" />
+                  </span>
+                  <span>{starter}</span>
+                  <Icon name="arrowRight" style={{ color: "var(--ink-3)" }} />
+                </Link>
+              ))}
             </div>
           </div>
-          <aside className="margin-column" style={{ paddingTop: 30 }} aria-label="Ready to cite">
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-                fontSize: 12,
-                lineHeight: 1.5,
-                color: "var(--ink-2)",
-              }}
-            >
-              <h2 className="margin-box-title" style={{ margin: 0 }}>
-                Ready to cite
-              </h2>
-              {empty.readyToCite.map((item) => {
-                if (item === "Add your own documents") {
-                  return (
-                    <Link key={item} href="/app/knowledge/documents">
-                      {item}
-                    </Link>
-                  );
-                }
-                const [name, ...rest] = item.split(" · ");
-                return (
-                  <p key={item} style={{ margin: 0 }}>
-                    <span style={{ fontWeight: 500, color: "var(--ink)" }}>{name}</span>
-                    {rest.length ? ` · ${rest.join(" · ")}` : null}
-                  </p>
-                );
-              })}
-            </div>
-          </aside>
+          <ButtonLink href="/app/new" variant="primary" size="lg" style={{ marginTop: 10, padding: "0 16px" }}>
+            Start a sourced conversation
+            <Icon name="arrowRight" style={{ color: "currentColor" }} />
+          </ButtonLink>
         </div>
+        <aside className="pv-side" aria-label="Ready to cite" style={{ paddingTop: 96, gap: 16 }}>
+          <h2 className="pv-lbl">Ready to cite</h2>
+          {ready.map((item) => {
+            const [name, ...rest] = item.split(" · ");
+            return (
+              <div key={item} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                <span className="pv-chk" aria-hidden="true">
+                  <Icon name="check" strokeWidth={1.8} style={{ width: 12, height: 12, color: "currentColor" }} />
+                </span>
+                <span style={{ fontSize: 12, lineHeight: 1.45, color: "var(--ink-3)" }}>
+                  <b>{name}</b>
+                  {rest.length ? ` · ${rest.join(" · ")}` : null}
+                </span>
+              </div>
+            );
+          })}
+          <ButtonLink href="/app/knowledge/documents" variant="secondary" size="sm" style={{ alignSelf: "flex-start", marginTop: 6 }}>
+            <Icon name="file" style={{ color: "var(--ink-2)" }} />
+            Add your own documents
+          </ButtonLink>
+        </aside>
       </div>
     );
   }
 
   const data = getConversations();
   return (
-    <div>
-      <div className="page-head">
-        <div className="page-head-row" style={{ alignItems: "flex-end" }}>
-          <div>
-            <h1 className="page-title">Conversations</h1>
-            <p className="meta" style={{ marginTop: 6 }}>
-              {data.conversations.length} conversations · {data.sharedWithYou} shared with you
-            </p>
-          </div>
-          <ButtonLink href="/app/new" variant="primary" size="sm" style={{ minHeight: 32 }}>
-            New conversation
-          </ButtonLink>
+    <>
+      <header className="pv-ph">
+        <div className="pv-ph-title">
+          <h1>Conversations</h1>
+          <span className="pv-ph-sub">
+            {data.conversations.length} conversations · {data.sharedWithYou} shared with you
+          </span>
         </div>
-      </div>
-      <Suspense fallback={<p className="caption">Loading conversations…</p>}>
+        <ButtonLink href="/app/new" variant="primary">
+          <Icon name="plus" strokeWidth={1.8} style={{ color: "currentColor" }} />
+          New conversation
+        </ButtonLink>
+      </header>
+      <Suspense fallback={<p className="pv-body caption">Loading conversations…</p>}>
         <HistoryFilters />
       </Suspense>
-    </div>
+    </>
   );
 }

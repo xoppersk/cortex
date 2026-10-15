@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "../../../components/Button";
+import { Icon } from "../../../components/Icon";
 
 /**
  * The design's inline picker: a solid-underlined button inside the config
@@ -22,13 +23,8 @@ function Picker({
   return (
     <button
       type="button"
-      className="underlined-picker"
-      aria-label={label}
-      style={{
-        textDecoration: "none",
-        borderBottom: "1px solid var(--ink)",
-        padding: "0 2px 1px",
-      }}
+      className="pv-pick"
+      aria-label={`${label}: ${value}. Change`}
       onClick={() => onChange(options[(options.indexOf(value) + 1) % options.length]!)}
     >
       {value}
@@ -54,7 +50,7 @@ export function ConfigSentence({
   const [limit, setLimit] = useState(ceiling);
 
   return (
-      <p className="config-sentence" style={{ margin: 0 }}>
+      <p className="pv-config">
         Answer using{" "}
         <Picker label="First source" options={collections} value={firstSource} onChange={setFirstSource} />{" "}
         and{" "}
@@ -82,28 +78,31 @@ export function ConfigSentence({
 
 export function QuestionForm() {
   return (
-      <form className="composer" action="/app/c/launch-narrative" method="get">
-        <label className="sr-only" htmlFor="new-question">
-          Your question
-        </label>
-        <textarea
-          id="new-question"
-          name="q"
-          placeholder="Name the decision you are making and what a useful answer should make clearer."
-          rows={5}
-          style={{ fontSize: 16, resize: "none" }}
-        />
-        <div className="composer-row" style={{ justifyContent: "space-between" }}>
-          <span style={{ fontSize: 12, color: "var(--ink-3)" }}>Type / for a playbook, @ for a source</span>
-          <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <Button variant="quiet" size="sm" type="button">
-              Attach file
-            </Button>
-            <Button variant="primary" size="sm" type="submit" style={{ minHeight: 32, padding: "0 16px" }}>
-              Start
-            </Button>
-          </span>
+    <form className="pv-ask" action="/app/c/launch-narrative" method="get">
+      <label className="sr-only" htmlFor="new-question">
+        Your question
+      </label>
+      <textarea
+        id="new-question"
+        name="q"
+        placeholder="Name the decision you are making and what a useful answer should make clearer."
+        rows={5}
+      />
+      <div className="pv-ask-row">
+        <span style={{ fontSize: 12, color: "var(--ink-3)" }}>
+          Type <span className="pv-kbd">/</span> for a playbook, <span className="pv-kbd">@</span> for a source
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Button variant="quiet" type="button">
+            <Icon name="paperclip" />
+            Attach file
+          </Button>
+          <Button variant="primary" type="submit" style={{ minHeight: 34, padding: "0 16px" }}>
+            Start
+            <Icon name="arrowRight" style={{ color: "currentColor" }} />
+          </Button>
         </div>
-      </form>
+      </div>
+    </form>
   );
 }

@@ -84,6 +84,7 @@ export interface MarginNoteData {
   broken?: boolean;
   openPassage?: boolean;
   passageHref?: string;
+  match?: number;
 }
 
 export interface ThreadBlock {
@@ -92,6 +93,7 @@ export interface ThreadBlock {
   items?: Segment[][];
   text?: string;
   attribution?: string;
+  unsourced?: boolean;
 }
 
 export interface ThreadTurn {
@@ -109,10 +111,19 @@ export interface ThreadTurn {
 
 export interface ThreadData {
   id: string;
-  header: { title: string; meta: string; project: string; edited: string };
+  header: { title: string; meta: string; project: string; edited: string; scopeLabel?: string };
   turns: ThreadTurn[];
   notes: MarginNoteData[];
-  composer: { sources: string; playbook: string; model: string; costSentence: string; placeholder?: string };
+  composer: {
+    sources: string;
+    playbook: string;
+    model: string;
+    costSentence: string;
+    placeholder?: string;
+    estimate?: number;
+    threadLeft?: number;
+    threadLimit?: number;
+  };
   streamContinuation: string;
   sourcesDown: {
     meta: string;

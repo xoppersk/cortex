@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useSyncExternalStore, type FormEvent, type ReactNode } from "react";
-import { getConversations, getMembers, getWorkspaceData } from "../lib/api";
+import { useEffect, useSyncExternalStore, type FormEvent, type ReactNode } from "react";
+import { fixtureTotals, getConversations, getMembers, getStates, getThread, getWorkspaceData } from "../lib/api";
+import { Icon } from "./Icon";
 import { NavItem } from "./NavItem";
 
 function subscribeToLocation(onChange: () => void) {
@@ -20,12 +21,64 @@ function useQueryString() {
   return new URLSearchParams(query);
 }
 
-function NewConversationRow() {
+function RailBrand({ sub }: { sub: string }) {
   return (
-    <Link href="/app/new" className="new-conversation-row">
-      <span>New conversation</span>
-      <span className="new-conversation-key">⌘N</span>
+    <Link href="/app/new" className="pv-brand" aria-label="Cortex home">
+      <span className="pv-monogram" aria-hidden="true">
+        C
+      </span>
+      <span className="pv-brand-text">
+        <b className="pv-brand-name">Cortex</b>
+        <span className="pv-brand-sub">{sub}</span>
+      </span>
     </Link>
+  );
+}
+
+function RailSearch({ onSearch }: { onSearch: (event: FormEvent<HTMLFormElement>) => void }) {
+  return (
+    <form onSubmit={onSearch} role="search" className="pv-search">
+      <Icon name="search" />
+      <input
+        id="sidebar-search"
+        name="q"
+        type="search"
+        aria-label="Search conversations"
+        placeholder="Search"
+        aria-keyshortcuts="Meta+K"
+      />
+      <span className="pv-kbd" aria-hidden="true">
+        ⌘K
+      </span>
+    </form>
+  );
+}
+
+function NewConversationButton() {
+  return (
+    <Link href="/app/new" className="pv-new" aria-keyshortcuts="Meta+N">
+      New conversation{" "}
+      <span className="pv-kbd pv-kbd-dark" aria-hidden="true">
+        ⌘N
+      </span>
+    </Link>
+  );
+}
+
+function UserRow({ initials, name, sub, avatarClass = "pv-av-ink" }: { initials: string; name: string; sub?: string; avatarClass?: string }) {
+  return (
+    <div className="pv-user">
+      <span className={`pv-av ${avatarClass}`} aria-hidden="true">
+        {initials}
+      </span>
+      <span className="pv-user-name">
+        {name}
+        {sub ? <span className="pv-user-sub">{sub}</span> : null}
+      </span>
+      <Link href="/settings/profile" aria-label="Settings">
+        <Icon name="gear" />
+      </Link>
+    </div>
   );
 }
 
@@ -33,21 +86,20 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const params = useQueryString();
-  const { workspace } = getWorkspaceData();
+  const { workspace, currentUser } = getWorkspaceData();
   const conversations = getConversations();
+  const thread = getThread();
 
   const state = params.get("state");
   const onThread = pathname.startsWith("/app/c/");
   const sourcesDown = onThread && state === "sources-down";
   const limit = onThread && state === "limit";
-  const reduced = sourcesDown || limit;
   const viewer = state === "viewer" && (onThread || pathname === "/app/new");
   const emptyTrial = pathname === "/app/history" && state === "empty";
-  const showRecent =
-    !reduced && (pathname === "/app/new" || pathname === "/app/history" || onThread);
+  const brandSub = `${workspace.name} · ${workspace.plan}`;
 
-  const isActive = (href: string, exact = false) =>
-    exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const onConversations = onThread || pathname === "/app/new" || isActive("/app/history");
 
   function onSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -56,190 +108,176 @@ export function AppShell({ children }: { children: ReactNode }) {
     router.push(q ? `/app/history?q=${encodeURIComponent(q)}` : "/app/history");
   }
 
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (!(event.metaKey || event.ctrlKey)) return;
+      const key = event.key.toLowerCase();
+      if (key === "k") {
+        const input = document.getElementById("sidebar-search");
+        if (input) {
+          event.preventDefault();
+          input.focus();
+        }
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   if (viewer) {
     const shared = ["launch-narrative", "procurement-objections", "q4-decision-memo"]
       .map((id) => conversations.conversations.find((c) => c.id === id))
-      .filter(Boolean);
+      .filter((c): c is NonNullable<typeof c> => Boolean(c));
+    const currentId = onThread ? pathname.split("/")[3] : shared[0]?.id;
     return (
-      <div className="app-shell">
-        <aside className="app-sidebar">
-          <div className="sidebar-brand">
-            <span className="wordmark">Cortex</span>
-            <span className="caption">{workspace.name}</span>
+      <div className="pv-shell">
+        <nav className="pv-rail" aria-label="Workspace">
+          <RailBrand sub={brandSub} />
+          <div className="pv-rail-actions">
+            <RailSearch onSearch={onSearch} />
           </div>
-          <nav className="sidebar-nav" aria-label="Shared with you">
-            <div className="sidebar-nav-group">
-              <p className="nav-section-title">Shared with you</p>
-              {shared.map((c) => (
-                <NavItem key={c!.id} href={`/app/c/${c!.id}`} active={pathname === `/app/c/${c!.id}`}>
-                  {c!.title}
-                </NavItem>
-              ))}
-            </div>
-          </nav>
-          <div className="sidebar-footer">
-            <span className="ui-strong" style={{ padding: "0 10px" }}>Lena Brooks</span>
-            <span className="caption" style={{ padding: "0 10px" }}>Viewer · Legal</span>
+          <div className="pv-nav">
+            <span className="pv-nav-title">Shared with you</span>
+            {shared.map((c) => (
+              <NavItem key={c.id} href={`/app/c/${c.id}`} active={c.id === currentId}>
+                {c.title}
+              </NavItem>
+            ))}
           </div>
-        </aside>
-        <main className="app-main">{children}</main>
+          <div className="pv-spacer" />
+          <UserRow initials="LB" name="Lena Brooks" sub="Viewer · Legal" avatarClass="pv-av-2" />
+        </nav>
+        <main className="pv-panel">{children}</main>
       </div>
     );
   }
 
   if (emptyTrial) {
     return (
-      <div className="app-shell">
-        <aside className="app-sidebar">
-          <div className="sidebar-brand">
-            <span className="wordmark">Cortex</span>
-            <span className="caption">Sevyn Studios · trial</span>
+      <div className="pv-shell">
+        <nav className="pv-rail" aria-label="Workspace">
+          <RailBrand sub={getStates().emptyHistory.workspace} />
+          <div className="pv-rail-actions">
+            <RailSearch onSearch={onSearch} />
+            <NewConversationButton />
           </div>
-          <NewConversationRow />
-          <nav className="sidebar-nav" aria-label="Workspace">
-            <div className="sidebar-nav-group">
-              <NavItem href="/app/history?state=empty" active count={0}>
-                Conversations
-              </NavItem>
-              <NavItem href="/app/playbooks" count={0}>
-                Playbooks
-              </NavItem>
-              <NavItem href="/app/knowledge" count="2 sources">
-                Knowledge
-              </NavItem>
-            </div>
-          </nav>
-          <div className="sidebar-footer">
-            <span className="ui-strong" style={{ padding: "0 10px" }}>Sheku Koroma</span>
+          <div className="pv-nav">
+            <NavItem href="/app/history?state=empty" icon="chat" active count={0}>
+              Conversations
+            </NavItem>
+            <NavItem href="/app/playbooks" icon="book" count={0}>
+              Playbooks
+            </NavItem>
+            <NavItem href="/app/knowledge" icon="database" count="2 sources">
+              Knowledge
+            </NavItem>
+            <NavItem href="/app/evaluations" icon="check">
+              Evaluations
+            </NavItem>
+            <NavItem href="/app/usage" icon="chart">
+              Usage
+            </NavItem>
           </div>
-        </aside>
-        <main className="app-main">{children}</main>
+          <div className="pv-spacer" />
+          <UserRow initials="SK" name={currentUser.name} />
+        </nav>
+        <main className="pv-panel">{children}</main>
       </div>
     );
   }
 
   const recent = conversations.conversations.slice(0, 5);
   const spendShown = limit ? workspace.monthlyLimit : workspace.spend;
+  const spendPercent = Math.min(100, (spendShown / workspace.monthlyLimit) * 100);
+  const limitTitle = thread.limitState.title;
+  const selectedId = limit
+    ? recent.find((c) => c.title === limitTitle)?.id
+    : onThread
+      ? pathname.split("/")[3]
+      : undefined;
+  const writingId = thread.id;
 
   return (
-    <div className="app-shell">
-      <aside className="app-sidebar">
-        <div className="sidebar-brand">
-          <span className="wordmark">Cortex</span>
-          <span className="caption">{workspace.name}</span>
+    <div className="pv-shell">
+      <nav className="pv-rail" aria-label="Workspace">
+        <RailBrand sub={brandSub} />
+        <div className="pv-rail-actions">
+          <RailSearch onSearch={onSearch} />
+          <NewConversationButton />
         </div>
-        {reduced ? null : (
-          <form onSubmit={onSearch} role="search">
-            <label className="sr-only" htmlFor="sidebar-search">
-              Search
-            </label>
-            <input
-              id="sidebar-search"
-              name="q"
-              type="search"
-              className="field-control field-control-32"
-              placeholder="Search"
-            />
-          </form>
-        )}
-        <NewConversationRow />
-        <nav className="sidebar-nav" aria-label="Workspace">
-          <div className="sidebar-nav-group">
-            <NavItem href="/app/history" active={isActive("/app/history")} count={conversations.conversations.length}>
-              Conversations
-            </NavItem>
-            <NavItem href="/app/playbooks" active={isActive("/app/playbooks")} count={7}>
-              Playbooks
-            </NavItem>
-            <NavItem
-              href="/app/knowledge"
-              active={isActive("/app/knowledge")}
-              count={sourcesDown ? "Unreachable" : "32 sources"}
-              countTone={sourcesDown ? "danger" : undefined}
-            >
-              Knowledge
-            </NavItem>
-            {isActive("/app/knowledge") ? (
-              <>
-                <NavItem href="/app/knowledge" active={pathname === "/app/knowledge"} indent>
-                  Knowledge bases
-                </NavItem>
-                <NavItem href="/app/knowledge/documents" active={isActive("/app/knowledge/documents")} indent>
-                  Documents
-                </NavItem>
-                <NavItem href="/app/knowledge/ask" active={pathname === "/app/knowledge/ask"} indent>
-                  Ask
-                </NavItem>
-              </>
-            ) : null}
-            {sourcesDown || limit ? null : (
-              <NavItem href="/app/evaluations" active={isActive("/app/evaluations", true)} count="94%">
-                Evaluations
+        <div className="pv-nav">
+          <NavItem href="/app/history" icon="chat" active={onConversations} count={conversations.conversations.length}>
+            Conversations
+          </NavItem>
+          <NavItem href="/app/playbooks" icon="book" active={isActive("/app/playbooks")} count={7}>
+            Playbooks
+          </NavItem>
+          <NavItem
+            href="/app/knowledge"
+            icon="database"
+            active={isActive("/app/knowledge")}
+            count={sourcesDown ? "Unreachable" : limit ? `${fixtureTotals.documents} sources` : fixtureTotals.documents}
+            countTone={sourcesDown ? "danger" : undefined}
+          >
+            Knowledge
+          </NavItem>
+          <NavItem href="/app/evaluations" icon="check" active={isActive("/app/evaluations")} count="94%">
+            Evaluations
+          </NavItem>
+          <NavItem href="/app/usage" icon="chart" active={isActive("/app/usage")}>
+            Usage
+          </NavItem>
+        </div>
+        <div className="pv-nav">
+          <span className="pv-nav-title">Recent</span>
+          {recent.map((conversation) => {
+            const selected = conversation.id === selectedId;
+            const writing = !limit && conversation.id === writingId;
+            return (
+              <NavItem
+                key={conversation.id}
+                href={`/app/c/${conversation.id}`}
+                selected={selected}
+                count={writing || selected ? <span aria-label={writing ? "answer in progress" : "open"}>●</span> : undefined}
+              >
+                {conversation.title}
               </NavItem>
-            )}
-            <NavItem href="/app/usage" active={isActive("/app/usage", true)}>
-              Usage
-            </NavItem>
-          </div>
-          {showRecent ? (
-            <div className="sidebar-nav-group">
-              <p className="nav-section-title">Recent</p>
-              {recent.map((conversation) => (
-                <NavItem
-                  key={conversation.id}
-                  href={`/app/c/${conversation.id}`}
-                  active={pathname === `/app/c/${conversation.id}`}
-                >
-                  {conversation.title}
-                </NavItem>
-              ))}
-            </div>
-          ) : null}
-        </nav>
-        {sourcesDown ? null : (
-          <div className="sidebar-spend">
-            <p className="spend-row">
-              <span className="spend-label">Spend this cycle</span>
-              <span className="spend-value">
-                ${spendShown} of ${workspace.monthlyLimit}
-              </span>
-            </p>
-            <div
-              className="meter-track"
-              role="img"
-              aria-label={`${spendShown} of ${workspace.monthlyLimit} dollars spent this cycle`}
-              style={{ margin: "0 10px" }}
-            >
-              <div
-                className="meter-fill"
-                style={{ width: `${Math.min(100, (spendShown / workspace.monthlyLimit) * 100)}%` }}
-              />
-            </div>
-            <p className="caption" style={{ padding: "0 10px" }}>
-              {limit ? "Resets October 9 at midnight." : "Admins were alerted at 90%."}
-            </p>
-          </div>
-        )}
-        {reduced ? (
-          <div className="sidebar-footer">
-            <span className="ui-strong" style={{ padding: "0 10px" }}>
-              Sheku Koroma
+            );
+          })}
+        </div>
+        <div className="pv-spacer" />
+        <section className="pv-spend" aria-label="Spend this cycle">
+          <div className="pv-spend-row">
+            <span className="pv-spend-label">Spend this cycle</span>
+            <span className="pv-spend-value">
+              {limit ? `$${spendShown} of $${workspace.monthlyLimit}` : `$${spendShown} / $${workspace.monthlyLimit}`}
             </span>
           </div>
-        ) : (
-          <div className="sidebar-footer">
-            <div className="row-between" style={{ padding: "0 10px", flexWrap: "nowrap" }}>
-              <span className="ui-strong">Sheku Koroma</span>
-              <Link href="/settings/members" className="text-button">
-                Settings
-              </Link>
-            </div>
+          <div
+            className="meter-track"
+            role="img"
+            aria-label={`${spendShown} of ${workspace.monthlyLimit} dollars spent this cycle`}
+          >
+            <div className="meter-fill" style={{ width: `${spendPercent}%` }} />
+            <i className="meter-tick" style={{ left: `${workspace.alertThreshold * 100}%` }} />
           </div>
-        )}
-      </aside>
-      <main className="app-main">{children}</main>
+          <span className="pv-spend-note">
+            {limit
+              ? `Resets ${monthName(workspace.billingCycle.end)} at midnight.`
+              : `Past the ${Math.round(workspace.alertThreshold * 100)}% alert · ${workspace.billingCycle.daysLeft} days left in cycle`}
+          </span>
+        </section>
+        <UserRow initials="SK" name={currentUser.name} />
+      </nav>
+      <main className="pv-panel">{children}</main>
     </div>
   );
+}
+
+function monthName(short: string) {
+  const months: Record<string, string> = { Sep: "September", Oct: "October", Nov: "November" };
+  const [m, d] = short.split(" ");
+  return `${(m && months[m]) ?? m} ${d}`;
 }
 
 export function SettingsShell({ children }: { children: ReactNode }) {

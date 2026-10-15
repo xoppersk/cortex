@@ -10,24 +10,27 @@ export function UsageActions({
   const [chosen, setChosen] = useState<string | null>(null);
 
   return (
-    <ul className="stack-3" style={{ listStyle: "none", padding: 0, margin: 0 }}>
-      {actions.map((action) => {
+    <>
+      {actions.map((action, index) => {
         const active = chosen === action.label;
+        const isLast = index === actions.length - 1;
         return (
-          <li key={action.label}>
-            <button
-              type="button"
-              className="act-card"
-              aria-pressed={active}
-              onClick={() => setChosen(active ? null : action.label)}
-              style={active ? { borderColor: "var(--ink)" } : undefined}
-            >
-              <span className="act-label">{action.label}</span>
-              <span className="act-detail">{action.description}</span>
-            </button>
-          </li>
+          <button
+            key={action.label}
+            type="button"
+            className="pv-act pv-act-stack"
+            aria-pressed={active}
+            onClick={() => setChosen(active ? null : action.label)}
+            style={{
+              ...(isLast ? { background: "var(--paper-sunk)" } : null),
+              ...(active ? { boxShadow: "var(--shadow-hover)" } : null),
+            }}
+          >
+            {action.label}
+            <span className="pv-act-sub">{action.description}</span>
+          </button>
         );
       })}
-    </ul>
+    </>
   );
 }

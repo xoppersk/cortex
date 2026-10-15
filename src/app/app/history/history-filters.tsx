@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import { Button } from "../../../components/Button";
+import { Icon } from "../../../components/Icon";
 import { getConversations } from "../../../lib/api";
 import type { Conversation } from "../../../lib/types";
 import { formatCost } from "../../../lib/utils";
@@ -99,8 +100,8 @@ export function HistoryFilters() {
   });
 
   return (
-    <div className="stack-5">
-      <div className="row-between" style={{ alignItems: "center" }}>
+    <div className="pv-body" style={{ paddingTop: 24, gap: 18 }}>
+      <div className="pv-toolbar">
         <div className="filter-row" role="group" aria-label="Filter conversations">
           {FILTERS.map((item) => (
             <button
@@ -114,108 +115,98 @@ export function HistoryFilters() {
             </button>
           ))}
         </div>
-        <div className="history-search-group" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ minWidth: 220, flex: "0 1 260px" }}>
-            <label className="sr-only" htmlFor="history-search">
-              Search titles, people, sources and message text
-            </label>
+        <div className="pv-toolbar-group">
+          <label className="pv-search pv-search-wide" htmlFor="history-search">
+            <Icon name="search" />
+            <span className="sr-only">Search titles, people, sources and message text</span>
             <input
               id="history-search"
-              className="field-control field-control-32"
               type="search"
               placeholder="Search"
               value={searchValue}
               onChange={(event) => onSearchChange(event.target.value)}
             />
-          </div>
+          </label>
           <Button
             variant="secondary"
-            size="sm"
             aria-label="Sort conversations by last edited"
             aria-pressed={sortAsc}
             onClick={() => updateParams({ sort: sortAsc ? "desc" : "asc" })}
           >
+            <Icon name="sort" style={{ color: "var(--ink-2)" }} />
             Last edited
           </Button>
         </div>
       </div>
 
       {term.trim() ? (
-        <p className="caption" style={{ margin: 0 }}>
+        <p style={{ margin: 0, fontSize: 12.5, color: "var(--ink-3)", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+          <span className="pv-tag" style={{ background: "var(--highlight)" }}>
+            {term.trim()}
+          </span>
           {visible.length} conversations mention “{term.trim()}” in a title, message or cited source.
         </p>
       ) : null}
 
       {visible.length === 0 ? (
-        <p className="summary-sentence">No conversations match this search.</p>
+        <p className="pv-lede">No conversations match this search.</p>
       ) : (
-        <div className="table-scroll">
-          <table className="data-table history-table">
-            <thead>
-              <tr>
-                <th scope="col">Conversation</th>
-                <th scope="col">Sources</th>
-                <th scope="col">People</th>
-                <th scope="col" className="numeric">
-                  Cost
-                </th>
-                <th scope="col" className="numeric">
-                  Edited
-                </th>
-              </tr>
-            </thead>
-            {GROUPS.map((group) => {
-              const groupRows = visible.filter((conversation) => conversation.group === group);
-              const rows = sortAsc ? [...groupRows].reverse() : groupRows;
-              if (rows.length === 0) return null;
-              return (
-                <tbody key={group}>
-                  <tr>
-                    <td colSpan={5} style={{ borderBottom: 0, padding: "18px 0 6px" }}>
-                      <h2 style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", margin: 0 }}>
-                        {group === "Earlier" ? "Earlier in October" : group}
-                      </h2>
-                    </td>
-                  </tr>
-                  {rows.map((conversation) => (
-                    <tr key={conversation.id}>
-                      <td>
-                        <Link
-                          href={`/app/c/${conversation.id}`}
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 4,
-                            textDecoration: "none",
-                          }}
-                        >
-                          <span style={{ fontSize: 14, fontWeight: 500, color: "var(--ink)" }}>
-                            <Highlighted text={conversation.title} term={term.trim()} />
+        <div role="table" aria-label="Conversations" className="pv-card pv-rows" style={{ overflow: "hidden" }}>
+          <div role="row" className="pv-row pv-hist-row pv-th pv-stack pv-row-head" style={{ background: "transparent", paddingTop: 12, paddingBottom: 12 }}>
+            <span role="columnheader">Conversation</span>
+            <span role="columnheader">Sources</span>
+            <span role="columnheader">People</span>
+            <span role="columnheader" style={{ textAlign: "right" }}>
+              Cost
+            </span>
+            <span role="columnheader" style={{ textAlign: "right" }}>
+              Edited
+            </span>
+          </div>
+          {GROUPS.map((group) => {
+            const groupRows = visible.filter((conversation) => conversation.group === group);
+            const rows = sortAsc ? [...groupRows].reverse() : groupRows;
+            if (rows.length === 0) return null;
+            return (
+              <div role="rowgroup" key={group} style={{ display: "contents" }}>
+                <h2 className="pv-group">{group === "Earlier" ? "Earlier in October" : group}</h2>
+                {rows.map((conversation) => (
+                  <Link role="row" key={conversation.id} href={`/app/c/${conversation.id}`} className="pv-row pv-hist-row pv-stack">
+                    <span role="cell" style={{ display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
+                      <b style={{ fontSize: 14, fontWeight: 600 }}>
+                        <Highlighted text={conversation.title} term={term.trim()} />
+                      </b>
+                      <span className="pv-snip">
+                        <Highlighted text={conversation.snippet} term={term.trim()} />
+                      </span>
+                    </span>
+                    <span role="cell">
+                      <span className="pv-row-cell-label">Sources</span>
+                      <span className="pv-tag">{conversation.sources}</span>
+                    </span>
+                    <span role="cell" className="pv-ppl">
+                      <span className="pv-avs" aria-hidden="true">
+                        {conversation.people.map((person) => (
+                          <span key={person} className={`pv-av pv-av-sm ${avatarTone(person)}`}>
+                            {initialsOf(person)}
                           </span>
-                          <span
-                            style={{
-                              fontFamily: "var(--font-serif)",
-                              fontSize: 14,
-                              lineHeight: 1.45,
-                              color: "var(--ink-3)",
-                            }}
-                          >
-                            <Highlighted text={conversation.snippet} term={term.trim()} />
-                          </span>
-                        </Link>
-                      </td>
-                      <td style={{ color: "var(--ink-2)" }}>{conversation.sources}</td>
-                      <td style={{ color: "var(--ink-2)" }}>{peopleLabel(conversation.people)}</td>
-                      <td className="numeric">{formatCost(conversation.cost)}</td>
-                      <td className="numeric" style={{ color: "var(--ink-3)" }}>
-                        {conversation.edited}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              );
-            })}
-          </table>
+                        ))}
+                      </span>
+                      {peopleLabel(conversation.people)}
+                    </span>
+                    <span role="cell" className="pv-mono" style={{ textAlign: "right" }}>
+                      <span className="pv-row-cell-label">Cost</span>
+                      {formatCost(conversation.cost)}
+                    </span>
+                    <span role="cell" className="pv-mono" style={{ textAlign: "right", color: "var(--ink-3)", fontSize: 12 }}>
+                      <span className="pv-row-cell-label">Edited</span>
+                      {conversation.edited}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -230,7 +221,7 @@ export function HistoryFilters() {
               <button
                 type="button"
                 className="text-button"
-                style={{ fontSize: 12 }}
+                style={{ fontSize: 12, color: "var(--ink-2)" }}
                 onClick={() => updateParams({ archived: "1" })}
               >
                 include archived
@@ -242,4 +233,20 @@ export function HistoryFilters() {
       ) : null}
     </div>
   );
+}
+
+function initialsOf(name: string) {
+  return name
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+export function avatarTone(name: string) {
+  if (name === "Sheku Koroma") return "pv-av-ink";
+  if (name.startsWith("Maya")) return "pv-av-1";
+  if (name.startsWith("Owen")) return "pv-av-2";
+  return "pv-av-3";
 }

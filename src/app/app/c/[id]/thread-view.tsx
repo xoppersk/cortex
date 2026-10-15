@@ -1,27 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { Button, ButtonLink } from "../../../../components/Button";
 import { Composer } from "../../../../components/Composer";
 import { CopyButton } from "../../../../components/CopyButton";
 import { Footnote, MarginNote, RichSegments } from "../../../../components/Footnote";
-import { Notice } from "../../../../components/Notice";
-import type {
-  Conversation,
-  MarginNoteData,
-  Segment,
-  ThreadBlock,
-  ThreadData,
-  ThreadTurn,
-} from "../../../../lib/types";
+import { Icon } from "../../../../components/Icon";
+import type { Conversation, MarginNoteData, Segment, ThreadBlock, ThreadData, ThreadTurn } from "../../../../lib/types";
 import { formatCost } from "../../../../lib/utils";
 
 export type ThreadState = "normal" | "sources-down" | "limit" | "viewer";
 
-/** Notes in the design align to the top of the paragraph they cite; the
- *  heading above the first paragraph pushes its note group down by 62px. */
-const HEADING_NOTE_OFFSET = 62;
+const ME = "Sheku Koroma";
+
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
 
 function blockText(block: ThreadBlock): string {
   if (block.type === "pullQuote") return block.text ?? "";
@@ -29,21 +29,29 @@ function blockText(block: ThreadBlock): string {
   return (block.segments ?? []).map((segment) => segment.text).join("");
 }
 
-function answerPlainText(turn: ThreadTurn, extra = ""): string {
+function answerPlainText(turn: ThreadTurn): string {
   const body = turn.answer.blocks.map(blockText).join("\n\n");
-  return `${turn.answer.heading}\n\n${body}${extra}`;
+  return `${turn.answer.heading}\n\n${body}`;
 }
 
-function Segments({ segments, broken }: { segments: Segment[]; broken?: boolean }) {
-  if (!broken) return <RichSegments segments={segments} />;
+/** Claims are the footnoted segments of the answer (the unsourced pull quote is labelled, not counted). */
+function claimCount(turn: ThreadTurn) {
+  let total = 0;
+  for (const block of turn.answer.blocks) {
+    const groups = block.type === "list" ? (block.items ?? []) : [block.segments ?? []];
+    for (const segments of groups) total += segments.filter((segment) => segment.footnote).length;
+  }
+  return total;
+}
+
+function Segments({ segments, broken, current }: { segments: Segment[]; broken?: boolean; current?: number }) {
+  if (!broken) return <RichSegments segments={segments} currentFootnote={current} />;
   return (
     <>
       {segments.map((segment, index) => (
         <span key={index}>
           {segment.mark ? <mark>{segment.text}</mark> : segment.text}
-          {segment.footnote ? (
-            <Footnote n={segment.footnote} noteId={`note-${segment.footnote}`} broken />
-          ) : null}
+          {segment.footnote ? <Footnote n={segment.footnote} noteId={`note-${segment.footnote}`} broken /> : null}
         </span>
       ))}
     </>
@@ -53,74 +61,93 @@ function Segments({ segments, broken }: { segments: Segment[]; broken?: boolean 
 export function Block({
   block,
   broken,
-  style,
+  current,
+  muted,
+  caret,
 }: {
   block: ThreadBlock;
   broken?: boolean;
-  style?: CSSProperties;
+  current?: number;
+  muted?: boolean;
+  caret?: boolean;
 }) {
   if (block.type === "pullQuote") {
-    // The attribution is rendered in the margin column by the caller (M-2).
     return (
-      <figure style={{ margin: 0 }}>
-        <blockquote className="pull-quote">{block.text}</blockquote>
+      <figure className="pv-pull">
+        <blockquote>{block.text}</blockquote>
+        {block.attribution ? (
+          <figcaption>
+            {block.unsourced ? <span className="pv-unsourced">Not sourced</span> : null}
+            {block.attribution}
+          </figcaption>
+        ) : null}
       </figure>
     );
   }
   if (block.type === "list") {
     return (
-      <ol className="answer-list">
+      <ol className="pv-prose-list">
         {(block.items ?? []).map((item, index) => (
           <li key={index}>
-            <Segments segments={item} broken={broken} />
+            <Segments segments={item} broken={broken} current={current} />
           </li>
         ))}
       </ol>
     );
   }
   return (
-    <p className="answer-text" style={style}>
-      <Segments segments={block.segments ?? []} broken={broken} />
+    <p className={muted ? "pv-prose pv-prose-muted" : "pv-prose"}>
+      <Segments segments={block.segments ?? []} broken={broken} current={current} />
+      {caret ? <span className="pv-caret" aria-hidden="true" /> : null}
     </p>
   );
 }
 
-function AnswerFooter({
-  tokens,
-  duration,
-  cost,
-  citedLabel,
-  copyText,
-}: {
-  tokens: string;
-  duration: string;
-  cost: number;
-  citedLabel: string;
-  copyText: string;
-}) {
-  const smallButton: CSSProperties = { minHeight: 26, fontSize: 12, padding: "0 8px" };
+function Question({ text, time }: { text: string; time: string }) {
   return (
-    <div className="answer-footer">
-      <span>
-        {tokens} · {duration} · {formatCost(cost)} · {citedLabel}
+    <div className="pv-turn-q">
+      <span className="pv-av pv-av-ink" aria-hidden="true">
+        SK
       </span>
-      <span style={{ display: "flex", gap: 2 }}>
-        <CopyButton text={copyText} style={smallButton} />
-        <Button variant="quiet" size="sm" style={smallButton}>
-          Retry
-        </Button>
-        <Button variant="quiet" size="sm" style={smallButton}>
-          Flag for eval
-        </Button>
-      </span>
+      <div className="pv-bubble">
+        {text}
+        <span className="pv-bubble-time">{time}</span>
+      </div>
     </div>
   );
 }
 
-/**
- * The streaming turn rests in its "Writing" state (M-17): the design shows no
- * completion footer for turn 2, so Stop only freezes the cost ticker.
- */
+function Provenance({ turn }: { turn: ThreadTurn }) {
+  const footer = turn.answer.footer!;
+  const claims = claimCount(turn);
+  return (
+    <footer className="pv-prov">
+      <span className="pv-prov-line">
+        <Icon name="check" strokeWidth={1.8} style={{ color: "var(--ink)", width: 15, height: 15 }} />
+        <b>
+          {claims} of {claims} claims cited
+        </b>
+        <span className="pv-prov-sep" aria-hidden="true">
+          ·
+        </span>
+        <span className="pv-prov-stats">
+          {footer.tokens} · {footer.duration} · {formatCost(footer.cost)}
+        </span>
+      </span>
+      <span className="pv-prov-actions">
+        <CopyButton text={answerPlainText(turn)} variant="secondary" size="sm" />
+        <Button variant="secondary" size="sm">
+          Retry
+        </Button>
+        <ButtonLink href="/app/evaluations" variant="secondary" size="sm">
+          Flag for eval
+        </ButtonLink>
+      </span>
+    </footer>
+  );
+}
+
+/** The streaming turn rests in its "Writing" state: Stop freezes the cost ticker. */
 function StreamingLine({ turn }: { turn: ThreadTurn }) {
   const costSoFar = turn.answer.streaming?.costSoFar ?? 0.019;
   const targetCost = 0.031;
@@ -137,473 +164,234 @@ function StreamingLine({ turn }: { turn: ThreadTurn }) {
   const cost = costSoFar + progress * (targetCost - costSoFar);
 
   return (
-    <div className="streaming-line">
+    <div className="pv-writing" role="status">
+      <span className="pv-writing-dot" aria-hidden="true" />
       <span>
-        {turn.answer.streaming?.label ?? "Writing"} · {formatCost(cost)} so far
+        {stopped ? "Stopped" : (turn.answer.streaming?.label ?? "Writing")} · <span className="pv-mono">{formatCost(cost)}</span>{" "}
+        so far
       </span>
-      <Button
-        variant="secondary"
-        size="sm"
-        style={{ minHeight: 24, padding: "0 8px", fontSize: 12 }}
-        onClick={() => setStopped(true)}
-      >
-        Stop
-      </Button>
-    </div>
-  );
-}
-
-/** One doc + margin row: notes sit beside the block they cite (M-1) and drop
- *  below it when the layout stacks on narrow screens. */
-function DocMarginRow({
-  doc,
-  margin,
-  marginOffset = 0,
-  marginLabel,
-}: {
-  doc: ReactNode;
-  margin?: ReactNode;
-  marginOffset?: number;
-  marginLabel?: string;
-}) {
-  return (
-    <div className="doc-margin">
-      <div className="doc-column">{doc}</div>
-      {margin ? (
-        <aside
-          className="margin-column"
-          aria-label={marginLabel ?? "Sources"}
-          style={marginOffset ? { paddingTop: marginOffset } : undefined}
-        >
-          {margin}
-        </aside>
-      ) : (
-        <div className="margin-column" aria-hidden="true" />
+      {stopped ? null : (
+        <Button variant="secondary" size="sm" style={{ minHeight: 26, marginLeft: 4 }} onClick={() => setStopped(true)}>
+          Stop
+        </Button>
       )}
     </div>
   );
 }
 
-function NotesStack({ notes }: { notes: MarginNoteData[] }) {
-  if (notes.length === 0) return null;
-  return (
-    <div className="margin-stack">
-      {notes.map((note) => (
-        <MarginNote key={note.id} note={note} />
-      ))}
-    </div>
-  );
-}
-
-function TurnArticle({ turn, notes }: { turn: ThreadTurn; notes: MarginNoteData[] }) {
-  // Assign each paragraph block the fixture paragraphId used by the notes.
-  let paragraphCount = 0;
-  const blocks = turn.answer.blocks.map((block) => {
-    const paragraphId = block.type === "paragraph" ? `${turn.id}-p${++paragraphCount}` : null;
-    return { block, paragraphId };
-  });
-  const notesFor = (paragraphId: string | null) =>
-    paragraphId ? notes.filter((note) => note.paragraphId === paragraphId) : [];
+function TurnArticle({ turn, current }: { turn: ThreadTurn; current?: number }) {
   const streaming = Boolean(turn.answer.streaming);
-
-  const questionRow = (
-    <DocMarginRow
-      doc={
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <p className="caption" style={{ color: "var(--ink-4)" }}>
-            {turn.speaker}, {turn.time}
-          </p>
-          <p className="ui-strong" style={{ margin: 0 }}>
-            {turn.question}
-          </p>
-        </div>
-      }
-    />
-  );
-
-  if (streaming) {
-    const firstParagraphId = blocks.find((entry) => entry.paragraphId)?.paragraphId ?? null;
-    return (
-      <article className="turn">
-        {questionRow}
-        <DocMarginRow
-          marginOffset={HEADING_NOTE_OFFSET}
-          margin={<NotesStack notes={notesFor(firstParagraphId)} />}
-          doc={
-            <div className="stack-4">
-              <h2 className="answer-heading">{turn.answer.heading}</h2>
-              {blocks.map(({ block }, index) => (
-                <Block key={index} block={block} />
-              ))}
-              <StreamingLine turn={turn} />
-            </div>
-          }
-        />
-      </article>
-    );
-  }
-
-  const [first, ...rest] = blocks;
+  const blocks = turn.answer.blocks;
   return (
-    <article className="turn">
-      {questionRow}
-      {first ? (
-        <DocMarginRow
-          marginOffset={HEADING_NOTE_OFFSET}
-          margin={<NotesStack notes={notesFor(first.paragraphId)} />}
-          doc={
-            <div className="stack-4">
-              <h2 className="answer-heading">{turn.answer.heading}</h2>
-              <Block block={first.block} />
-            </div>
-          }
-        />
-      ) : null}
-      {rest.map(({ block, paragraphId }, index) =>
-        block.type === "pullQuote" ? (
-          <DocMarginRow
-            key={index}
-            doc={<Block block={block} />}
-            margin={
-              block.attribution ? (
-                <p
-                  className="caption"
-                  style={{ color: "var(--ink-4)", paddingTop: 8, margin: 0 }}
-                >
-                  {block.attribution}
-                </p>
-              ) : null
-            }
-          />
-        ) : (
-          <DocMarginRow
-            key={index}
-            doc={<Block block={block} />}
-            margin={<NotesStack notes={notesFor(paragraphId)} />}
-          />
-        ),
-      )}
-      {turn.answer.footer ? (
-        <DocMarginRow
-          doc={
-            <AnswerFooter
-              tokens={turn.answer.footer.tokens}
-              duration={turn.answer.footer.duration}
-              cost={turn.answer.footer.cost}
-              citedLabel={turn.answer.footer.citedLabel}
-              copyText={answerPlainText(turn)}
-            />
-          }
-        />
-      ) : null}
-    </article>
+    <>
+      <Question text={turn.question} time={turn.time} />
+      <article
+        aria-labelledby={`${turn.id}-h`}
+        aria-busy={streaming ? "true" : undefined}
+        style={{ display: "flex", flexDirection: "column", gap: streaming ? 14 : 18 }}
+      >
+        <h2 id={`${turn.id}-h`} className="pv-answer-h">
+          {turn.answer.heading}
+        </h2>
+        {blocks.map((block, index) => (
+          <Block key={index} block={block} current={current} caret={streaming && index === blocks.length - 1} />
+        ))}
+        {streaming ? <StreamingLine turn={turn} /> : null}
+        {turn.answer.footer ? <Provenance turn={turn} /> : null}
+      </article>
+    </>
   );
 }
 
 function PausedComposer({ note }: { note: string }) {
   return (
-    <DocMarginRow
-      doc={
-        <div
-          className="tint-box"
-          role="status"
-          style={{ border: "1px solid var(--rule)", fontSize: 14, color: "var(--ink-4)" }}
-        >
-          {note}
-        </div>
-      }
-    />
+    <div className="pv-paused" role="status" style={{ marginTop: "auto" }}>
+      <Icon name="pause" />
+      <span>{note}</span>
+      <span className="pv-paused-send" aria-hidden="true">
+        <Icon name="arrowRight" style={{ color: "currentColor" }} />
+      </span>
+    </div>
   );
 }
 
-function SourcesDownView({
-  thread,
-  conversation,
-}: {
-  thread: ThreadData;
-  conversation?: Conversation;
-}) {
-  const sd = thread.sourcesDown as ThreadData["sourcesDown"] & {
-    bannerHeadline?: string;
-    bannerBody?: string;
-  };
+function notesForTurn(turn: ThreadTurn, notes: MarginNoteData[]) {
+  return notes.filter((note) => note.paragraphId.startsWith(`${turn.id}-`));
+}
+
+function SourcesDownView({ thread, conversation }: { thread: ThreadData; conversation?: Conversation }) {
+  const sd = thread.sourcesDown as ThreadData["sourcesDown"] & { bannerHeadline?: string; bannerBody?: string };
   const headline = sd.bannerHeadline ?? "The answer is here. Its proof is not.";
   const body = sd.bannerBody ?? sd.banner.replace(`${headline} `, "");
   const turn = thread.turns[0]!;
   const firstParagraph = turn.answer.blocks[0]!;
   return (
-    <div>
-      {/* Designed header (M-3): full-width hairline bar, title + meta
-          stacked (SourcesUnavailable.html). */}
-      <header
-        className="bleed-head"
-        style={{
-          paddingTop: 18,
-          paddingBottom: 16,
-          display: "flex",
-          flexDirection: "column",
-          gap: 6,
-        }}
-      >
-        <h1 className="conversation-title">{conversation?.title ?? thread.header.title}</h1>
-        <p className="meta">{conversation ? `${conversation.sources} sources · Cortex 4` : sd.meta}</p>
+    <>
+      <header className="pv-ph">
+        <h1>{conversation?.title ?? thread.header.title}</h1>
+        <span className="pv-chip">
+          <Icon name="databaseSmall" />
+          {conversation ? `${conversation.sources} sources · Cortex 4` : sd.meta}
+        </span>
       </header>
 
-      <section
-        className="notice"
-        role="alert"
-        style={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "var(--space-4)",
-          marginTop: 24,
-          marginBottom: "var(--space-6)",
-          maxWidth: 980,
-        }}
-      >
-        <div className="stack-2" style={{ maxWidth: 600 }}>
-          <h2 className="notice-headline">{headline}</h2>
-          <p className="notice-body" style={{ margin: 0 }}>
-            {body}
-          </p>
+      <div className="pv-alert" role="alert">
+        <span className="pv-alert-icon" aria-hidden="true">
+          <Icon name="unlink" />
+        </span>
+        <div className="pv-alert-text">
+          <b className="pv-alert-title">{headline}</b>
+          <span className="pv-alert-body">{body}</span>
         </div>
-        <div className="row">
-          <Button
-            variant="primary"
-            size="md"
-            style={{ minHeight: 34 }}
-            onClick={() => window.location.reload()}
-          >
+        <div className="pv-alert-actions">
+          <Button variant="primary" onClick={() => window.location.reload()}>
             Try again
           </Button>
-          <ButtonLink href="/app/knowledge" variant="quiet" size="md" style={{ minHeight: 34 }}>
+          <ButtonLink href="/app/knowledge" variant="secondary">
             Check the catalog
           </ButtonLink>
         </div>
-      </section>
-
-      <DocMarginRow
-        doc={
-          <article className="turn">
-            <p className="caption" style={{ color: "var(--ink-4)" }}>
-              {turn.speaker}, {turn.time}
-            </p>
-            <p className="ui-strong" style={{ margin: 0 }}>
-              {sd.question}
-            </p>
-            <div className="stack-4">
-              <h2 className="answer-heading">{turn.answer.heading}</h2>
-              <Block block={firstParagraph} broken style={{ color: "var(--ink-3)" }} />
-              <p
-                style={{
-                  fontSize: 12,
-                  lineHeight: 1.45,
-                  color: "var(--ink-4)",
-                  borderTop: "1px solid var(--rule)",
-                  paddingTop: 10,
-                  margin: 0,
-                }}
-              >
-                {sd.footerLine}
-              </p>
-            </div>
-          </article>
-        }
-        margin={
-          <div style={{ display: "flex", flexDirection: "column", gap: 14, fontSize: 12, lineHeight: 1.45 }}>
-            <dl
-              style={{
-                margin: 0,
-                display: "grid",
-                gridTemplateColumns: "auto minmax(0, 1fr)",
-                gap: "8px 14px",
-              }}
-            >
-              <dt style={{ color: "var(--ink-4)" }}>Thread</dt>
-              <dd style={{ margin: 0 }}>Preserved</dd>
-              <dt style={{ color: "var(--ink-4)" }}>Sources</dt>
-              <dd style={{ margin: 0, color: "var(--danger)" }}>Unavailable</dd>
-              <dt style={{ color: "var(--ink-4)" }}>{sd.marginNoteTitle}</dt>
-              <dd style={{ margin: 0 }}>{sd.marginNoteStatus}</dd>
-            </dl>
-            <p
-              style={{
-                margin: 0,
-                paddingTop: 14,
-                borderTop: "1px solid var(--rule)",
-                color: "var(--ink-2)",
-              }}
-            >
-              {sd.marginNoteText}
-            </p>
-          </div>
-        }
-        marginOffset={110}
-      />
-
-      <div style={{ marginTop: "var(--space-6)" }}>
-        <PausedComposer note={sd.composerNote} />
       </div>
-    </div>
+
+      <div className="pv-split">
+        <div className="pv-thread" style={{ gap: 22 }}>
+          <Question text={sd.question} time={`${turn.speaker}, ${turn.time}`} />
+          <article style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <h2 className="pv-answer-h">{turn.answer.heading}</h2>
+            <Block block={firstParagraph} broken muted />
+            <p className="pv-prov" style={{ justifyContent: "flex-start", gap: 8, fontSize: 12.5, color: "var(--ink-3)" }}>
+              <Icon name="warning" style={{ color: "var(--warn)" }} />
+              {sd.footerLine}
+            </p>
+          </article>
+          <PausedComposer note={sd.composerNote} />
+        </div>
+        <aside className="pv-side pv-thread-sources" aria-label="Status">
+          <dl className="pv-st pv-card" style={{ padding: 16 }}>
+            <dt>Thread</dt>
+            <dd>
+              <span className="pv-dot" aria-hidden="true" />
+              Preserved
+            </dd>
+            <dt>Sources</dt>
+            <dd style={{ color: "var(--danger)" }}>
+              <span className="pv-dot pv-dot-bad" aria-hidden="true" />
+              Unavailable
+            </dd>
+            <dt>{sd.marginNoteTitle}</dt>
+            <dd>
+              <span className="pv-dot pv-dot-ring" aria-hidden="true" />
+              {sd.marginNoteStatus}
+            </dd>
+          </dl>
+          <span style={{ fontSize: 12.5, lineHeight: 1.55, color: "var(--ink-2)" }}>{sd.marginNoteText}</span>
+        </aside>
+      </div>
+    </>
   );
 }
 
 function LimitView({ thread }: { thread: ThreadData }) {
   const limit = thread.limitState;
-  const citationNotes = thread.notes.filter((note) => note.n === 1 || note.n === 2);
+  const icons = ["arrowRight", "clock"] as const;
   return (
-    <div>
-      {/* Designed header (M-3): full-width hairline bar, title only
-          (BudgetExceeded.html). */}
-      <header className="bleed-head" style={{ paddingTop: 18, paddingBottom: 16 }}>
-        <h1 className="conversation-title">{limit.title}</h1>
+    <>
+      <header className="pv-ph">
+        <h1>{limit.title}</h1>
       </header>
-
-      <div style={{ marginTop: 32 }}>
-      <DocMarginRow
-        doc={
-          <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
-            <p className="caption" style={{ color: "var(--ink-4)", margin: 0 }}>
-              {limit.speaker}, {limit.time}
-            </p>
-            <p className="ui-strong" style={{ margin: 0 }}>
-              {limit.question}
-            </p>
-            <p className="answer-text" style={{ margin: 0 }}>
-              <RichSegments segments={limit.partialSegments} />
-            </p>
-            <div
-              role="status"
-              className="stack-3"
-              style={{ borderTop: "1px solid var(--ink)", paddingTop: 22, marginTop: 10 }}
-            >
-              <h2 className="answer-heading" style={{ margin: 0 }}>
-                {limit.headline}
-              </h2>
-              <p className="answer-text" style={{ fontSize: 17, margin: 0 }}>
-                {limit.body}
-              </p>
-            </div>
+      <div className="pv-split">
+        <div className="pv-thread" style={{ gap: 22 }}>
+          <Question text={limit.question} time={`${limit.speaker}, ${limit.time}`} />
+          <p className="pv-prose">
+            <RichSegments segments={limit.partialSegments} />
+            <span className="pv-caret" aria-hidden="true" style={{ background: "var(--danger)", marginLeft: 4, animation: "none" }} />
+          </p>
+          <div role="status" className="pv-limit-card">
+            <span className="pv-limit-title">
+              <span className="pv-limit-icon" aria-hidden="true">
+                <Icon name="stop" style={{ color: "var(--on-ink)" }} />
+              </span>
+              <b>{limit.headline}</b>
+            </span>
+            <p>{limit.body}</p>
           </div>
-        }
-        margin={
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <h2 style={{ margin: "0 0 4px", fontSize: 12, fontWeight: 400, color: "var(--ink-4)" }}>
-              {limit.adminHeading}
-            </h2>
-            {limit.actions.map((action) => (
-              <button key={action.label} type="button" className="act-card">
-                <span className="act-label">{action.label}</span>
-                <span className="act-detail">{action.detail}</span>
-              </button>
-            ))}
-            <Link
-              href="/app/usage"
-              style={{ fontSize: 12, color: "var(--ink-2)", paddingTop: 6 }}
-            >
-              {limit.usageLinkLabel}
-            </Link>
-            <p
-              style={{
-                margin: 0,
-                fontSize: 12,
-                lineHeight: 1.5,
-                color: "var(--ink-3)",
-                borderTop: "1px solid var(--rule)",
-                paddingTop: 10,
-              }}
-            >
-              {limit.editorsNote}
-            </p>
-            {/* Citations 1–2 keep working in this state (L-5): their notes
-                live at the foot of the margin column. */}
-            <div style={{ marginTop: "var(--space-5)" }}>
-              <NotesStack notes={citationNotes} />
-            </div>
-          </div>
-        }
-      />
+          <PausedComposer note={limit.composerNote} />
+        </div>
+        <aside className="pv-side pv-thread-sources" style={{ gap: 12 }} aria-label="What you can do">
+          <h2 className="pv-lbl" style={{ marginBottom: 4 }}>
+            {limit.adminHeading}
+          </h2>
+          {limit.actions.map((action, index) => (
+            <button key={action.label} type="button" className="pv-act">
+              <span>
+                {action.label}
+                <span className="pv-act-sub" style={{ fontSize: 12 }}>
+                  {action.detail}
+                </span>
+              </span>
+              <Icon name={icons[index] ?? "arrowRight"} style={{ color: "var(--ink)" }} />
+            </button>
+          ))}
+          <Link href="/app/usage" style={{ fontSize: 12.5, fontWeight: 500, paddingTop: 6 }}>
+            {limit.usageLinkLabel}
+          </Link>
+          <span style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-3)", paddingTop: 12, borderTop: "1px solid var(--rule)" }}>
+            {limit.editorsNote}
+          </span>
+        </aside>
       </div>
-
-      <div style={{ marginTop: "var(--space-6)" }}>
-        <PausedComposer note={limit.composerNote} />
-      </div>
-    </div>
+    </>
   );
 }
 
-export function BlockedView({
-  thread,
-  conversation,
-}: {
-  thread: ThreadData;
-  conversation?: Conversation;
-}) {
+export function BlockedView({ thread, conversation }: { thread: ThreadData; conversation?: Conversation }) {
   const blocked = thread.blocked;
   const notes = thread.notes.filter((note) => note.n === 6 || note.n === 7);
   return (
-    <div>
-      {/* Designed header (M-3): full-width hairline bar, title + meta
-          column only (Blocked.html). */}
-      <header
-        className="bleed-head"
-        style={{
-          paddingTop: 18,
-          paddingBottom: 16,
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          gap: 12,
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <h1 className="conversation-title">{conversation?.title ?? thread.header.title}</h1>
-          <p className="meta">{blocked.meta}</p>
+    <>
+      <header className="pv-ph">
+        <div className="pv-ph-title">
+          <h1>{conversation?.title ?? thread.header.title}</h1>
+          <p className="pv-ph-sub" style={{ margin: 0, fontSize: 12.5 }}>
+            {blocked.meta}
+          </p>
         </div>
+        <span className="pv-chip">
+          <Icon name="eye" />
+          Viewer
+        </span>
       </header>
-      <div style={{ marginTop: 32 }}>
-      <DocMarginRow
-        marginOffset={50}
-        margin={<NotesStack notes={notes} />}
-        doc={
-          <div className="stack-4">
-            <h2 className="answer-heading">{blocked.heading}</h2>
-            <p className="answer-text">
+      <div className="pv-split">
+        <div className="pv-thread" style={{ paddingBottom: 30 }}>
+          <article style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <h2 className="pv-answer-h">{blocked.heading}</h2>
+            <p className="pv-prose">
               <RichSegments segments={blocked.segments} />
             </p>
+          </article>
+          <section aria-labelledby="read-only-heading" className="pv-readonly">
+            <span className="pv-readonly-icon" aria-hidden="true">
+              <Icon name="lock" />
+            </span>
+            <h2 id="read-only-heading">{blocked.noticeHeading}</h2>
+            <p>{blocked.noticeBody}</p>
+            <div className="pv-readonly-actions">
+              <Button variant="primary">Request Editor access</Button>
+              <Button variant="secondary">Leave a comment instead</Button>
+            </div>
+          </section>
+        </div>
+        <aside className="pv-side pv-thread-sources" aria-label="Sources">
+          <h2 className="pv-lbl">Sources</h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {notes.map((note) => (
+              <MarginNote key={note.id} note={note} />
+            ))}
           </div>
-        }
-      />
+        </aside>
       </div>
-      <div style={{ maxWidth: "var(--column-doc)", marginTop: "var(--space-6)" }}>
-        <Notice
-          headline={blocked.noticeHeading}
-          actions={
-            <>
-              <Button variant="primary" size="md" style={{ minHeight: 34 }}>
-                Request Editor access
-              </Button>
-              <Button variant="secondary" size="md" style={{ minHeight: 34 }}>
-                Leave a comment instead
-              </Button>
-            </>
-          }
-        >
-          <p style={{ margin: 0 }}>{blocked.noticeBody}</p>
-        </Notice>
-      </div>
-    </div>
+    </>
   );
-}
-
-function sharedWithLabel(conversation: Conversation): string | null {
-  const others = conversation.people.filter((person) => person !== "Sheku Koroma");
-  if (others.length === 0) return null;
-  if (others.length === 1) return `shared with ${others[0]}`;
-  return `shared with ${others.slice(0, -1).join(", ")} and ${others[others.length - 1]}`;
 }
 
 export function ThreadView({
@@ -619,76 +407,81 @@ export function ThreadView({
   if (state === "limit") return <LimitView thread={thread} />;
   if (state === "viewer") return <BlockedView thread={thread} conversation={conversation} />;
 
-  // M-16: the header reflects the conversation named by the route.
   const title = conversation?.title ?? thread.header.title;
-  const shared = conversation ? sharedWithLabel(conversation) : null;
-  const meta = conversation
-    ? `${conversation.sources} sources · Cortex 4${shared ? ` · ${shared}` : ""}`
-    : thread.header.meta;
+  const sources = conversation?.sources ?? 32;
+  const others = (conversation?.people ?? []).filter((person) => person !== ME);
+  const current = thread.notes.find((note) => note.expanded)?.n;
+  const composer = thread.composer;
 
   return (
-    <div>
-      {/* Designed header (M-3): a full-width hairline bar bleeding to the
-          edges of the main column — title + meta stacked left, actions
-          bottom-aligned right (Main.html). */}
-      <header
-        className="bleed-head"
-        style={{
-          paddingTop: 18,
-          paddingBottom: 16,
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "flex-end",
-          justifyContent: "space-between",
-          gap: 14,
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
-          <h1 className="conversation-title">{title}</h1>
-          <p className="meta">{meta}</p>
+    <>
+      <header className="pv-ph">
+        <div className="pv-ph-title">
+          <span className="pv-ph-sub">
+            <Link href="/app/history">Conversations</Link>
+            <span className="pv-crumb-sep" aria-hidden="true">
+              /
+            </span>
+            {thread.header.project}
+          </span>
+          <h1>{title}</h1>
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, alignItems: "center" }}>
-          <Button variant="quiet" size="sm">
-            Fork
-          </Button>
-          <Button variant="quiet" size="sm">
+        <div className="pv-ph-actions">
+          <span className="pv-chip">
+            <Icon name="databaseSmall" />
+            {sources} sources{thread.header.scopeLabel ? ` · ${thread.header.scopeLabel}` : ""}
+          </span>
+          <span className="pv-chip">{composer.model}</span>
+          {others.length > 0 ? (
+            <span className="pv-avs" style={{ marginLeft: 4 }} aria-label={`Shared with ${others.join(" and ")}`} role="img">
+              {others.map((person, index) => (
+                <span key={person} className={`pv-av pv-av-${(index % 2) + 1}`} title={person}>
+                  {initials(person)}
+                </span>
+              ))}
+            </span>
+          ) : null}
+          <Button variant="secondary">Fork</Button>
+          <ButtonLink href="/app/playbooks/launch-brief/edit" variant="secondary">
             Save as playbook
-          </Button>
-          <Button variant="primary" size="sm">
-            Share
-          </Button>
+          </ButtonLink>
+          <Button variant="primary">Share</Button>
         </div>
       </header>
 
-      <div className="column-heads" style={{ marginTop: 36 }}>
-        <span className="doc-head">Thread</span>
-        <span className="margin-head" style={{ display: "flex", justifyContent: "space-between" }}>
-          <span>Sources</span>
-          <Link href="/app/knowledge" style={{ color: "var(--ink-2)" }}>
-            Open catalog
-          </Link>
-        </span>
-      </div>
-
-      {thread.turns.map((turn) => (
-        <TurnArticle key={turn.id} turn={turn} notes={thread.notes} />
-      ))}
-
-      <div style={{ marginTop: "var(--space-6)" }}>
-        <DocMarginRow
-          doc={
+      <div className="pv-split">
+        <div className="pv-thread">
+          {thread.turns.map((turn) => (
+            <TurnArticle key={turn.id} turn={turn} current={current} />
+          ))}
+          <div style={{ marginTop: 6 }}>
             <Composer
-              sourcesLabel={thread.composer.sources}
-              playbookLabel={thread.composer.playbook}
-              model={thread.composer.model}
-              costSentence={thread.composer.costSentence}
-              placeholder={thread.composer.placeholder}
+              sources={composer.sources.split(",").map((name) => name.trim()).filter(Boolean)}
+              playbookLabel={composer.playbook}
+              estimate={composer.estimate}
+              threadLeft={composer.threadLeft}
+              threadLimit={composer.threadLimit}
+              placeholder={composer.placeholder}
               label="Ask a follow-up"
-              usingSentence
             />
-          }
-        />
+          </div>
+        </div>
+        <aside className="pv-side pv-thread-sources" aria-label="Sources">
+          <div className="pv-sources-head">
+            <h2 className="pv-lbl">Sources</h2>
+            <Link href="/app/knowledge">Open catalog</Link>
+          </div>
+          {thread.turns.map((turn, index) => (
+            <div key={turn.id} style={{ display: "contents" }}>
+              {index > 0 ? <div className="pv-sources-rule" aria-hidden="true" /> : null}
+              {notesForTurn(turn, thread.notes).map((note) => (
+                <MarginNote key={note.id} note={note} />
+              ))}
+            </div>
+          ))}
+        </aside>
       </div>
-    </div>
+    </>
   );
 }
+

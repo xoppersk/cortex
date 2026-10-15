@@ -3,15 +3,19 @@
  "header": {
   "title": "Launch narrative",
   "meta": "32 sources · Cortex 4 · shared with Maya Jordan and Owen Clarke",
-  "project": "Launch narrative",
-  "edited": "Edited 10:41 PM"
+  "project": "Go-to-market",
+  "edited": "Edited 10:41 PM",
+  "scopeLabel": "this month"
  },
  "composer": {
   "sources": "Positioning research, Customer interviews",
   "playbook": "Launch brief",
   "model": "Cortex 4",
   "costSentence": "About $0.012 for this reply. $0.030 left of this thread’s $0.08 limit.",
-  "placeholder": "Ask a follow-up. Type / for a playbook, @ for a source."
+  "placeholder": "Ask a follow-up…",
+  "estimate": 0.012,
+  "threadLeft": 0.03,
+  "threadLimit": 0.08
  },
  "streamContinuation": "",
  "turns": [
@@ -47,8 +51,9 @@
      },
      {
       "type": "pullQuote",
-      "text": "“Cortex turns scattered expertise into trusted, repeatable playbooks — with citations and cost controls built in.”",
-      "attribution": "Proposed one-liner. Not sourced; it summarises 1–5."
+      "text": "“Cortex turns scattered expertise into trusted, repeatable playbooks, with citations and cost controls built in.”",
+      "attribution": "Proposed one-liner · summarises 1–5",
+      "unsourced": true
      },
      {
       "type": "paragraph",
@@ -118,35 +123,8 @@
         "footnote": 7
        },
        {
-        "text": ". In practice that means three things the buyer can check for themselves:"
+        "text": ""
        }
-      ]
-     },
-     {
-      "type": "list",
-      "items": [
-       [
-        {
-         "text": "Each claim opens the passage it came from."
-        }
-       ],
-       [
-        {
-         "text": "Roles, retention and audit history pass a security review"
-        },
-        {
-         "text": "",
-         "footnote": 7
-        },
-        {
-         "text": "."
-        }
-       ],
-       [
-        {
-         "text": "Spend is capped per answer, not reconciled at month end."
-        }
-       ]
       ]
      }
     ],
@@ -181,7 +159,7 @@
    "paragraphId": "turn-1-p2",
    "documentTitle": "Customer interview synthesis",
    "catalog": "Catalog 02",
-   "meta": "Catalog 02 · Oct 2 · chunk 118",
+   "meta": "Catalog 02 · Oct 2 · passage 118",
    "expanded": true,
    "openPassage": true,
    "excerpt": [
@@ -196,7 +174,8 @@
      "text": " before forwarding it to legal. Seven of nine teams named traceability as the deciding criterion.”"
     }
    ],
-   "passageHref": "/app/knowledge/documents/customer-interview-synthesis"
+   "passageHref": "/app/knowledge/documents/customer-interview-synthesis",
+   "match": 0.91
   },
   {
    "id": "note-4",
