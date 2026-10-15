@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, type ReactNode } from "react";
+import { Icon } from "../../../components/Icon";
 
 export interface AuditSegment {
   text: string;
@@ -55,22 +56,52 @@ function renderActor(actor: string): ReactNode {
   if (actor.endsWith(suffix)) {
     return (
       <>
-        <span style={{ fontWeight: 500, color: "var(--ink)" }}>{actor.slice(0, -suffix.length)}</span>
+        <b>{actor.slice(0, -suffix.length)}</b>
         {suffix}
       </>
     );
   }
-  return <span style={{ fontWeight: 500, color: "var(--ink)" }}>{actor}</span>;
+  return <b>{actor}</b>;
 }
 
-const filterSelectStyle = {
-  height: 30,
-  minHeight: 30,
-  padding: "0 8px",
-  width: "auto",
-} as const;
+function ActorAvatar({ actor }: { actor: string }) {
+  if (actor.endsWith("(API key)")) {
+    return (
+      <span className="pv-av pv-av-md" style={{ background: "var(--ground)" }} aria-hidden="true">
+        <Icon name="key" size={12} style={{ color: "var(--ink)" }} />
+      </span>
+    );
+  }
+  if (actor === "Cortex") {
+    return (
+      <span className="pv-av pv-av-md pv-av-ln pv-av-c" style={{ color: "var(--ink)" }} aria-hidden="true">
+        C
+      </span>
+    );
+  }
+  const tone = actor === "Sheku Koroma" ? "pv-av-ink" : actor.startsWith("Maya") ? "pv-av-1" : actor.startsWith("Owen") ? "pv-av-2" : "pv-av-3";
+  const initials = actor
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2);
+  return (
+    <span className={`pv-av pv-av-md ${tone}`} aria-hidden="true">
+      {initials}
+    </span>
+  );
+}
 
-const filterLabelStyle = { fontSize: 12, color: "var(--ink-3)" } as const;
+/* "Admin · can now manage…" → the role as a tag, the rest as text. */
+function RoleChange({ value, tone }: { value: string; tone: "ln" | "dk" }) {
+  const [role, ...rest] = value.split(" · ");
+  return (
+    <>
+      <span className={`pv-tag pv-tag-${tone}`}>{role}</span>
+      {rest.length ? <span style={{ color: "var(--ink-2)" }}> · {rest.join(" · ")}</span> : null}
+    </>
+  );
+}
 
 export function AuditLog({
   groups,
@@ -130,158 +161,125 @@ export function AuditLog({
   const filteredGroups = groups
     .map((group) => ({ day: group.day, entries: group.entries.filter(matches) }))
     .filter((group) => group.entries.length > 0);
+  const filtered = who !== filters.who[0] || what !== filters.what[0] || when !== filters.when[0];
+  const shownCount = filteredGroups.reduce((total, group) => total + group.entries.length, 0);
 
   return (
-    <div className="stack-6">
-      <div
-        style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", flexWrap: "wrap" }}
-        role="group"
-        aria-label="Audit log filters"
-      >
-        <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)" }}>
-          <label htmlFor="audit-who" style={filterLabelStyle}>
-            Who
-          </label>
-          <select
-            id="audit-who"
-            className="field-control"
-            style={filterSelectStyle}
-            value={who}
-            onChange={(event) => updateFilter("who", event.target.value, filters.who[0]!)}
-          >
-            {filters.who.map((option) => (
-              <option key={option}>{option}</option>
-            ))}
-          </select>
+    <>
+      <div className="pv-filters" role="group" aria-label="Audit log filters">
+        <span className="pv-filter">
+        <label htmlFor="audit-who">Who</label>
+        <select
+          id="audit-who"
+          className="pv-sel pv-sel-sm"
+          value={who}
+          onChange={(event) => updateFilter("who", event.target.value, filters.who[0]!)}
+        >
+          {filters.who.map((option) => (
+            <option key={option}>{option}</option>
+          ))}
+        </select>
         </span>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)" }}>
-          <label htmlFor="audit-what" style={filterLabelStyle}>
-            What
-          </label>
-          <select
-            id="audit-what"
-            className="field-control"
-            style={filterSelectStyle}
-            value={what}
-            onChange={(event) => updateFilter("what", event.target.value, filters.what[0]!)}
-          >
-            {filters.what.map((option) => (
-              <option key={option}>{option}</option>
-            ))}
-          </select>
+        <span className="pv-filter">
+        <label htmlFor="audit-what">What</label>
+        <select
+          id="audit-what"
+          className="pv-sel pv-sel-sm"
+          value={what}
+          onChange={(event) => updateFilter("what", event.target.value, filters.what[0]!)}
+        >
+          {filters.what.map((option) => (
+            <option key={option}>{option}</option>
+          ))}
+        </select>
         </span>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)" }}>
-          <label htmlFor="audit-when" style={filterLabelStyle}>
-            When
-          </label>
-          <select
-            id="audit-when"
-            className="field-control"
-            style={filterSelectStyle}
-            value={when}
-            onChange={(event) => updateFilter("when", event.target.value, filters.when[0]!)}
-          >
-            {filters.when.map((option) => (
-              <option key={option}>{option}</option>
-            ))}
-          </select>
+        <span className="pv-filter">
+        <label htmlFor="audit-when">When</label>
+        <select
+          id="audit-when"
+          className="pv-sel pv-sel-sm"
+          value={when}
+          onChange={(event) => updateFilter("when", event.target.value, filters.when[0]!)}
+        >
+          {filters.when.map((option) => (
+            <option key={option}>{option}</option>
+          ))}
+        </select>
         </span>
         {when === "Custom range" ? (
-          <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)" }}>
-            <label htmlFor="audit-from" style={filterLabelStyle}>
-              From
-            </label>
+          <>
+            <label htmlFor="audit-from">From</label>
             <input
               id="audit-from"
               type="date"
-              className="field-control"
-              style={filterSelectStyle}
+              className="pv-inp pv-sel-sm"
               value={rangeFrom}
               onChange={(event) => setRangeFrom(event.target.value)}
             />
-            <label htmlFor="audit-to" style={filterLabelStyle}>
-              To
-            </label>
+            <label htmlFor="audit-to">To</label>
             <input
               id="audit-to"
               type="date"
-              className="field-control"
-              style={filterSelectStyle}
+              className="pv-inp pv-sel-sm"
               value={rangeTo}
               onChange={(event) => setRangeTo(event.target.value)}
             />
-          </span>
+          </>
         ) : null}
-        <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--ink-3)" }}>{totalEntries} entries</span>
+        <span className="pv-chip" role="status">
+          <span className="pv-mono">{filtered ? shownCount : totalEntries}</span> {filtered ? "shown" : "entries"}
+        </span>
       </div>
 
       {filteredGroups.length === 0 ? (
-        <p className="ui-text">No audit entries match these filters.</p>
+        <p className="pv-card" style={{ margin: 0, padding: "18px 20px", fontSize: 13, color: "var(--ink-2)" }}>
+          No audit entries match these filters.
+        </p>
       ) : (
-        filteredGroups.map((group) => (
-          <section key={group.day} aria-label={group.day}>
-            <h2 style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", marginBottom: 4 }}>{group.day}</h2>
-            <div>
+        <div role="list" aria-label="Audit entries" className="pv-card pv-rows" style={{ overflow: "hidden" }}>
+          {filteredGroups.map((group) => (
+            <section key={group.day} aria-label={group.day} role="presentation">
+              <h2 className="pv-day">{group.day}</h2>
               {group.entries.map((entry, index) => (
-                <div key={`${entry.time}-${index}`}>
-                  <div
-                    className="audit-entry"
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "80px minmax(0, 1fr) 120px",
-                      gap: 18,
-                      alignItems: "baseline",
-                      padding: "12px 0",
-                      borderTop: "1px solid var(--rule)",
-                      fontSize: 14,
-                      lineHeight: 1.45,
-                    }}
-                  >
-                    <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{entry.time}</span>
-                    <span style={{ color: "var(--ink-body)" }}>
-                      {renderActor(entry.actor)}{" "}
-                      {entry.segments ? renderSegments(entry.segments) : entry.sentence}
-                    </span>
-                    <span style={{ fontSize: 12, color: "var(--ink-4)", textAlign: "right" }}>{entry.category}</span>
-                  </div>
+                <div role="listitem" key={`${entry.time}-${index}`} className={entry.changes ? "pv-ev pv-ev-open" : "pv-ev"}>
+                  <ActorAvatar actor={entry.actor} />
+                  <time>{entry.time}</time>
                   {entry.changes ? (
-                    <div
-                      style={{
-                        background: "#FAFAF8",
-                        borderRadius: "var(--radius-m)",
-                        padding: 12,
-                        margin: "0 -12px 12px",
-                      }}
-                    >
-                      <dl
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "70px minmax(0, 1fr)",
-                          gap: "6px 14px",
-                          fontSize: 12,
-                          lineHeight: 1.5,
-                          margin: 0,
-                        }}
-                      >
-                        <dt style={{ color: "var(--ink-4)" }}>Before</dt>
-                        <dd style={{ color: "var(--ink-body)" }}>{entry.changes.before}</dd>
-                        <dt style={{ color: "var(--ink-4)" }}>After</dt>
-                        <dd style={{ color: "var(--ink-body)" }}>{entry.changes.after}</dd>
+                    <span className="pv-ev-detail">
+                      <span>
+                        {renderActor(entry.actor)} {entry.segments ? renderSegments(entry.segments) : entry.sentence}
+                      </span>
+                      <dl className="pv-dl">
+                        <dt>Before</dt>
+                        <dd>
+                          <RoleChange value={entry.changes.before} tone="ln" />
+                        </dd>
+                        <dt>After</dt>
+                        <dd>
+                          <RoleChange value={entry.changes.after} tone="dk" />
+                        </dd>
                         {entry.context ? (
                           <>
-                            <dt style={{ color: "var(--ink-4)" }}>From</dt>
-                            <dd style={{ color: "var(--ink-body)" }}>{entry.context.replace(/^From /, "")}</dd>
+                            <dt>From</dt>
+                            <dd>{entry.context.replace(/^From /, "")}</dd>
                           </>
                         ) : null}
                       </dl>
-                    </div>
-                  ) : null}
+                    </span>
+                  ) : (
+                    <span>
+                      {renderActor(entry.actor)} {entry.segments ? renderSegments(entry.segments) : entry.sentence}
+                    </span>
+                  )}
+                  <span className="pv-ev-k">
+                    <span className={entry.category === "Spending" ? "pv-tag pv-tag-warn" : "pv-tag"}>{entry.category}</span>
+                  </span>
                 </div>
               ))}
-            </div>
-          </section>
-        ))
+            </section>
+          ))}
+        </div>
       )}
-    </div>
+    </>
   );
 }

@@ -6,41 +6,39 @@ import { TemplatesBrowser } from "./TemplatesBrowser";
 
 export const metadata: Metadata = { title: { absolute: "Cortex — Playbook templates" } };
 
-/* P-03 Templates. Headline copy follows the canvas reference exactly. */
+/* Templates (Premium v2): category pills + search, one white sheet of rows with the featured template open. */
 export default function TemplatesPage() {
   const data = getTemplates();
 
   return (
-    <div>
+    <div className="pm-page">
       <SiteHeader current="/templates" />
 
-      <section className="site-wrap" style={{ paddingTop: 72, paddingBottom: 40 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-          <h1 className="display-l" style={{ fontSize: 56, maxWidth: "16ch" }}>
+      <main>
+        <section className="pm-wrap pm-hero" style={{ paddingTop: 76, paddingBottom: 44, gap: 20 }}>
+          <h1 className="pm-display" style={{ fontSize: 60, lineHeight: 1.03, letterSpacing: "-0.035em", maxWidth: "16ch" }}>
             Playbooks other teams already trust.
           </h1>
-          <p className="serif-lead" style={{ maxWidth: "34em" }}>
-            Each template comes with its inputs, the kind of sources it expects and the checks it runs.
-            Copy one into your workspace and point it at your own documents.
+          <p className="pm-lead" style={{ fontSize: 20, lineHeight: 1.55, maxWidth: "34em" }}>
+            Each template comes with its inputs, the kind of sources it expects and the checks it runs. Copy one into your
+            workspace and point it at your own documents.
           </p>
-        </div>
-      </section>
+        </section>
 
-      <section className="site-wrap" style={{ paddingBottom: 96 }}>
-        <Suspense
-          fallback={
-            <p className="ui-text muted-3" role="status">
-              Loading templates…
-            </p>
-          }
-        >
-          <TemplatesBrowser data={data} />
-        </Suspense>
-      </section>
+        <section className="pm-wrap" style={{ paddingBottom: 80, display: "flex", flexDirection: "column", gap: 16 }}>
+          <Suspense
+            fallback={
+              <p className="ui-text muted-3" role="status">
+                Loading templates…
+              </p>
+            }
+          >
+            <TemplatesBrowser data={data} />
+          </Suspense>
+        </section>
+      </main>
 
-      <div className="hairline-top">
-        <SiteFooter />
-      </div>
+      <SiteFooter />
     </div>
   );
 }

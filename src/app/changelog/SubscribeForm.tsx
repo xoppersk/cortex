@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { Icon } from "../../components/Icon";
 
 /*
- * P-05 subscribe form, built to the canvas control pairing: a plain 14px
- * input and a bespoke submit button with a 1px ink border (neither the DS
- * primary nor secondary button). On submit the form stays in place and a
- * status line appears under it (brief §10 form behaviour).
+ * Changelog subscribe form (Premium v2): a white pill-card holding the mail
+ * icon, a borderless input and the ink Subscribe button. On submit the form
+ * stays in place and a status line appears under it.
  */
 export function SubscribeForm() {
   const [subscribed, setSubscribed] = useState(false);
@@ -20,40 +20,25 @@ export function SubscribeForm() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      <form onSubmit={onSubmit} style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+      <form onSubmit={onSubmit} className="pm-subscribe">
         <label htmlFor="changelog-email" className="sr-only">
           Email address
         </label>
+        <Icon name="mail" style={{ marginLeft: 8 }} />
         <input
           id="changelog-email"
           type="email"
           required
           placeholder="Email for monthly updates"
-          className="field-control"
-          style={{ width: 240, minHeight: 36, fontSize: 14, padding: "0 10px" }}
           value={email}
           onChange={(event) => setEmail(event.target.value)}
         />
-        <button
-          type="submit"
-          style={{
-            height: 36,
-            padding: "0 14px",
-            border: "1px solid var(--ink)",
-            borderRadius: "var(--radius-m)",
-            background: "var(--paper)",
-            color: "var(--ink)",
-            fontSize: 14,
-            fontWeight: 500,
-            lineHeight: 1,
-            cursor: "pointer",
-          }}
-        >
+        <button type="submit" className="btn btn-primary" style={{ minHeight: 34 }}>
           Subscribe
         </button>
       </form>
       {subscribed ? (
-        <p className="ui-text" role="status" style={{ fontSize: 14 }}>
+        <p role="status" style={{ margin: 0, fontSize: 14, color: "var(--ink-2)" }}>
           You’re on the list.
         </p>
       ) : null}

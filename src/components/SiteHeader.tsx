@@ -9,30 +9,38 @@ const links = [
   { href: "/changelog", label: "Changelog" },
 ];
 
+/* The C monogram + wordmark used on every public and system screen. */
+export function SiteBrand({ small = false, style }: { small?: boolean; style?: CSSProperties }) {
+  return (
+    <Link href="/" className="pv-site-brand" aria-label="Cortex home" style={style}>
+      <i aria-hidden="true" style={small ? { width: 24, height: 24, fontSize: 13 } : undefined}>
+        C
+      </i>
+      <b style={small ? { fontSize: 17 } : undefined}>Cortex</b>
+    </Link>
+  );
+}
+
+/*
+ * Public site header (Premium v2): monogram brand, pill navigation (the
+ * current page is a white card on a hairline ring), Sign in + Start free.
+ */
 export function SiteHeader({ current }: { current?: string }) {
   return (
-    <header className="site-wrap site-header">
-      <Link href="/" className="pv-site-brand" aria-label="Cortex home">
-        <i aria-hidden="true">C</i>
-        <b>Cortex</b>
-      </Link>
-      <nav aria-label="Main" className="site-nav">
+    <header className="pm-wrap pm-head">
+      <SiteBrand />
+      <nav aria-label="Main" className="pm-nav">
         {links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="text-link"
-            aria-current={current === link.href ? "page" : undefined}
-          >
+          <Link key={link.href} href={link.href} aria-current={current === link.href ? "page" : undefined}>
             {link.label}
           </Link>
         ))}
       </nav>
-      <div className="row" style={{ gap: 18 }}>
-        <Link href="/login" className="text-link">
+      <div className="pm-head-actions">
+        <Link href="/login" className="pm-tl">
           Sign in
         </Link>
-        <ButtonLink href="/app/new" variant="primary" size="md" style={{ fontSize: 14 }}>
+        <ButtonLink href="/app/new" variant="primary" className="pm-btn-head">
           Start free
         </ButtonLink>
       </div>
@@ -40,22 +48,18 @@ export function SiteHeader({ current }: { current?: string }) {
   );
 }
 
-export function SiteFooter() {
+export function SiteFooter({ wrapClass = "pm-wrap" }: { wrapClass?: string }) {
   return (
-    <footer className="site-wrap site-footer">
-      <span className="wordmark" style={{ fontSize: 17 }}>Cortex</span>
-      <nav aria-label="Footer" className="site-nav">
+    <footer className={`${wrapClass} pm-foot`}>
+      <SiteBrand small />
+      <nav aria-label="Footer">
         {links.map((link) => (
-          <Link key={link.href} href={link.href} className="text-link" style={{ fontSize: 13 }}>
+          <Link key={link.href} href={link.href}>
             {link.label}
           </Link>
         ))}
-        <a href="#" className="text-link" style={{ fontSize: 13 }}>
-          Security
-        </a>
-        <a href="#" className="text-link" style={{ fontSize: 13 }}>
-          Privacy
-        </a>
+        <a href="#">Security</a>
+        <a href="#">Privacy</a>
       </nav>
       <span>© 2026 [Company]</span>
     </footer>
@@ -63,12 +67,10 @@ export function SiteFooter() {
 }
 
 /*
- * LegalFooter (brief §7): one line on auth and standalone screens
- * (Login, Signup, Invite, Upgrade, 404) — © 2026 [Company] left;
- * Privacy / Terms / Security / Status / Help right; 1px --rule top border.
- * Help reaches Docs (/docs/citations) as the designs specify; the other
- * items keep the designs' "#" placeholders. (The Login canvas shows only
- * Privacy / Terms / Status; brief §7's five-item set wins per fix item 8.)
+ * LegalFooter: one line on auth and standalone screens (Login, Signup,
+ * Invite, Upgrade, 404) — © 2026 [Company] left; Privacy / Terms / Security /
+ * Status / Help right on a hairline. Help reaches Docs; the other items keep
+ * the designs' "#" placeholders. Login passes its shorter set.
  */
 const legalItems: Array<{ label: string; href: string }> = [
   { label: "Privacy", href: "#" },
@@ -86,28 +88,16 @@ export function LegalFooter({
   style?: CSSProperties;
 }) {
   return (
-    <footer
-      style={{
-        padding: "18px 48px 24px",
-        borderTop: "1px solid var(--rule)",
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "space-between",
-        gap: 12,
-        fontSize: 13,
-        color: "var(--ink-3)",
-        ...style,
-      }}
-    >
+    <footer className="pm-foot pm-legal" style={style}>
       <span>© 2026 [Company]</span>
-      <nav aria-label="Legal" style={{ display: "flex", flexWrap: "wrap", gap: 18 }}>
+      <nav aria-label="Legal">
         {items.map((item) =>
           item.href.startsWith("/") ? (
-            <Link key={item.label} href={item.href} style={{ color: "var(--ink-3)" }}>
+            <Link key={item.label} href={item.href}>
               {item.label}
             </Link>
           ) : (
-            <a key={item.label} href={item.href} style={{ color: "var(--ink-3)" }}>
+            <a key={item.label} href={item.href}>
               {item.label}
             </a>
           ),

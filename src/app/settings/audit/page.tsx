@@ -4,6 +4,8 @@ import { Suspense } from "react";
 
 export const metadata: Metadata = { title: { absolute: "Cortex — Audit log" } };
 import { Button } from "../../../components/Button";
+import { Icon } from "../../../components/Icon";
+import { SettingsHeader } from "../../../components/Shells";
 import { getAdminData } from "../../../lib/api";
 import { AuditLog, type AuditGroupView } from "./AuditLog";
 
@@ -24,40 +26,56 @@ export default function AuditPage() {
     })),
   }));
 
+  // The margin splits the fixture's "not shown" copy into its two cards.
+  const splitAt = audit.notShownSegments[0]?.text.indexOf("Streaming") ?? -1;
+  const first = splitAt > 0 ? audit.notShownSegments[0]!.text.slice(0, splitAt).trim() : audit.notShown;
+  const secondSegments =
+    splitAt > 0
+      ? [{ text: audit.notShownSegments[0]!.text.slice(splitAt) }, ...audit.notShownSegments.slice(1)]
+      : [];
+
   return (
     <>
-      <header className="page-head">
-        <div className="page-head-row">
-          <h1 className="page-title">Audit log</h1>
-          <Button variant="secondary" size="sm">
+      <SettingsHeader
+        title="Audit log"
+        lede={audit.summary}
+        actions={
+          <Button variant="secondary">
+            <Icon name="download" style={{ color: "var(--ink-2)" }} />
             Export CSV
           </Button>
-        </div>
-        <p className="summary-sentence">{audit.summary}</p>
-      </header>
+        }
+      />
 
-      <div className="doc-margin">
-        <div className="doc-column" style={{ maxWidth: 680 }}>
+      <div className="pv-split">
+        <div className="pv-set-main" style={{ gap: 16 }}>
           <Suspense fallback={<p className="caption">Loading the audit log.</p>}>
             <AuditLog groups={groups} filters={audit.filters} totalEntries={audit.totalEntries} />
           </Suspense>
         </div>
 
-        <aside className="margin-column">
-          <div className="margin-box stack-3">
-            <h2 className="margin-box-title">Not shown here</h2>
-            <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>
-              {audit.notShownSegments.map((segment, index) =>
-                "href" in segment && segment.href ? (
-                  <Link key={index} href={segment.href}>
-                    {segment.text}
-                  </Link>
-                ) : (
-                  <span key={index}>{segment.text}</span>
-                ),
-              )}
-            </p>
-          </div>
+        <aside className="pv-side" aria-labelledby="not-shown-heading">
+          <h2 className="pv-lbl pv-side-lbl" id="not-shown-heading">
+            Not shown here
+          </h2>
+          <section className="pv-card pv-card-lift">
+            <span>{first}</span>
+          </section>
+          {secondSegments.length ? (
+            <section className="pv-card">
+              <span>
+                {secondSegments.map((segment, index) =>
+                  "href" in segment && segment.href ? (
+                    <Link key={index} href={segment.href}>
+                      {segment.text}
+                    </Link>
+                  ) : (
+                    <span key={index}>{segment.text}</span>
+                  ),
+                )}
+              </span>
+            </section>
+          ) : null}
         </aside>
       </div>
     </>

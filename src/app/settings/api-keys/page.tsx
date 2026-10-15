@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "../../../components/Button";
+import { Icon } from "../../../components/Icon";
+import { SettingsHeader } from "../../../components/Shells";
 import { getAdminData } from "../../../lib/api";
+import { cx } from "../../../lib/utils";
 import { RevealPanel, type RevealView } from "./RevealPanel";
 
 interface KeyRow {
@@ -90,99 +93,72 @@ export default function ApiKeysPage() {
     setRows((previous) => previous.filter((row) => row.id !== id));
   }
 
+  const newestId = rows[0]?.id;
+
   return (
     <>
-      <header className="page-head">
-        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "var(--space-4)", flexWrap: "wrap" }}>
-          <div style={{ maxWidth: 620 }}>
-            <h1 className="page-title">API keys</h1>
-            <p className="summary-sentence" style={{ marginTop: "var(--space-3)" }}>
-              {apiKeys.summary}
-            </p>
-          </div>
-          <Button variant="primary" onClick={createKey} style={{ minHeight: 32 }}>
+      <SettingsHeader
+        title="API keys"
+        lede={apiKeys.summary}
+        actions={
+          <Button variant="primary" onClick={createKey}>
+            <Icon name="plus" size={14} strokeWidth={1.8} style={{ color: "currentColor" }} />
             Create key
           </Button>
-        </div>
-      </header>
+        }
+      />
 
-      <div className="stack-6">
+      <div className="pv-set-form" style={{ gap: 18, maxWidth: 1176 }}>
         {reveal ? <RevealPanel reveal={reveal} onStored={() => setReveal(null)} /> : null}
 
-        <section aria-label="All keys">
-          <div className="table-scroll">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th scope="col">Key</th>
-                  <th scope="col">Access</th>
-                  <th scope="col">Last used</th>
-                  <th scope="col">
-                    <span className="sr-only">Actions</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => (
-                  <tr key={row.id}>
-                    <td>
-                      <span className="ui-strong" style={{ fontSize: 13 }}>
-                        {row.name}
-                      </span>
-                      <br />
-                      <span
-                        style={{
-                          fontFamily: "var(--font-mono)",
-                          fontSize: 12,
-                          lineHeight: 1.4,
-                          color: "var(--ink-2)",
-                        }}
-                      >
+        <div className="pv-card" style={{ overflow: "hidden" }}>
+          <div role="table" aria-label="All keys" className="pv-rows">
+            <div role="row" className="pv-row pv-row-head pv-keyr pv-th pv-stack">
+              <span role="columnheader">Key</span>
+              <span role="columnheader">Access</span>
+              <span role="columnheader">Last used</span>
+              <span role="columnheader">
+                <span className="sr-only">Actions</span>
+              </span>
+            </div>
+            {rows.map((row) => {
+              const fresh = reveal !== null && row.id === newestId && row.lastUsed === "Never";
+              return (
+                <div role="row" key={row.id} className={cx("pv-row pv-keyr pv-stack", fresh && "pv-keyr-new")}>
+                  <span role="cell" className="pv-ki">
+                    <span className={cx("pv-ib", fresh && "pv-ib-hl", row.flag && "pv-ib-ln")} aria-hidden="true">
+                      <Icon name="key" style={row.flag ? { color: "var(--ink-4)" } : undefined} />
+                    </span>
+                    <span className="pv-ki-text">
+                      <b>{row.name}</b>
+                      <code>
                         {row.masked} · {row.createdNote}
-                      </span>
-                    </td>
-                    <td>
-                      {row.flag ? (
-                        <span style={{ color: "var(--warn)", fontWeight: 500 }}>{row.access}</span>
-                      ) : (
-                        row.access
-                      )}
-                      {row.flag ? (
-                        <>
-                          <br />
-                          <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{row.flag}</span>
-                        </>
-                      ) : null}
-                    </td>
-                    <td>
-                      {row.lastUsed}
-                      {row.cost ? (
-                        <>
-                          <br />
-                          <span className="meta-ink4">${row.cost} this cycle</span>
-                        </>
-                      ) : null}
-                      {row.expiresNote ? (
-                        <>
-                          <br />
-                          <span style={{ fontSize: 12, color: "var(--warn)" }}>{row.expiresNote}</span>
-                        </>
-                      ) : null}
-                    </td>
-                    <td>
-                      <Button variant="quiet" size="sm" style={{ minHeight: 26, padding: "0 6px" }} onClick={() => revoke(row.id)}>
-                        Revoke
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      </code>
+                    </span>
+                  </span>
+                  <span role="cell" className="pv-cell-stack">
+                    <span className={cx("pv-tag", row.flag && "pv-tag-warn")}>{row.access}</span>
+                    {row.flag ? <span className="pv-cell-sub">{row.flag}</span> : null}
+                  </span>
+                  <span role="cell" className="pv-cell-stack" style={{ color: row.lastUsed === "Never" ? "var(--ink-3)" : "var(--ink)" }}>
+                    <span className="pv-row-cell-label">Last used</span>
+                    {row.lastUsed}
+                    {row.cost ? <span className="pv-mono pv-cell-sub" style={{ color: "var(--ink-4)" }}>${row.cost} this cycle</span> : null}
+                    {row.expiresNote ? <span className="pv-cell-sub" style={{ color: "var(--warn)" }}>{row.expiresNote}</span> : null}
+                  </span>
+                  <span role="cell" className="pv-row-actions">
+                    <Button variant="quiet" size="sm" onClick={() => revoke(row.id)} aria-label={`Revoke ${row.name}`}>
+                      Revoke
+                    </Button>
+                  </span>
+                </div>
+              );
+            })}
           </div>
-          <p style={{ fontSize: 12, lineHeight: 1.45, color: "var(--ink-3)", marginTop: "var(--space-4)" }}>
+          <p className="pv-foot-note">
             {apiKeys.footerSegments.map((segment, index) =>
               "href" in segment && segment.href ? (
-                <Link key={index} href={segment.href} style={{ color: "var(--ink-2)" }}>
+                <Link key={index} href={segment.href}>
                   {segment.text}
                 </Link>
               ) : (
@@ -190,7 +166,7 @@ export default function ApiKeysPage() {
               ),
             )}
           </p>
-        </section>
+        </div>
       </div>
     </>
   );

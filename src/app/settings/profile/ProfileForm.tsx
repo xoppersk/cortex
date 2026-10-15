@@ -2,7 +2,8 @@
 
 import { useState, useSyncExternalStore, type ReactNode } from "react";
 import { Button } from "../../../components/Button";
-import { SettingsSection } from "../../../components/SettingsSection";
+import { Icon } from "../../../components/Icon";
+import { SettingsHeader } from "../../../components/Shells";
 import type { AdminData } from "../../../lib/types";
 
 type Profile = AdminData["profile"];
@@ -45,23 +46,29 @@ function getStoredTheme(): string | null {
   }
 }
 
-function MarginNote({ children }: { children: ReactNode }) {
-  return <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>{children}</p>;
+function Section({ title, note, children }: { title: string; note: ReactNode; children: ReactNode }) {
+  return (
+    <section className="pv-card pv-ss" aria-label={title}>
+      <div className="pv-ss-body" style={{ gap: 14 }}>
+        <h2 className="pv-ss-h">{title}</h2>
+        {children}
+      </div>
+      <p className="pv-ss-note">{note}</p>
+    </section>
+  );
 }
 
-function GridRow({ label, htmlFor, children }: { label: string; htmlFor?: string; children: ReactNode }) {
+function GridRow({ label, htmlFor, labelId, children }: { label: string; htmlFor?: string; labelId?: string; children: ReactNode }) {
   return (
-    <div className="settings-grid" style={{ alignItems: "center", marginBottom: "var(--space-4)" }}>
+    <div className="pv-fr">
       {htmlFor ? (
-        <label className="settings-grid-label" htmlFor={htmlFor} style={{ paddingTop: 0 }}>
-          {label}
-        </label>
+        <label htmlFor={htmlFor}>{label}</label>
       ) : (
-        <span className="settings-grid-label" style={{ paddingTop: 0 }}>
+        <span className="pv-fr-lb" id={labelId}>
           {label}
         </span>
       )}
-      <div>{children}</div>
+      {children}
     </div>
   );
 }
@@ -72,7 +79,7 @@ function notificationLabel(label: string): ReactNode {
     return (
       <>
         {label.slice(0, -suffix.length)}
-        <span style={{ color: "var(--ink-3)" }}>{suffix}</span>
+        <span className="pv-tag pv-tag-ln">admins only</span>
       </>
     );
   }
@@ -84,12 +91,12 @@ function sessionName(name: string): ReactNode {
   if (name.endsWith(suffix)) {
     return (
       <>
-        <span style={{ fontWeight: 500, color: "var(--ink)" }}>{name.slice(0, -suffix.length)}</span>
-        {suffix}
+        <b>{name.slice(0, -suffix.length)}</b>
+        <span className="pv-tag pv-tag-dk">this device</span>
       </>
     );
   }
-  return <span style={{ fontWeight: 500, color: "var(--ink)" }}>{name}</span>;
+  return <b>{name}</b>;
 }
 
 export function ProfileForm({ profile, email }: { profile: Profile; email: string }) {
@@ -126,154 +133,136 @@ export function ProfileForm({ profile, email }: { profile: Profile; email: strin
 
   return (
     <div>
-      <div
-        className="bleed-head"
-        style={{ paddingTop: 28, paddingBottom: 18, marginBottom: "var(--space-2)" }}
-      >
-        <h1 className="page-title">Profile and preferences</h1>
-      </div>
+      <SettingsHeader
+        title="Profile and preferences"
+        align="center"
+        leading={
+          <span className="pv-av pv-av-ink pv-av-xl" aria-hidden="true">
+            {name
+              .split(" ")
+              .map((part) => part[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase()}
+          </span>
+        }
+      />
 
-      <SettingsSection title="Profile" margin={<MarginNote>{profile.profileNote}</MarginNote>}>
-        <GridRow label="Name" htmlFor="profile-name">
-          <input
-            id="profile-name"
-            className="field-control field-control-32"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-          />
-        </GridRow>
-        <GridRow label="Email" htmlFor="profile-email">
-          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
-            <input id="profile-email" className="field-control field-control-32" value={email} readOnly />
-            <a href="#" onClick={(event) => event.preventDefault()} style={{ fontSize: 12, whiteSpace: "nowrap" }}>
-              Change
-            </a>
-          </div>
-        </GridRow>
-        <GridRow label="Team label" htmlFor="profile-team">
-          <input
-            id="profile-team"
-            className="field-control field-control-32"
-            value={teamLabel}
-            onChange={(event) => setTeamLabel(event.target.value)}
-          />
-        </GridRow>
-      </SettingsSection>
+      <form className="pv-set-form" onSubmit={(event) => event.preventDefault()} aria-label="Profile and preferences">
+        <Section title="Profile" note={profile.profileNote}>
+          <GridRow label="Name" htmlFor="profile-name">
+            <input id="profile-name" className="pv-inp" value={name} onChange={(event) => setName(event.target.value)} />
+          </GridRow>
+          <GridRow label="Email" htmlFor="profile-email">
+            <div className="pv-fr-inline" style={{ gap: 10 }}>
+              <input id="profile-email" className="pv-inp pv-inp-ro" style={{ flex: 1, minWidth: 0 }} value={email} readOnly />
+              <Button variant="secondary" size="sm" onClick={() => undefined}>
+                Change
+              </Button>
+            </div>
+          </GridRow>
+          <GridRow label="Team label" htmlFor="profile-team">
+            <input id="profile-team" className="pv-inp" value={teamLabel} onChange={(event) => setTeamLabel(event.target.value)} />
+          </GridRow>
+        </Section>
 
-      <SettingsSection title="Email me when" margin={<MarginNote>{profile.notificationsNote}</MarginNote>}>
-        <div className="stack-3">
+        <Section title="Email me when" note={profile.notificationsNote}>
           {profile.notifications.map((notification, index) => (
-            <label key={notification.label} className="check-row">
+            <label key={notification.label} className="pv-sck">
               <input
                 type="checkbox"
                 checked={notifications[index] ?? false}
                 onChange={(event) =>
-                  setNotifications((previous) =>
-                    previous.map((value, i) => (i === index ? event.target.checked : value)),
-                  )
+                  setNotifications((previous) => previous.map((value, i) => (i === index ? event.target.checked : value)))
                 }
               />
               <span>{notificationLabel(notification.label)}</span>
             </label>
           ))}
-        </div>
-      </SettingsSection>
+        </Section>
 
-      <SettingsSection
-        title="Reading"
-        margin={<MarginNote>Sources move below each answer automatically on narrow screens.</MarginNote>}
-      >
-        <GridRow label="Appearance">
-          <div className="segmented" role="radiogroup" aria-label="Appearance">
-            {APPEARANCE_OPTIONS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                role="radio"
-                aria-checked={appearance === option}
-                onClick={() => chooseAppearance(option)}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </GridRow>
-        <GridRow label="Answer text size" htmlFor="profile-text-size">
-          <select
-            id="profile-text-size"
-            className="field-control field-control-32"
-            style={{ width: 160 }}
-            value={textSize}
-            onChange={(event) => setTextSize(event.target.value)}
-          >
-            {profile.reading.textSizeOptions.map((option) => (
-              <option key={option}>{option}</option>
-            ))}
-          </select>
-        </GridRow>
-        <GridRow label="Show sources" htmlFor="profile-sources">
-          <select
-            id="profile-sources"
-            className="field-control field-control-32"
-            style={{ width: 220 }}
-            value={placement}
-            onChange={(event) => setPlacement(event.target.value)}
-          >
-            {profile.reading.sourcePlacementOptions.map((option) => (
-              <option key={option}>{option}</option>
-            ))}
-          </select>
-        </GridRow>
-        <div className="tint-box" aria-label="Reading preview">
-          <p
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: previewPx,
-              lineHeight: 1.6,
-              color: "var(--ink-body)",
-            }}
-          >
-            Preview: every claim stays attached to its source
-            {sourcesBelow ? null : <sup style={{ fontSize: 10, fontWeight: 600 }}>1</sup>}
-          </p>
-          {sourcesBelow ? (
-            <p style={{ fontSize: 12, color: "var(--ink-3)", marginTop: "var(--space-2)" }}>
-              <sup style={{ fontSize: 10, fontWeight: 600 }}>1</sup> Source
-            </p>
-          ) : null}
-        </div>
-      </SettingsSection>
-
-      <SettingsSection title="Signed in" margin={<MarginNote>{profile.twoStepNote}</MarginNote>}>
-        <div>
-          {sessions.map((session) => (
-            <div
-              key={session.name}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "minmax(0, 1fr) 140px 90px",
-                gap: "var(--space-4)",
-                alignItems: "baseline",
-                padding: "10px 0",
-                borderTop: "1px solid var(--rule)",
-                fontSize: 13,
-              }}
-            >
-              <span style={{ color: "var(--ink-body)" }}>{sessionName(session.name)}</span>
-              <span style={{ color: "var(--ink-2)" }}>{session.place}</span>
-              <span style={{ color: "var(--ink-3)" }}>{session.when}</span>
+        <Section title="Reading" note="Sources move below each answer automatically on narrow screens.">
+          <GridRow label="Appearance" labelId="appearance-label">
+            <div className="pv-seg" role="radiogroup" aria-labelledby="appearance-label">
+              {APPEARANCE_OPTIONS.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  role="radio"
+                  aria-checked={appearance === option}
+                  tabIndex={appearance === option ? 0 : -1}
+                  onClick={() => chooseAppearance(option)}
+                  onKeyDown={(event) => {
+                    const step = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 0;
+                    if (!step) return;
+                    event.preventDefault();
+                    const index = APPEARANCE_OPTIONS.indexOf(appearance);
+                    const next = APPEARANCE_OPTIONS[(index + step + APPEARANCE_OPTIONS.length) % APPEARANCE_OPTIONS.length]!;
+                    chooseAppearance(next);
+                    const buttons = event.currentTarget.parentElement?.querySelectorAll("button");
+                    buttons?.[APPEARANCE_OPTIONS.indexOf(next)]?.focus();
+                  }}
+                >
+                  {option}
+                </button>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="row" style={{ marginTop: "var(--space-4)" }}>
-          <Button variant="secondary" size="sm" onClick={() => setSessions((previous) => previous.slice(0, 1))}>
-            Sign out other devices
-          </Button>
-          <Button variant="quiet" size="sm">
-            Sign out
-          </Button>
-        </div>
-      </SettingsSection>
+          </GridRow>
+          <GridRow label="Answer text size" htmlFor="profile-text-size">
+            <select id="profile-text-size" className="pv-sel" style={{ width: 180 }} value={textSize} onChange={(event) => setTextSize(event.target.value)}>
+              {profile.reading.textSizeOptions.map((option) => (
+                <option key={option}>{option}</option>
+              ))}
+            </select>
+          </GridRow>
+          <GridRow label="Show sources" htmlFor="profile-sources">
+            <select id="profile-sources" className="pv-sel" style={{ width: 220, maxWidth: "100%" }} value={placement} onChange={(event) => setPlacement(event.target.value)}>
+              {profile.reading.sourcePlacementOptions.map((option) => (
+                <option key={option}>{option}</option>
+              ))}
+            </select>
+          </GridRow>
+          <p className="pv-preview" aria-label="Reading preview" style={{ fontSize: previewPx }}>
+            <span className="pv-preview-label">Preview:</span>
+            every claim stays attached to its source
+            {sourcesBelow ? null : <span className="footnote" aria-hidden="true">1</span>}.
+            {sourcesBelow ? (
+              <span className="pv-preview-sources">
+                <span className="footnote" aria-hidden="true">1</span> Source
+              </span>
+            ) : null}
+          </p>
+        </Section>
+
+        <Section title="Signed in" note={profile.twoStepNote}>
+          <div role="table" aria-label="Active sessions" className="pv-sessions">
+            {sessions.map((session) => {
+              const now = session.when === "Now";
+              return (
+                <div role="row" key={session.name} className="pv-sr">
+                  <span role="cell" aria-hidden="true">
+                    <Icon name={session.name.includes("iPhone") ? "phone" : "laptop"} style={now ? { color: "var(--ink)" } : undefined} />
+                  </span>
+                  <span role="cell">{sessionName(session.name)}</span>
+                  <span role="cell" style={{ color: "var(--ink-2)" }}>
+                    {session.place}
+                  </span>
+                  <span role="cell" className={now ? "pv-ok-row" : undefined} style={now ? { gap: 6 } : { color: "var(--ink-3)" }}>
+                    {now ? <span className="pv-dot" aria-hidden="true" /> : null}
+                    {session.when}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="pv-fr-inline" style={{ flexWrap: "wrap" }}>
+            <Button variant="secondary" onClick={() => setSessions((previous) => previous.slice(0, 1))} disabled={sessions.length < 2}>
+              Sign out other devices
+            </Button>
+            <Button variant="quiet">Sign out</Button>
+          </div>
+        </Section>
+      </form>
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { LegalFooter } from "../../components/SiteHeader";
+import { Icon, type IconName } from "../../components/Icon";
+import { LegalFooter, SiteBrand } from "../../components/SiteHeader";
 import { getStates } from "../../lib/api";
 import { SignupForm } from "./SignupForm";
 
@@ -22,47 +23,22 @@ async function SignupInner({ searchParams }: { searchParams: SearchParams }) {
   const facts = auth.trialFacts.slice(0, 3);
   const closingFact = auth.trialFacts[3];
 
+  const icons: IconName[] = ["clock", "check", "user"];
+
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "var(--paper)",
-        color: "var(--ink)",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <header
-        className="signup-topbar"
-        style={{
-          padding: "28px 48px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Link href="/" className="wordmark" style={{ fontSize: 22 }}>
-          Cortex
-        </Link>
+    <div className="pm-page">
+      <header className="pm-sys-head">
+        <SiteBrand />
         <span style={{ fontSize: 14, color: "var(--ink-3)" }}>
           Already have a workspace?{" "}
-          <Link href="/login" style={{ color: "var(--ink)" }}>
+          <Link href="/login" style={{ fontWeight: 500 }}>
             Sign in
           </Link>
         </span>
       </header>
 
-      <div
-        style={{
-          flex: 1,
-          padding: "40px 48px 64px",
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          gap: 72,
-        }}
-      >
-        <div style={{ flex: "1 1 360px", maxWidth: 400 }}>
+      <main className="pm-sys-body">
+        <div className="pm-sheet pm-lift" style={{ flex: "1 1 380px", maxWidth: 460, padding: 36 }}>
           <SignupForm
             signupError={auth.signupError}
             initialErrorState={errorState}
@@ -71,44 +47,34 @@ async function SignupInner({ searchParams }: { searchParams: SearchParams }) {
           />
         </div>
 
-        <aside
-          aria-label="What the trial includes"
-          style={{
-            flex: "1 1 300px",
-            maxWidth: 360,
-            paddingTop: 34,
-            display: "flex",
-            flexDirection: "column",
-            gap: 14,
-            fontSize: 14,
-            lineHeight: 1.5,
-            color: "var(--ink-2)",
-          }}
-        >
-          <h2 style={{ margin: 0, fontSize: 13, fontWeight: 400, color: "var(--ink-4)" }}>
+        <aside aria-labelledby="trial-heading" className="pm-sheet pm-trial">
+          <h2 className="pv-lbl" id="trial-heading" style={{ fontSize: 11.5, paddingBottom: 2 }}>
             In the trial
           </h2>
           {facts.map((fact, index) => {
             const lead = factLeads[index];
             const hasLead = lead && fact.startsWith(lead);
             return (
-              <span key={fact}>
-                {hasLead ? (
-                  <>
-                    <b style={{ color: "var(--ink)", fontWeight: 500 }}>{lead}</b>
-                    {fact.slice(lead.length)}
-                  </>
-                ) : (
-                  fact
-                )}
+              <span key={fact} className="pm-perk">
+                <span className="pm-ib" aria-hidden="true">
+                  <Icon name={icons[index] ?? "check"} />
+                </span>
+                <span>
+                  {hasLead ? (
+                    <>
+                      <b>{lead}</b>
+                      {fact.slice(lead.length)}
+                    </>
+                  ) : (
+                    fact
+                  )}
+                </span>
               </span>
             );
           })}
-          {closingFact ? (
-            <span style={{ paddingTop: 14, borderTop: "1px solid var(--rule)" }}>{closingFact}</span>
-          ) : null}
+          {closingFact ? <span className="pm-trial-note">{closingFact}</span> : null}
         </aside>
-      </div>
+      </main>
 
       <LegalFooter />
     </div>

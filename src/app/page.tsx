@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ButtonLink } from "../components/Button";
-import { RichSegments } from "../components/Footnote";
-import { Meter } from "../components/Meter";
+import { Icon, type IconName } from "../components/Icon";
 import { SiteFooter, SiteHeader } from "../components/SiteHeader";
 import { getPlaybooks, getWorkspaceData } from "../lib/api";
 import type { MarginNoteData } from "../lib/types";
@@ -77,24 +76,6 @@ const traceRows = [
   { cite: "—", passage: "Customer interview synthesis · 77 · below 0.70", match: "0.66", aside: true, warn: "" },
 ];
 
-function MarketingH2({ children }: { children: string }) {
-  return (
-    <h2
-      style={{
-        fontFamily: "var(--font-serif)",
-        fontSize: 40,
-        lineHeight: 1.1,
-        fontWeight: 600,
-        letterSpacing: "-0.02em",
-        color: "var(--ink)",
-        maxWidth: "16ch",
-      }}
-    >
-      {children}
-    </h2>
-  );
-}
-
 const excerptQuestion = "Why do buyers hesitate to forward AI answers to legal?";
 const excerptSegments = [
   { text: "Seven of nine teams said an answer is only forwardable if the reviewer can open the document behind it" },
@@ -107,330 +88,269 @@ const excerptSegments = [
   { text: "." },
 ];
 
+const trustIcons: IconName[] = ["shield", "file", "menu", "key"];
+
+function Footnote({ n, on = false }: { n: number; on?: boolean }) {
+  return (
+    <a className={on ? "pm-fn pm-fn-on" : "pm-fn"} href={`#note-${n}`} aria-label={`Source ${n}`}>
+      {n}
+    </a>
+  );
+}
+
 export default function LandingPage() {
   const workspace = getWorkspaceData().workspace;
   const featured = getPlaybooks().featured;
+  const lastNote = excerptNotes.length;
 
   return (
-    <div>
+    <div className="pm-page">
       <SiteHeader current="/" />
 
-      {/* Hero */}
-      <section className="site-wrap" style={{ paddingTop: 96, paddingBottom: 72 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-          <h1 className="display-xl" style={{ maxWidth: "12ch" }}>
-            Answers that can show their work.
-          </h1>
-          <p className="serif-lead" style={{ fontSize: 22, maxWidth: "34em" }}>
-            Cortex is a research workspace for teams that have to forward what they find. Every claim is
-            footnoted to the passage it came from, every good prompt becomes a playbook, and every answer
-            shows its cost before it is written.
+      <main>
+        {/* Hero */}
+        <section className="pm-wrap pm-hero">
+          <h1 className="pm-display">Answers that can show their work.</h1>
+          <p className="pm-lead" style={{ fontSize: 22, lineHeight: 1.55, maxWidth: "34em" }}>
+            Cortex is a research workspace for teams that have to forward what they find. Every claim is footnoted to the
+            passage it came from, every good prompt becomes a playbook, and every answer shows its cost before it is
+            written.
           </p>
-          <div className="row" style={{ gap: 10 }}>
-            <ButtonLink href="/app/new" variant="primary" size="lg">
+          <div className="pm-hero-actions">
+            <ButtonLink href="/app/new" variant="primary" className="pm-btn-xl">
               Start free for 14 days
+              <Icon name="arrowRight" size={15} />
             </ButtonLink>
-            <ButtonLink
-              href="/app/c/launch-evidence"
-              variant="secondary"
-              size="lg"
-              style={{ padding: "0 18px" }}
-            >
+            <ButtonLink href="/app/c/launch-evidence" variant="secondary" className="pm-btn-xl">
               See a real thread
             </ButtonLink>
-            <span className="ui-text muted-3" style={{ marginLeft: 6 }}>
+            <span className="pm-note" style={{ marginLeft: 8 }}>
               No card. $20 of model use included.
             </span>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Product excerpt */}
-      <section aria-label="Example answer" className="site-wrap" style={{ paddingBottom: 104 }}>
-        <div
-          style={{
-            borderTop: "1px solid var(--ink)",
-            paddingTop: 28,
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 56,
-          }}
-        >
-          <div style={{ flex: "1 1 520px", maxWidth: 680 }} className="stack-4">
-            <span className="caption" style={{ color: "var(--ink-4)", fontSize: 13 }}>
-              Asked of 426 interview passages · $0.014
-            </span>
-            <p
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: 30,
-                lineHeight: 1.25,
-                fontWeight: 600,
-                letterSpacing: "-0.015em",
-                color: "var(--ink)",
-              }}
-            >
-              {excerptQuestion}
-            </p>
-            <p className="answer-text" style={{ fontSize: 20 }}>
-              <RichSegments segments={excerptSegments} />
-            </p>
-          </div>
-          <ol
-            style={{
-              flex: "1 1 240px",
-              maxWidth: 300,
-              margin: 0,
-              padding: "30px 0 0",
-              listStyle: "none",
-              display: "flex",
-              flexDirection: "column",
-              gap: 16,
-              fontSize: 13,
-              lineHeight: 1.5,
-              color: "var(--ink-2)",
-            }}
-          >
-            {excerptNotes.map((note) => (
-              <li
-                key={note.id}
-                id={note.id}
-                tabIndex={-1}
-                className="margin-note"
-                style={{ fontSize: 13, lineHeight: 1.5 }}
-              >
-                <span>
-                  <span className="margin-note-number">{note.n}</span>{" "}
-                  <span style={{ color: "var(--ink-2)", fontWeight: 400 }}>{note.documentTitle}</span>
-                  <br />
-                  <span style={{ fontSize: 13, color: "var(--ink-4)" }}>{note.meta}</span>
-                </span>
-                {note.excerpt && note.excerpt.length > 0 ? (
-                  <span className="margin-note-excerpt">
-                    <RichSegments segments={note.excerpt} />
-                  </span>
-                ) : null}
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      {/* 1 · Evidence */}
-      <section className="site-wrap marketing-section">
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 56 }}>
-          <div style={{ flex: "1 1 420px" }} className="stack-4">
-            <span className="section-number">1 · Evidence</span>
-            <MarketingH2>Every claim opens the passage behind it.</MarketingH2>
-            <p className="serif-lead" style={{ fontSize: 19, lineHeight: 1.6, maxWidth: "34em" }}>
-              Cortex reads your documents in passages, not pages. It shows you which ones it used, which it
-              set aside, and why — so when an answer is wrong you can see whether the problem was the
-              question, the source or the search.
-            </p>
-          </div>
-          <div
-            className="fragment evidence-trace"
-            role="img"
-            aria-label="Retrieval trace: four passages cited, one set aside because it was over 30 days old, one below the match minimum."
-            style={{ flex: "1 1 420px", maxWidth: 520, alignSelf: "flex-start", fontSize: 13 }}
-          >
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "26px minmax(0, 1fr) 46px",
-                gap: 12,
-                padding: "8px 0",
-                color: "var(--ink-4)",
-                fontSize: 12,
-              }}
-            >
-              <span>Cite</span>
-              <span>Passage</span>
-              <span style={{ textAlign: "right" }}>Match</span>
+        {/* Product excerpt */}
+        <section aria-label="Example answer" className="pm-wrap" style={{ paddingBottom: 72 }}>
+          <div className="pm-sheet pm-lift pm-excerpt">
+            <div className="pm-excerpt-main">
+              <span className="pv-chip" style={{ alignSelf: "flex-start" }}>
+                <Icon name="database" />
+                Asked of 426 interview passages · <span className="pv-mono" style={{ color: "var(--ink)" }}>$0.014</span>
+              </span>
+              <p className="pm-excerpt-q">{excerptQuestion}</p>
+              <p className="pm-prose">
+                {excerptSegments.map((segment, index) =>
+                  segment.footnote ? (
+                    <Footnote key={index} n={segment.footnote} on={segment.footnote === lastNote} />
+                  ) : segment.mark ? (
+                    <mark key={index}>{segment.text}</mark>
+                  ) : (
+                    <span key={index}>{segment.text}</span>
+                  ),
+                )}
+              </p>
             </div>
-            {traceRows.map((row) => (
-              <div
-                key={`${row.passage}-${row.match}`}
+            <ol aria-label="Sources">
+              {excerptNotes.map((note) => {
+                const [match, date] = note.meta.replace(/^Match\s*/, "").split(" · ");
+                const head = (
+                  <span className="pm-src">
+                    <span className={note.n === lastNote ? "pm-src-n pm-src-n-on" : "pm-src-n"}>{note.n}</span>
+                    <span>
+                      <b>{note.documentTitle}</b>
+                      <br />
+                      Match <span className="pv-mono">{match}</span> · {date}
+                    </span>
+                  </span>
+                );
+                return note.excerpt?.length ? (
+                  <li key={note.id} id={note.id} tabIndex={-1} className="pm-src-card">
+                    {head}
+                    <span className="pm-quote">
+                      {(note.excerpt ?? []).map((segment, index) =>
+                        segment.mark ? <mark key={index}>{segment.text}</mark> : <span key={index}>{segment.text}</span>,
+                      )}
+                    </span>
+                  </li>
+                ) : (
+                  <li key={note.id} id={note.id} tabIndex={-1}>
+                    {head}
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        </section>
+
+        <div className="pm-wrap pm-feats">
+          {/* 1 · Evidence */}
+          <section className="pm-sheet pm-feat" aria-labelledby="feat-evidence">
+            <div className="pm-feat-text">
+              <span className="pm-sn">
+                <span className="pm-nb">1</span>· Evidence
+              </span>
+              <h2 className="pm-h2" id="feat-evidence" style={{ maxWidth: "16ch" }}>
+                Every claim opens the passage behind it.
+              </h2>
+              <p className="pm-lead" style={{ maxWidth: "30em" }}>
+                Cortex reads your documents in passages, not pages. It shows you which ones it used, which it set aside, and
+                why — so when an answer is wrong you can see whether the problem was the question, the source or the search.
+              </p>
+            </div>
+            <div
+              className="pm-inset"
+              role="img"
+              aria-label="Retrieval trace: two passages cited, one set aside because it was over 30 days old, one below the match minimum."
+              style={{ overflow: "hidden" }}
+            >
+              <div className="pm-trow pm-trow-head pv-th" aria-hidden="true">
+                <span>Cite</span>
+                <span>Passage</span>
+                <span style={{ textAlign: "right" }}>Match</span>
+              </div>
+              {traceRows.map((row) => (
+                <div key={`${row.passage}-${row.match}`} className={row.aside ? "pm-trow pm-trow-off" : "pm-trow"}>
+                  <span className={row.aside ? "pm-nb pm-nb-off" : "pm-nb"}>{row.cite}</span>
+                  <span>
+                    {row.passage}
+                    {row.warn ? <span className="warn-text">{row.warn}</span> : null}
+                  </span>
+                  <span className="pm-mbar">
+                    <i>
+                      <b style={{ width: `${Math.round(Number(row.match) * 100)}%` }} />
+                    </i>
+                    {row.match}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* 2 · Playbooks */}
+          <section className="pm-sheet pm-feat" aria-labelledby="feat-playbooks">
+            <div className="pm-feat-text">
+              <span className="pm-sn">
+                <span className="pm-nb">2</span>· Playbooks
+              </span>
+              <h2 className="pm-h2" id="feat-playbooks" style={{ maxWidth: "16ch" }}>
+                The prompt that worked becomes the team’s.
+              </h2>
+              <p className="pm-lead" style={{ maxWidth: "30em" }}>
+                Save a good request as a playbook with inputs, approved sources and checks. Anyone on the team can run it; a
+                run that fails its checks is marked, never quietly shared.
+              </p>
+            </div>
+            <div className="pm-inset" style={{ padding: "22px 24px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, color: "var(--ink-3)" }}>
+                <Icon name="book" style={{ color: "var(--ink)" }} />
+                <span>
+                  {featured.name} · {featured.runs} runs this month · 39 passed checks
+                </span>
+              </span>
+              <p
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "26px minmax(0, 1fr) 46px",
-                  gap: 12,
-                  padding: "9px 0",
-                  borderTop: "1px solid #E4E4E0",
-                  color: row.aside ? "var(--ink-3)" : undefined,
+                  margin: 0,
+                  paddingTop: 14,
+                  borderTop: "1px solid var(--rule-soft)",
+                  font: "400 18px/1.75 var(--font-serif)",
+                  color: "var(--ink-body)",
                 }}
               >
-                <strong style={{ fontWeight: row.aside ? 400 : 600 }}>{row.cite}</strong>
-                <span>
-                  {row.passage}
-                  {row.warn ? <span className="warn-text">{row.warn}</span> : null}
-                </span>
-                <span style={{ textAlign: "right" }}>{row.match}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+                Write a launch brief for <b className="pm-pick">product</b> aimed at <b className="pm-pick">audience</b>. State
+                the single promise in one sentence, then the three strongest pieces of proof…
+              </p>
+            </div>
+          </section>
 
-      {/* 2 · Playbooks */}
-      <section className="site-wrap marketing-section">
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 56 }}>
-          <div style={{ flex: "1 1 420px" }} className="stack-4">
-            <span className="section-number">2 · Playbooks</span>
-            <MarketingH2>The prompt that worked becomes the team’s.</MarketingH2>
-            <p className="serif-lead" style={{ fontSize: 19, lineHeight: 1.6, maxWidth: "34em" }}>
-              Save a good request as a playbook with inputs, approved sources and checks. Anyone on the team
-              can run it; a run that fails its checks is marked, never quietly shared.
-            </p>
-          </div>
-          <div
-            className="fragment stack-3"
-            style={{ flex: "1 1 420px", maxWidth: 520, alignSelf: "flex-start" }}
-          >
-            <span className="caption" style={{ color: "var(--ink-4)" }}>
-              {featured.name} · {featured.runs} runs this month · 39 passed checks
-            </span>
-            <p
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: 17,
-                lineHeight: 1.65,
-                color: "var(--ink-body)",
-              }}
-            >
-              Write a launch brief for{" "}
-              <span className="dotted-input" style={{ fontFamily: "var(--font-sans)", fontSize: 15 }}>
-                product
-              </span>{" "}
-              aimed at{" "}
-              <span className="dotted-input" style={{ fontFamily: "var(--font-sans)", fontSize: 15 }}>
-                audience
+          {/* 3 · Cost */}
+          <section className="pm-sheet pm-feat" aria-labelledby="feat-cost">
+            <div className="pm-feat-text">
+              <span className="pm-sn">
+                <span className="pm-nb">3</span>· Cost
               </span>
-              . State the single promise in one sentence, then the three strongest pieces of proof…
-            </p>
-          </div>
+              <h2 className="pm-h2" id="feat-cost" style={{ maxWidth: "16ch" }}>
+                You see the price before the answer.
+              </h2>
+              <p className="pm-lead" style={{ maxWidth: "30em" }}>
+                Set a ceiling per answer and a limit per month. Cortex estimates each reply before writing it and stops at the
+                line you drew, without touching anything already written.
+              </p>
+            </div>
+            <div className="pm-inset" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+              <p style={{ margin: 0, font: "400 20px/1.5 var(--font-serif)", color: "var(--ink)" }}>
+                <b style={{ fontWeight: 600 }}>${workspace.spend}</b> of the ${workspace.monthlyLimit} limit is spent with three
+                days left. At this pace the workspace reaches the limit around <b style={{ fontWeight: 600 }}>October 8</b>.
+              </p>
+              <div
+                role="img"
+                aria-label={`$${workspace.spend} of $${workspace.monthlyLimit} spent`}
+                style={{ height: 6, borderRadius: 3, background: "var(--hover)" }}
+              >
+                <div
+                  style={{
+                    width: `${Math.round((workspace.spend / workspace.monthlyLimit) * 100)}%`,
+                    height: 6,
+                    borderRadius: 3,
+                    background: "var(--ink)",
+                  }}
+                />
+              </div>
+              <span
+                style={{
+                  padding: "12px 14px",
+                  borderRadius: "var(--radius-l)",
+                  background: "var(--paper-sunk)",
+                  boxShadow: "0 0 0 1px var(--rule)",
+                  fontSize: 13,
+                  lineHeight: 1.5,
+                  color: "var(--ink-2)",
+                }}
+              >
+                About <span className="pv-mono" style={{ color: "var(--ink)" }}>$0.012</span> for this reply.{" "}
+                <span className="pv-mono">$0.030</span> left of this thread’s <span className="pv-mono">$0.08</span> limit.
+              </span>
+            </div>
+          </section>
         </div>
-      </section>
 
-      {/* 3 · Cost */}
-      <section className="site-wrap marketing-section">
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 56 }}>
-          <div style={{ flex: "1 1 420px" }} className="stack-4">
-            <span className="section-number">3 · Cost</span>
-            <MarketingH2>You see the price before the answer.</MarketingH2>
-            <p className="serif-lead" style={{ fontSize: 19, lineHeight: 1.6, maxWidth: "34em" }}>
-              Set a ceiling per answer and a limit per month. Cortex estimates each reply before writing it
-              and stops at the line you drew, without touching anything already written.
-            </p>
-          </div>
-          <div
-            className="fragment"
-            style={{ flex: "1 1 420px", maxWidth: 520, alignSelf: "flex-start" }}
-          >
-            <Meter
-              sentence={
-                <>
-                  <strong style={{ fontWeight: 600 }}>${workspace.spend}</strong> of the $
-                  {workspace.monthlyLimit} limit is spent with three days left. At this pace the workspace
-                  reaches the limit around <strong style={{ fontWeight: 600 }}>October 8</strong>.
-                </>
-              }
-              value={workspace.spend}
-              max={workspace.monthlyLimit}
-              caption={
-                <span style={{ fontSize: 13 }}>
-                  About $0.012 for this reply. $0.030 left of this thread’s $0.08 limit.
-                </span>
-              }
-              label={`$${workspace.spend} of $${workspace.monthlyLimit} spent`}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Trust */}
-      <section className="site-wrap marketing-section" style={{ paddingBottom: 96 }}>
-        <div className="stack-6" style={{ gap: 32 }}>
-          <div className="stack-4">
-            <span className="section-number">For the people who review it</span>
-            <h2
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: 40,
-                lineHeight: 1.1,
-                fontWeight: 600,
-                letterSpacing: "-0.02em",
-                color: "var(--ink)",
-                maxWidth: "22ch",
-              }}
-            >
+        {/* Trust */}
+        <section className="pm-wrap" style={{ paddingTop: 72, paddingBottom: 88, display: "flex", flexDirection: "column", gap: 32 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <span className="pm-sn">For the people who review it</span>
+            <h2 className="pm-h2" style={{ maxWidth: "22ch" }}>
               What security and legal will ask, answered up front.
             </h2>
           </div>
-          <dl
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-              gap: "28px 40px",
-              fontSize: 15,
-              lineHeight: 1.55,
-            }}
-          >
-            {trustPoints.map((point) => (
-              <div key={point.term}>
-                <dt style={{ fontWeight: 600, color: "var(--ink)" }}>{point.term}</dt>
-                <dd style={{ marginTop: 6, color: "var(--ink-2)" }}>{point.definition}</dd>
+          <dl className="pm-tcs">
+            {trustPoints.map((point, index) => (
+              <div key={point.term} className="pm-tc">
+                <span className="pm-ib" aria-hidden="true">
+                  <Icon name={trustIcons[index] ?? "check"} />
+                </span>
+                <dt>{point.term}</dt>
+                <dd>{point.definition}</dd>
               </div>
             ))}
           </dl>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA band */}
-      <section className="cta-band">
-        <div
-          className="site-wrap"
-          style={{
-            paddingTop: 88,
-            paddingBottom: 88,
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "flex-end",
-            justifyContent: "space-between",
-            gap: 32,
-          }}
-        >
-          <h2
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: 52,
-              lineHeight: 1.05,
-              fontWeight: 600,
-              letterSpacing: "-0.03em",
-              maxWidth: "14ch",
-              color: "var(--on-ink)",
-            }}
-          >
-            Bring one question and the documents behind it.
-          </h2>
-          <div className="stack-3" style={{ alignItems: "flex-start" }}>
-            <ButtonLink
-              href="/app/new"
-              variant="primary"
-              size="lg"
-              style={{ background: "var(--on-ink)", borderColor: "var(--on-ink)", color: "var(--ink)" }}
-            >
-              Start free for 14 days
-            </ButtonLink>
-            <span style={{ fontSize: 13, color: "#C9C9C3" }}>
-              $30 per seat after the trial ·{" "}
-              <Link href="/pricing" style={{ color: "var(--on-ink)" }}>
-                pricing
-              </Link>
-            </span>
+        {/* CTA */}
+        <section className="pm-wrap" aria-labelledby="cta-heading">
+          <div className="pm-cta">
+            <h2 id="cta-heading">Bring one question and the documents behind it.</h2>
+            <div className="pm-cta-side">
+              <ButtonLink href="/app/new" variant="secondary" className="pm-btn-xl pm-btn-light">
+                Start free for 14 days
+                <Icon name="arrowRight" size={15} />
+              </ButtonLink>
+              <span>
+                $30 per seat after the trial · <Link href="/pricing">pricing</Link>
+              </span>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
       <SiteFooter />
     </div>

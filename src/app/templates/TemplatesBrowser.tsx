@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
-import type { MouseEvent } from "react";
-import { withDottedInputs } from "../app/playbooks/playbooks-tabs";
+import { useState, type ReactNode } from "react";
+import { Icon } from "../../components/Icon";
 import type { TemplateItem, TemplatesData } from "../../lib/types";
 
 /*
@@ -59,67 +58,46 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
     setExpanded(false);
   }
 
-  function rowHover(event: MouseEvent<HTMLAnchorElement>, on: boolean) {
-    event.currentTarget.style.background = on ? "var(--paper-sunk)" : "";
-  }
-
   const featured = data.featured;
-  const grid = {
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) 170px 130px",
-    gap: 24,
-    alignItems: "baseline",
-  } as const;
 
   return (
-    <div className="stack-2">
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 12,
-          paddingBottom: 10,
-        }}
-      >
-        <div className="filter-row" role="group" aria-label="Filter templates by category">
+    <>
+      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+        <div className="pv-seg pm-seg-ground" role="group" aria-label="Filter templates by category">
           {data.categories.map((item) => (
             <button
               key={item.name}
               type="button"
-              className="filter-button"
-              style={{ fontSize: 14 }}
               aria-pressed={category === item.name}
               onClick={() => updateParams({ category: item.name })}
             >
-              {item.name === "All" ? `All ${item.count}` : item.name}
+              {item.name}
+              {item.name === "All" ? (
+                <span className="pv-mono" style={{ fontSize: 11.5, color: "var(--ink-4)" }}>
+                  {item.count}
+                </span>
+              ) : null}
             </button>
           ))}
         </div>
-        <div>
+        <span className="pm-search">
           <label htmlFor="template-search" className="sr-only">
             Search templates
           </label>
+          <Icon name="search" />
           <input
             id="template-search"
             type="search"
             placeholder="Search templates"
-            className="field-control"
-            style={{ width: 240, minHeight: 34, fontSize: 14 }}
+            className="pv-inp"
             value={query}
             onChange={(event) => updateParams({ q: event.target.value })}
           />
-        </div>
+        </span>
       </div>
 
-      <div className="table-scroll">
-      <div role="table" aria-label="Templates">
-        <div
-          role="row"
-          className="templates-row"
-          style={{ ...grid, padding: "0 0 10px", fontSize: 13, color: "var(--ink-4)" }}
-        >
+      <div role="table" aria-label="Templates" className="pm-sheet" style={{ overflow: "hidden" }}>
+        <div role="row" className="pm-tr pm-tr-head pv-th">
           <span role="columnheader">Template</span>
           <span role="columnheader">Expects</span>
           <span role="columnheader" style={{ textAlign: "right" }}>
@@ -128,168 +106,89 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
         </div>
 
         {featuredMatches ? (
-          <div
-            role="row"
-            style={{
-              borderTop: "1px solid var(--ink)",
-              padding: "22px 0 28px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 18,
-            }}
-          >
-            <div style={grid} className="templates-row">
-              <span role="cell" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <strong
-                  style={{
-                    fontFamily: "var(--font-serif)",
-                    fontSize: 22,
-                    lineHeight: 1.2,
-                    fontWeight: 600,
-                    color: "var(--ink)",
-                  }}
-                >
-                  {featured.name}
-                </strong>
-                <span
-                  style={{
-                    fontFamily: "var(--font-serif)",
-                    fontSize: 16,
-                    lineHeight: 1.5,
-                    color: "var(--ink-2)",
-                  }}
-                >
-                  {featured.description}
+          <div role="row" className="pm-tr-featured">
+            <div className="pm-tr" style={{ padding: 0, border: 0, alignItems: "start" }}>
+              <span role="cell" className="pm-tn">
+                <span className="pm-ib" style={{ background: "var(--ink)" }} aria-hidden="true">
+                  <Icon name="book" style={{ color: "var(--on-ink)" }} />
+                </span>
+                <span style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <b className="pm-tn-title-lg">{featured.name}</b>
+                  <span className="pm-tn-desc-lg">{featured.description}</span>
                 </span>
               </span>
-              <span role="cell" style={{ fontSize: 14, color: "var(--ink-2)" }}>
+              <span role="cell" className="pm-tr-expects" style={{ paddingTop: 6 }}>
                 {featured.expects}
               </span>
-              <span role="cell" style={{ fontSize: 14, color: "var(--ink)", textAlign: "right" }}>
+              <span role="cell" className="pm-cnt" style={{ paddingTop: 8 }}>
                 {featured.copied}
               </span>
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 40 }}>
-              {featured.instructions ? (
-                <p
-                  style={{
-                    flex: "1 1 460px",
-                    maxWidth: 640,
-                    margin: 0,
-                    padding: "18px 20px",
-                    background: "var(--tint)",
-                    borderRadius: "var(--radius-l)",
-                    fontFamily: "var(--font-serif)",
-                    fontSize: 17,
-                    lineHeight: 1.65,
-                    color: "var(--ink-body)",
-                  }}
-                >
-                  {withDottedInputs(featured.instructions)}
-                </p>
-              ) : null}
-              <dl
-                style={{
-                  flex: "1 1 220px",
-                  maxWidth: 280,
-                  margin: 0,
-                  display: "grid",
-                  gridTemplateColumns: "auto minmax(0, 1fr)",
-                  gap: "8px 16px",
-                  fontSize: 13,
-                  lineHeight: 1.45,
-                  color: "var(--ink-2)",
-                  alignContent: "start",
-                }}
-              >
-                <dt style={{ color: "var(--ink-4)" }}>Inputs</dt>
-                <dd style={{ margin: 0 }}>{featured.inputs}</dd>
-                <dt style={{ color: "var(--ink-4)" }}>Checks</dt>
-                <dd style={{ margin: 0 }}>{featured.checks}</dd>
-                <dt style={{ color: "var(--ink-4)" }}>Typical run</dt>
-                <dd style={{ margin: 0 }}>{featured.typicalRun}</dd>
+            <div className="pm-tr-detail">
+              {featured.instructions ? <p className="pm-instructions">{withPicks(featured.instructions)}</p> : null}
+              <dl className="pm-tr-meta">
+                <dt>Inputs</dt>
+                <dd className="pv-mono">{featured.inputs}</dd>
+                <dt>Checks</dt>
+                <dd>{featured.checks}</dd>
+                <dt>Typical run</dt>
+                <dd>{featured.typicalRun}</dd>
               </dl>
             </div>
-            <div>
-              <Link
-                href={`/app/playbooks/${featured.id}/edit`}
-                className="btn btn-primary btn-md"
-                style={{ fontSize: 14 }}
-              >
+            <div className="pm-tr-detail" style={{ gap: 8 }}>
+              <Link href={`/app/playbooks/${featured.id}/edit`} className="btn btn-primary btn-md" style={{ minHeight: 38, padding: "0 16px" }}>
                 Copy to my workspace
+                <Icon name="arrowRight" size={15} />
               </Link>
             </div>
           </div>
         ) : null}
 
-        {visible.map((template, index) => (
-          <Link
-            key={template.id}
-            role="row"
-            className="templates-row"
-            href="#"
-            onMouseEnter={(event) => rowHover(event, true)}
-            onMouseLeave={(event) => rowHover(event, false)}
-            style={{
-              ...grid,
-              padding: "18px 0",
-              borderTop: "1px solid var(--rule)",
-              borderBottom:
-                index === visible.length - 1 && hiddenCount === 0
-                  ? "1px solid var(--rule)"
-                  : undefined,
-              textDecoration: "none",
-              color: "var(--ink)",
-            }}
-          >
-            <span role="cell" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <strong style={{ fontSize: 16, fontWeight: 500 }}>{template.name}</strong>
-              <span
-                style={{
-                  fontFamily: "var(--font-serif)",
-                  fontSize: 15,
-                  lineHeight: 1.5,
-                  color: "var(--ink-3)",
-                }}
-              >
-                {template.description ?? template.inputs}
+        {visible.map((template) => (
+          <Link key={template.id} role="row" className="pm-tr" href="#">
+            <span role="cell" className="pm-tn">
+              <span className="pm-ib" aria-hidden="true">
+                <Icon name="book" />
+              </span>
+              <span style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <b className="pm-tn-title">{template.name}</b>
+                <span className="pm-tn-desc">{template.description ?? template.inputs}</span>
               </span>
             </span>
-            <span role="cell" style={{ fontSize: 14, color: "var(--ink-2)" }}>
+            <span role="cell" className="pm-tr-expects">
               {template.expects ?? template.sources}
             </span>
-            <span role="cell" style={{ fontSize: 14, color: "var(--ink)", textAlign: "right" }}>
+            <span role="cell" className="pm-cnt">
               {template.copied ?? "—"}
             </span>
           </Link>
         ))}
 
         {filtered.length === 0 && !featuredMatches ? (
-          <p className="ui-text muted-3" style={{ padding: "18px 0", borderTop: "1px solid var(--rule)" }}>
-            No templates match that search.
+          <p role="row" style={{ margin: 0, padding: "18px 28px", fontSize: 14, color: "var(--ink-3)" }}>
+            <span role="cell">No templates match that search.</span>
           </p>
         ) : null}
       </div>
-      </div>
 
       {hiddenCount > 0 ? (
-        <div style={{ marginTop: 14 }}>
-          <button
-            type="button"
-            onClick={() => setExpanded(true)}
-            style={{
-              background: "none",
-              border: 0,
-              padding: 0,
-              fontSize: 14,
-              color: "var(--ink-2)",
-              cursor: "pointer",
-            }}
-          >
-            Show {hiddenCount} more
-          </button>
-        </div>
+        <button type="button" className="btn btn-secondary btn-md" style={{ alignSelf: "center", marginTop: 8 }} onClick={() => setExpanded(true)}>
+          Show {hiddenCount} more
+        </button>
       ) : null}
-    </div>
+    </>
+  );
+}
+
+/* "[product]" placeholders in template instructions → underlined picks. */
+function withPicks(instructions: string): ReactNode {
+  return instructions.split(/(\[[^\]]+\])/g).map((part, index) =>
+    part.startsWith("[") && part.endsWith("]") ? (
+      <span key={index} className="pm-pick">
+        {part.slice(1, -1)}
+      </span>
+    ) : (
+      <span key={index}>{part}</span>
+    ),
   );
 }

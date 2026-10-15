@@ -3,15 +3,36 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "../../../components/Button";
+import { Icon, type IconName } from "../../../components/Icon";
+import { SettingsHeader } from "../../../components/Shells";
 import { getMembers } from "../../../lib/api";
 import type { Member, Role } from "../../../lib/types";
+import { cx } from "../../../lib/utils";
 import { InviteForm } from "./InviteForm";
 
 const ROLE_CYCLE: Role[] = ["Editor", "Viewer", "Admin"];
+const ROLE_ICONS: Record<Role, IconName> = { Viewer: "eye", Editor: "pencil", Admin: "shield" };
 
 function roleOptions(current: Role): Role[] {
   const start = ROLE_CYCLE.indexOf(current);
   return [0, 1, 2].map((i) => ROLE_CYCLE[(start + i) % 3]!);
+}
+
+function memberTone(name: string) {
+  if (name === "Sheku Koroma") return "pv-av-ink";
+  if (name.startsWith("Maya")) return "pv-av-1";
+  if (name.startsWith("Priya")) return "pv-av-sel";
+  if (name.startsWith("Owen")) return "pv-av-2";
+  return "pv-av-3";
+}
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 }
 
 interface PendingInvite {
@@ -21,8 +42,6 @@ interface PendingInvite {
   label: string;
   status: string;
 }
-
-const quietRowButton = { minHeight: 26, padding: "0 6px" } as const;
 
 export default function MembersPage() {
   const data = getMembers();
@@ -72,116 +91,133 @@ export default function MembersPage() {
 
   return (
     <>
-      <header className="page-head">
-        <h1 className="page-title">Members</h1>
-        <p className="summary-sentence">{data.summary}</p>
-      </header>
+      <SettingsHeader
+        title="Members"
+        lede={data.summary}
+        actions={
+          <span className="pv-avs pv-avs-tight5" aria-hidden="true">
+            {members.map((member) => (
+              <span key={member.id} className={`pv-av ${memberTone(member.name)}`}>
+                {initials(member.name)}
+              </span>
+            ))}
+          </span>
+        }
+      />
 
-      <div className="doc-margin">
-        <div className="doc-column stack-6" style={{ maxWidth: 680 }}>
+      <div className="pv-split">
+        <div className="pv-set-main">
           <InviteForm onInvite={addInvite} />
 
-          <section aria-label="Everyone in this workspace">
-            <div className="table-scroll">
-              <table className="data-table members-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Person</th>
-                    <th scope="col">Role</th>
-                    <th scope="col">Last active</th>
-                    <th scope="col">
-                      <span className="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {members.map((member) => (
-                    <tr key={member.id} style={member.note ? { background: "#FAFAF8" } : undefined}>
-                      <td>
-                        <span style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>
-                          {member.name}
-                          {member.self ? (
-                            <span style={{ fontWeight: 400, color: "var(--ink-4)" }}> (you)</span>
-                          ) : null}
-                        </span>
-                        <br />
-                        <span className="caption">{member.detail}</span>
-                      </td>
-                      <td>
-                        {member.self ? (
-                          <span>{member.role}</span>
-                        ) : (
-                          <select
-                            className="field-control"
-                            value={member.role}
-                            onChange={(event) => changeRole(member.id, event.target.value as Role)}
-                            aria-label={`Role for ${member.name}`}
-                            style={{ minHeight: 30, height: 30, padding: "0 8px", width: "auto", minWidth: 110 }}
-                          >
-                            {roleOptions(member.role).map((role) => (
-                              <option key={role} value={role}>
-                                {role}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                      </td>
-                      <td>{member.lastActive}</td>
-                      <td style={{ textAlign: "right" }}>
-                        {member.note ? (
-                          <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{member.note}</span>
-                        ) : member.removable ? (
-                          <Button variant="quiet" size="sm" style={quietRowButton} onClick={() => removeMember(member.id)}>
-                            Remove
-                          </Button>
-                        ) : null}
-                      </td>
-                    </tr>
-                  ))}
-                  {invites.map((invite) => (
-                    <tr key={invite.id}>
-                      <td>
-                        <span style={{ fontSize: 13, fontWeight: 500, color: "var(--ink-2)" }}>{invite.email}</span>
-                        <br />
-                        <span className="caption">{invite.label}</span>
-                      </td>
-                      <td>{invite.role}</td>
-                      <td>{invite.status}</td>
-                      <td>
-                        <span className="row" style={{ flexWrap: "nowrap", gap: "var(--space-1)" }}>
-                          <Button variant="quiet" size="sm" style={quietRowButton} onClick={() => resendInvite(invite.id)}>
-                            {resentId === invite.id ? "Resent" : "Resend"}
-                          </Button>
-                          <Button variant="quiet" size="sm" style={quietRowButton} onClick={() => cancelInvite(invite.id)}>
-                            Cancel
-                          </Button>
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </div>
-
-        <aside className="margin-column">
-          <div className="margin-box">
-            <h2 className="margin-box-title">What each role can do</h2>
-            {data.roleDefinitions.map((definition) => (
-              <div key={definition.role}>
-                <p style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>{definition.role}</p>
-                <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>{definition.description}</p>
+          <div className="pv-card" style={{ overflow: "hidden" }}>
+            <div role="table" aria-label="Everyone in this workspace" className="pv-rows">
+              <div role="row" className="pv-row pv-row-head pv-memr pv-th pv-stack">
+                <span role="columnheader">Person</span>
+                <span role="columnheader">Role</span>
+                <span role="columnheader">Last active</span>
+                <span role="columnheader">
+                  <span className="sr-only">Actions</span>
+                </span>
               </div>
-            ))}
-            <div className="hairline-top" style={{ paddingTop: "var(--space-4)" }}>
-              <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>
-                {footerParts[0]}
-                <Link href="/settings/audit">audit log</Link>
-                {footerParts.slice(1).join("audit log")}
-              </p>
+              {members.map((member) => (
+                <div role="row" key={member.id} className={cx("pv-row pv-memr pv-stack", member.note && "pv-row-soft")}>
+                  <span role="cell" className="pv-who">
+                    <span className={`pv-av pv-av-lg ${memberTone(member.name)}`} aria-hidden="true">
+                      {initials(member.name)}
+                    </span>
+                    <span className="pv-who-text">
+                      <b>
+                        {member.name}
+                        {member.self ? <span className="pv-you"> (you)</span> : null}
+                      </b>
+                      <span>{member.detail}</span>
+                    </span>
+                  </span>
+                  <span role="cell">
+                    {member.self ? (
+                      <span className="pv-tag pv-tag-dk">{member.role}</span>
+                    ) : (
+                      <select
+                        className={cx("pv-sel pv-sel-sm", member.note && "pv-sel-changed")}
+                        style={{ width: 110 }}
+                        value={member.role}
+                        onChange={(event) => changeRole(member.id, event.target.value as Role)}
+                        aria-label={`Role for ${member.name}`}
+                      >
+                        {roleOptions(member.role).map((role) => (
+                          <option key={role} value={role}>
+                            {role}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </span>
+                  <span role="cell" className={member.self ? "pv-ok-row" : undefined} style={member.self ? undefined : { color: "var(--ink-2)" }}>
+                    <span className="pv-row-cell-label">Last active</span>
+                    {member.self ? <span className="pv-dot" aria-hidden="true" /> : null}
+                    {member.lastActive}
+                  </span>
+                  <span role="cell" className="pv-row-actions">
+                    {member.note ? (
+                      <span className="pv-tag pv-tag-hl">{member.note}</span>
+                    ) : member.removable ? (
+                      <Button variant="quiet" size="sm" onClick={() => removeMember(member.id)} aria-label={`Remove ${member.name}`}>
+                        Remove
+                      </Button>
+                    ) : null}
+                  </span>
+                </div>
+              ))}
+              {invites.map((invite) => (
+                <div role="row" key={invite.id} className="pv-row pv-memr pv-stack pv-row-soft">
+                  <span role="cell" className="pv-who">
+                    <span className="pv-av pv-av-lg pv-av-ln" aria-hidden="true">
+                      <Icon name="mail" />
+                    </span>
+                    <span className="pv-who-text">
+                      <b className="pv-who-email">{invite.email}</b>
+                      <span>{invite.label}</span>
+                    </span>
+                  </span>
+                  <span role="cell">
+                    <span className="pv-tag pv-tag-ln">{invite.role}</span>
+                  </span>
+                  <span role="cell" className="pv-ok-row" style={{ color: "var(--ink-3)" }}>
+                    <span className="pv-dot pv-dot-empty" aria-hidden="true" />
+                    {invite.status}
+                  </span>
+                  <span role="cell" className="pv-row-actions">
+                    <Button variant="secondary" size="sm" onClick={() => resendInvite(invite.id)} aria-label={`Resend invite to ${invite.email}`}>
+                      {resentId === invite.id ? "Resent" : "Resend"}
+                    </Button>
+                    <Button variant="quiet" size="sm" onClick={() => cancelInvite(invite.id)} aria-label={`Cancel invite to ${invite.email}`}>
+                      Cancel
+                    </Button>
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
+        </div>
+
+        <aside className="pv-side" aria-labelledby="roles-heading">
+          <h2 className="pv-lbl pv-side-lbl" id="roles-heading">
+            What each role can do
+          </h2>
+          {data.roleDefinitions.map((definition) => (
+            <section key={definition.role} className="pv-card pv-role">
+              <b>
+                <Icon name={ROLE_ICONS[definition.role]} style={{ color: "var(--ink-3)" }} />
+                {definition.role}
+              </b>
+              <span>{definition.description}</span>
+            </section>
+          ))}
+          <p className="pv-side-foot">
+            {footerParts[0]}
+            <Link href="/settings/audit">audit log</Link>
+            {footerParts.slice(1).join("audit log")}
+          </p>
         </aside>
       </div>
     </>

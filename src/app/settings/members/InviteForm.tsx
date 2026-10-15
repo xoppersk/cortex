@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "../../../components/Button";
+import { Icon } from "../../../components/Icon";
 import type { Role } from "../../../lib/types";
 
 const ROLES: Role[] = ["Editor", "Viewer", "Admin"];
@@ -33,52 +34,47 @@ export function InviteForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: "var(--space-3)", flexWrap: "wrap" }}>
-        <div className="field" style={{ flex: "1 1 260px" }}>
-          <label className="field-label" htmlFor="invite-email" style={{ fontSize: 12, color: "var(--ink-3)" }}>
-            Invite by email
-          </label>
-          <input
-            id="invite-email"
-            className="field-control field-control-32"
-            style={{ height: 34 }}
-            type="email"
-            autoComplete="email"
-            placeholder="name@company.com, separate several with commas"
-            value={email}
-            onChange={(event) => {
-              setEmail(event.target.value);
-              if (error) setError(validateEmail(event.target.value));
-            }}
-            aria-invalid={error ? true : undefined}
-            aria-describedby={error ? "invite-email-error" : undefined}
-          />
-        </div>
-        <div className="field">
-          <label className="field-label" htmlFor="invite-role" style={{ fontSize: 12, color: "var(--ink-3)" }}>
-            Role
-          </label>
-          <select
-            id="invite-role"
-            className="field-control field-control-32"
-            style={{ height: 34, width: "auto" }}
-            value={role}
-            onChange={(event) => setRole(event.target.value as Role)}
-          >
-            {ROLES.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </div>
-        <Button variant="primary" type="submit" style={{ minHeight: 34 }}>
-          Send invite
-        </Button>
+    <form onSubmit={handleSubmit} noValidate className="pv-card pv-invite" aria-label="Invite people">
+      <div className="pv-invite-field" style={{ flex: "1 1 300px" }}>
+        <label htmlFor="invite-email">Invite by email</label>
+        <input
+          id="invite-email"
+          className="pv-inp"
+          style={{ width: "100%" }}
+          type="email"
+          autoComplete="email"
+          placeholder="name@company.com, separate several with commas"
+          value={email}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            if (error) setError(validateEmail(event.target.value));
+          }}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? "invite-email-error" : undefined}
+        />
       </div>
+      <div className="pv-invite-field">
+        <label htmlFor="invite-role">Role</label>
+        <select
+          id="invite-role"
+          className="pv-sel"
+          style={{ width: 120 }}
+          value={role}
+          onChange={(event) => setRole(event.target.value as Role)}
+        >
+          {ROLES.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </div>
+      <Button variant="primary" type="submit" style={{ minHeight: 34, padding: "0 16px" }}>
+        <Icon name="mail" size={14} strokeWidth={1.6} style={{ color: "currentColor" }} />
+        Send invite
+      </Button>
       {error ? (
-        <p className="field-error" id="invite-email-error" role="alert" style={{ marginTop: "var(--space-2)" }}>
+        <p className="pv-invite-error" id="invite-email-error" role="alert">
           {error}
         </p>
       ) : null}

@@ -108,6 +108,47 @@ const paths: Record<string, ReactNode> = {
     </>
   ),
   pencil: <path d="M10.5 2.5 13.5 5.5 6 13H3v-3z" />,
+  mail: (
+    <>
+      <path d="M2.5 4.5h11v7h-11z" />
+      <path d="m2.5 4.5 5.5 4 5.5-4" />
+    </>
+  ),
+  shield: <path d="M8 1.5 13 3.5v4c0 3-2.2 5.3-5 6.5-2.8-1.2-5-3.5-5-6.5v-4z" />,
+  copy: (
+    <>
+      <rect x="5.5" y="5.5" width="8" height="8" rx="1.5" />
+      <path d="M10.5 5.5v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2" />
+    </>
+  ),
+  card: (
+    <>
+      <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" />
+      <path d="M1.5 6.5h13" />
+    </>
+  ),
+  laptop: (
+    <>
+      <rect x="2" y="3" width="12" height="8" rx="1" />
+      <path d="M1 13.5h14" />
+    </>
+  ),
+  phone: (
+    <>
+      <rect x="4.5" y="1.5" width="7" height="13" rx="1.5" />
+      <path d="M7 12.5h2" />
+    </>
+  ),
+  arrowLeft: <path d="M13 8H3M7 4 3 8l4 4" />,
+  user: (
+    <>
+      <circle cx="8" cy="5.5" r="2.5" />
+      <path d="M3 13.5c.6-2.4 2.6-4 5-4s4.4 1.6 5 4" />
+    </>
+  ),
+  menu: <path d="M3 4h10M3 8h10M3 12h6" />,
+  close: <path d="m4 4 8 8M12 4l-8 8" />,
+  github: <path d="M6 13c-3 1-3-1.5-4.5-2M10 14v-2.2c0-.7.1-1-.4-1.5 1.7-.2 3.4-.8 3.4-3.6a2.8 2.8 0 0 0-.8-2 2.6 2.6 0 0 0-.1-2s-.6-.2-2.1.8a7 7 0 0 0-3.8 0C4.7 2.5 4.1 2.7 4.1 2.7a2.6 2.6 0 0 0-.1 2 2.8 2.8 0 0 0-.8 2c0 2.8 1.7 3.4 3.4 3.6-.4.4-.5.9-.4 1.5V14" />,
 };
 
 const filled: Record<string, ReactNode> = {

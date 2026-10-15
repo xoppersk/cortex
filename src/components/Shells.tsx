@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useSyncExternalStore, type FormEvent, type ReactNode } from "react";
-import { fixtureTotals, getConversations, getMembers, getStates, getThread, getWorkspaceData } from "../lib/api";
+import { fixtureTotals, getAdminData, getConversations, getMembers, getStates, getThread, getWorkspaceData } from "../lib/api";
 import { Icon } from "./Icon";
 import { NavItem } from "./NavItem";
 
@@ -65,7 +65,19 @@ function NewConversationButton() {
   );
 }
 
-function UserRow({ initials, name, sub, avatarClass = "pv-av-ink" }: { initials: string; name: string; sub?: string; avatarClass?: string }) {
+function UserRow({
+  initials,
+  name,
+  sub,
+  avatarClass = "pv-av-ink",
+  settingsCurrent = false,
+}: {
+  initials: string;
+  name: string;
+  sub?: string;
+  avatarClass?: string;
+  settingsCurrent?: boolean;
+}) {
   return (
     <div className="pv-user">
       <span className={`pv-av ${avatarClass}`} aria-hidden="true">
@@ -75,38 +87,15 @@ function UserRow({ initials, name, sub, avatarClass = "pv-av-ink" }: { initials:
         {name}
         {sub ? <span className="pv-user-sub">{sub}</span> : null}
       </span>
-      <Link href="/settings/profile" aria-label="Settings">
+      <Link href="/settings/profile" aria-label="Settings" aria-current={settingsCurrent ? "page" : undefined}>
         <Icon name="gear" />
       </Link>
     </div>
   );
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
+function useRailSearch() {
   const router = useRouter();
-  const params = useQueryString();
-  const { workspace, currentUser } = getWorkspaceData();
-  const conversations = getConversations();
-  const thread = getThread();
-
-  const state = params.get("state");
-  const onThread = pathname.startsWith("/app/c/");
-  const sourcesDown = onThread && state === "sources-down";
-  const limit = onThread && state === "limit";
-  const viewer = state === "viewer" && (onThread || pathname === "/app/new");
-  const emptyTrial = pathname === "/app/history" && state === "empty";
-  const brandSub = `${workspace.name} · ${workspace.plan}`;
-
-  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
-  const onConversations = onThread || pathname === "/app/new" || isActive("/app/history");
-
-  function onSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const q = String(data.get("q") ?? "").trim();
-    router.push(q ? `/app/history?q=${encodeURIComponent(q)}` : "/app/history");
-  }
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -123,6 +112,32 @@ export function AppShell({ children }: { children: ReactNode }) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  return function onSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const q = String(data.get("q") ?? "").trim();
+    router.push(q ? `/app/history?q=${encodeURIComponent(q)}` : "/app/history");
+  };
+}
+
+export function AppShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const params = useQueryString();
+  const { workspace, currentUser } = getWorkspaceData();
+  const conversations = getConversations();
+  const onSearch = useRailSearch();
+
+  const state = params.get("state");
+  const onThread = pathname.startsWith("/app/c/");
+  const sourcesDown = onThread && state === "sources-down";
+  const limit = onThread && state === "limit";
+  const viewer = state === "viewer" && (onThread || pathname === "/app/new");
+  const emptyTrial = pathname === "/app/history" && state === "empty";
+  const brandSub = `${workspace.name} · ${workspace.plan}`;
+
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const onConversations = onThread || pathname === "/app/new" || isActive("/app/history");
 
   if (viewer) {
     const shared = ["launch-narrative", "procurement-objections", "q4-decision-memo"]
@@ -186,19 +201,45 @@ export function AppShell({ children }: { children: ReactNode }) {
     );
   }
 
+  return (
+    <div className="pv-shell">
+      <WorkspaceRail onConversations={onConversations} isActive={isActive} sourcesDown={sourcesDown} limit={limit} selectedThreadId={onThread ? pathname.split("/")[3] : undefined} onSearch={onSearch} />
+      <main className="pv-panel">{children}</main>
+    </div>
+  );
+}
+
+function WorkspaceRail({
+  onConversations = false,
+  isActive = () => false,
+  sourcesDown = false,
+  limit = false,
+  selectedThreadId,
+  settingsCurrent = false,
+  onSearch,
+}: {
+  onConversations?: boolean;
+  isActive?: (href: string) => boolean;
+  sourcesDown?: boolean;
+  limit?: boolean;
+  selectedThreadId?: string;
+  settingsCurrent?: boolean;
+  onSearch: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+  const { workspace, currentUser } = getWorkspaceData();
+  const conversations = getConversations();
+  const thread = getThread();
+  const brandSub = `${workspace.name} · ${workspace.plan}`;
   const recent = conversations.conversations.slice(0, 5);
   const spendShown = limit ? workspace.monthlyLimit : workspace.spend;
   const spendPercent = Math.min(100, (spendShown / workspace.monthlyLimit) * 100);
   const limitTitle = thread.limitState.title;
   const selectedId = limit
     ? recent.find((c) => c.title === limitTitle)?.id
-    : onThread
-      ? pathname.split("/")[3]
-      : undefined;
+    : selectedThreadId;
   const writingId = thread.id;
 
   return (
-    <div className="pv-shell">
       <nav className="pv-rail" aria-label="Workspace">
         <RailBrand sub={brandSub} />
         <div className="pv-rail-actions">
@@ -267,10 +308,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               : `Past the ${Math.round(workspace.alertThreshold * 100)}% alert · ${workspace.billingCycle.daysLeft} days left in cycle`}
           </span>
         </section>
-        <UserRow initials="SK" name={currentUser.name} />
+        <UserRow initials="SK" name={currentUser.name} settingsCurrent={settingsCurrent} />
       </nav>
-      <main className="pv-panel">{children}</main>
-    </div>
   );
 }
 
@@ -280,52 +319,94 @@ function monthName(short: string) {
   return `${(m && months[m]) ?? m} ${d}`;
 }
 
+const SETTINGS_TABS = {
+  workspace: [
+    { href: "/settings/workspace", label: "General" },
+    { href: "/settings/members", label: "Members", count: "members" as const },
+    { href: "/settings/api-keys", label: "API keys", count: "keys" as const },
+    { href: "/settings/billing", label: "Billing" },
+    { href: "/settings/audit", label: "Audit log" },
+  ],
+  you: [{ href: "/settings/profile", label: "Profile and preferences" }],
+};
+
+/*
+ * Settings (Premium v2): the same workspace rail (the gear in the user row is
+ * the current page) and, inside the white panel, a tab bar grouped into
+ * Workspace and You with a way back to conversations.
+ */
 export function SettingsShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const members = getMembers();
-  const isActive = (href: string) => pathname === href;
+  const { apiKeys } = getAdminData();
+  const onSearch = useRailSearch();
+  const counts = { members: members.members.length + 1, keys: apiKeys.rows.length };
+
+  const tab = (item: { href: string; label: string; count?: "members" | "keys" }) => (
+    <Link key={item.href} href={item.href} aria-current={pathname === item.href ? "page" : undefined}>
+      {item.label}
+      {item.count ? <span className="pv-tabs-count">{counts[item.count]}</span> : null}
+    </Link>
+  );
+
   return (
-    <div className="settings-shell">
-      <aside className="settings-sidebar">
-        <div className="sidebar-brand">
-          <span className="wordmark">Settings</span>
-          <span className="caption">Sevyn Labs</span>
-        </div>
-        <Link href="/app/history" className="nav-item">
-          <span>← Back to conversations</span>
-        </Link>
-        <nav className="sidebar-nav" aria-label="Settings">
-          <div className="sidebar-nav-group">
-            <p className="nav-section-title">Workspace</p>
-            <NavItem href="/settings/workspace" active={isActive("/settings/workspace")}>
-              General
-            </NavItem>
-            <NavItem
-              href="/settings/members"
-              active={isActive("/settings/members")}
-              count={members.members.length + 1}
-            >
-              Members
-            </NavItem>
-            <NavItem href="/settings/api-keys" active={isActive("/settings/api-keys")} count={4}>
-              API keys
-            </NavItem>
-            <NavItem href="/settings/billing" active={isActive("/settings/billing")}>
-              Billing
-            </NavItem>
-            <NavItem href="/settings/audit" active={isActive("/settings/audit")}>
-              Audit log
-            </NavItem>
-          </div>
-          <div className="sidebar-nav-group">
-            <p className="nav-section-title">You</p>
-            <NavItem href="/settings/profile" active={isActive("/settings/profile")}>
-              Profile and preferences
-            </NavItem>
-          </div>
+    <div className="pv-shell">
+      <WorkspaceRail onSearch={onSearch} settingsCurrent />
+      <main className="pv-panel">
+        <nav className="pv-subnav pv-settings-tabs" aria-label="Settings">
+          <span className="pv-tabs-group" role="group" aria-labelledby="settings-group-workspace">
+            <span className="pv-tabs-label" id="settings-group-workspace">
+              Workspace
+            </span>
+            {SETTINGS_TABS.workspace.map(tab)}
+          </span>
+          <span className="pv-tabs-sep" aria-hidden="true" />
+          <span className="pv-tabs-group" role="group" aria-labelledby="settings-group-you">
+            <span className="pv-tabs-label" id="settings-group-you">
+              You
+            </span>
+            {SETTINGS_TABS.you.map(tab)}
+          </span>
+          <Link href="/app/history" className="pv-tabs-back">
+            ← Back to conversations
+          </Link>
         </nav>
-      </aside>
-      <main className="settings-main">{children}</main>
+        {children}
+      </main>
     </div>
+  );
+}
+
+/* Settings page header: breadcrumb, serif title, optional lede and actions. */
+export function SettingsHeader({
+  title,
+  lede,
+  actions,
+  leading,
+  align = "end",
+  width,
+}: {
+  title: string;
+  lede?: ReactNode;
+  actions?: ReactNode;
+  leading?: ReactNode;
+  align?: "end" | "center";
+  width?: number;
+}) {
+  const { workspace } = getWorkspaceData();
+  return (
+    <header className={`pv-ph pv-set-ph${align === "center" ? " pv-set-ph-center" : ""}`}>
+      <div className="pv-set-ph-main">
+        {leading}
+        <div className="pv-set-ph-text" style={width ? { maxWidth: width } : undefined}>
+          <span className="pv-ph-sub">
+            {workspace.name} <span className="pv-crumb-sep">/</span> Settings
+          </span>
+          <h1>{title}</h1>
+          {lede ? <p className="pv-lede">{lede}</p> : null}
+        </div>
+      </div>
+      {actions ? <div className="pv-ph-actions">{actions}</div> : null}
+    </header>
   );
 }

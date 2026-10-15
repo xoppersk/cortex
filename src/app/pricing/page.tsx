@@ -1,66 +1,57 @@
 import type { Metadata } from "next";
-import type { CSSProperties, ReactNode } from "react";
 import { ButtonLink } from "../../components/Button";
+import { Icon } from "../../components/Icon";
 import { SiteFooter, SiteHeader } from "../../components/SiteHeader";
 
 export const metadata: Metadata = { title: { absolute: "Cortex — Pricing" } };
 
 /*
- * P-02 Pricing. Copy follows the canvas reference
- * (.canvas-ref/screens/P-02-pricing/body-clean.html) exactly.
- * Note: the canvas contains four FAQ entries, not five.
- * Trial CTAs point to /app/new (NewChat) as the design specifies;
- * "Talk to sales" keeps the design's "#" placeholder.
+ * Pricing (Premium v2): three plan sheets (Team raised on an ink ring), a
+ * worked monthly cost, the comparison table and the billing FAQ, each on a
+ * white sheet over the ground. Trial CTAs point to /app/new; "Talk to
+ * sales" keeps the design's "#" placeholder.
  */
 
-const planHeading: CSSProperties = {
-  fontFamily: "var(--font-serif)",
-  fontSize: 24,
-  lineHeight: 1.2,
-  fontWeight: 600,
-  color: "var(--ink)",
-};
-
-const planPrice: CSSProperties = {
-  fontFamily: "var(--font-serif)",
-  fontSize: 40,
-  lineHeight: 1,
-  fontWeight: 600,
-  color: "var(--ink)",
-};
-
-const planList: CSSProperties = {
-  listStyle: "none",
-  display: "flex",
-  flexDirection: "column",
-  gap: 9,
-  fontSize: 14,
-  lineHeight: 1.45,
-  color: "var(--ink-body)",
-};
-
-function Plan({
-  featured = false,
-  children,
-}: {
-  featured?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <div
-      style={{
-        flex: "1 1 300px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 18,
-        paddingTop: 28,
-        borderTop: featured ? "2px solid var(--ink)" : "1px solid var(--rule-strong)",
-      }}
-    >
-      {children}
-    </div>
-  );
-}
+const plans = [
+  {
+    name: "Trial",
+    price: "$0",
+    priceNote: "for 14 days",
+    features: ["Up to 3 people", "$20 of model use included", "Two knowledge bases, 25 documents", "Everything in Team"],
+    cta: "Start the trial",
+    href: "/app/new",
+  },
+  {
+    name: "Team",
+    price: "$30",
+    priceNote: "per seat a month, plus model use at cost",
+    features: [
+      "Unlimited knowledge bases and documents",
+      "Playbooks with checks and versions",
+      "Evaluations, nightly",
+      "Per-answer and monthly spending limits",
+      "Audit log kept one year",
+      "Viewers are free",
+    ],
+    cta: "Start with Team",
+    href: "/app/new",
+    featured: true,
+  },
+  {
+    name: "Enterprise",
+    price: "Annual",
+    priceNote: "contract",
+    features: [
+      "Single sign-on and SCIM",
+      "Custom retention, up to 10 years",
+      "Audit log streamed to your SIEM",
+      "Data residency in the US or EU",
+      "A named contact and a 99.9% uptime commitment",
+    ],
+    cta: "Talk to sales",
+    href: "#",
+  },
+];
 
 const comparisonRows: Array<[string, string, string, string]> = [
   ["Cited answers with margin sources", "Yes", "Yes", "Yes"],
@@ -70,23 +61,6 @@ const comparisonRows: Array<[string, string, string, string]> = [
   ["Audit log", "—", "1 year, CSV export", "Streamed to your SIEM"],
   ["Sign-in", "Email", "Email, Google, two-step", "SSO, SCIM"],
 ];
-
-const compareGrid: CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "minmax(0, 1.4fr) repeat(3, minmax(0, 1fr))",
-  gap: 16,
-  padding: "12px 0",
-  borderTop: "1px solid var(--rule)",
-  fontSize: 14,
-};
-
-const exampleRow: CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "minmax(0, 1fr) 100px",
-  gap: 16,
-  padding: "12px 0",
-  borderTop: "1px solid var(--rule)",
-};
 
 const faqs = [
   {
@@ -114,238 +88,144 @@ const faqs = [
   },
 ];
 
-const faqDetails: CSSProperties = { borderTop: "1px solid var(--rule)", padding: "18px 0" };
-const faqSummary: CSSProperties = {
-  cursor: "pointer",
-  fontFamily: "var(--font-serif)",
-  fontSize: 17,
-  lineHeight: 1.35,
-  fontWeight: 600,
-  color: "var(--ink)",
-};
-const faqAnswer: CSSProperties = {
-  marginTop: 10,
-  fontSize: 15,
-  lineHeight: 1.6,
-  color: "var(--ink-2)",
-  maxWidth: "40em",
-};
-
 export default function PricingPage() {
   return (
-    <div>
+    <div className="pm-page">
       <SiteHeader current="/pricing" />
 
-      <section className="site-wrap" style={{ paddingTop: 80, paddingBottom: 56 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-          <h1 className="display-l" style={{ fontSize: 64, lineHeight: 1.04, maxWidth: "14ch" }}>
+      <main>
+        <section className="pm-wrap pm-hero" style={{ paddingTop: 80, paddingBottom: 56, gap: 22 }}>
+          <h1 className="pm-display" style={{ fontSize: 68, lineHeight: 1.02, letterSpacing: "-0.035em", maxWidth: "14ch" }}>
             Pay for seats. Pay for answers at cost.
           </h1>
-          <p className="serif-lead" style={{ fontSize: 21, maxWidth: "34em" }}>
-            A flat price per person, plus the model use your team actually spends — with a ceiling you set,
-            so the bill can’t surprise you.
+          <p className="pm-lead" style={{ fontSize: 21, lineHeight: 1.55, maxWidth: "34em" }}>
+            A flat price per person, plus the model use your team actually spends — with a ceiling you set, so the bill
+            can’t surprise you.
           </p>
-        </div>
-      </section>
+        </section>
 
-      <section aria-label="Plans" className="site-wrap" style={{ paddingBottom: 80 }}>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 40 }}>
-          <Plan>
-            <h2 style={planHeading}>Trial</h2>
-            <p style={{ fontSize: 15, color: "var(--ink-2)" }}>
-              <strong style={planPrice}>$0</strong> for 14 days
-            </p>
-            <ul style={planList}>
-              <li>Up to 3 people</li>
-              <li>$20 of model use included</li>
-              <li>Two knowledge bases, 25 documents</li>
-              <li>Everything in Team</li>
-            </ul>
-            <div style={{ marginTop: "auto", display: "flex" }}>
-              <ButtonLink href="/app/new" variant="secondary" size="lg" className="btn-block" style={{ justifyContent: "center" }}>
-                Start the trial
+        <section aria-label="Plans" className="pm-wrap pm-plans" style={{ paddingBottom: 16, gap: 16 }}>
+          {plans.map((plan) => (
+            <div key={plan.name} className={plan.featured ? "pm-sheet pm-plan pm-plan-featured" : "pm-sheet pm-plan"}>
+              <h2>
+                {plan.name}
+                {plan.featured ? <span className="pv-tag pv-tag-dk">Most teams</span> : null}
+              </h2>
+              <p className="pm-price">
+                <b>{plan.price}</b> {plan.priceNote}
+              </p>
+              <ul>
+                {plan.features.map((feature) => (
+                  <li key={feature}>
+                    <Icon name="check" size={14} strokeWidth={1.8} />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <ButtonLink href={plan.href} variant={plan.featured ? "primary" : "secondary"} className="pm-btn-xl">
+                {plan.cta}
               </ButtonLink>
             </div>
-          </Plan>
+          ))}
+        </section>
 
-          <Plan featured>
-            <div className="row-between" style={{ alignItems: "baseline" }}>
-              <h2 style={planHeading}>Team</h2>
-              <span style={{ fontSize: 13, color: "var(--ink-3)" }}>Most teams</span>
+        <div className="pm-wrap" style={{ paddingTop: 16, paddingBottom: 72, display: "flex", flexDirection: "column", gap: 16 }}>
+          <section className="pm-sheet pm-feat" style={{ padding: "52px 56px", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 540px)" }} aria-labelledby="month-heading">
+            <div className="pm-feat-text" style={{ gap: 16 }}>
+              <h2 className="pm-h2" id="month-heading" style={{ fontSize: 38, maxWidth: "14ch" }}>
+                What a month actually costs
+              </h2>
+              <p className="pm-lead" style={{ fontSize: 18, maxWidth: "30em" }}>
+                A typical cited answer costs two to four cents. Here is a five-person research team asking about 60 questions
+                each working day.
+              </p>
             </div>
-            <p style={{ fontSize: 15, color: "var(--ink-2)" }}>
-              <strong style={planPrice}>$30</strong> per seat a month, plus model use at cost
-            </p>
-            <ul style={planList}>
-              <li>Unlimited knowledge bases and documents</li>
-              <li>Playbooks with checks and versions</li>
-              <li>Evaluations, nightly</li>
-              <li>Per-answer and monthly spending limits</li>
-              <li>Audit log kept one year</li>
-              <li>Viewers are free</li>
-            </ul>
-            <div style={{ marginTop: "auto", display: "flex" }}>
-              <ButtonLink href="/app/new" variant="primary" size="lg" className="btn-block" style={{ justifyContent: "center" }}>
-                Start with Team
-              </ButtonLink>
-            </div>
-          </Plan>
-
-          <Plan>
-            <h2 style={planHeading}>Enterprise</h2>
-            <p style={{ fontSize: 15, color: "var(--ink-2)" }}>
-              <strong style={planPrice}>Annual</strong> contract
-            </p>
-            <ul style={planList}>
-              <li>Single sign-on and SCIM</li>
-              <li>Custom retention, up to 10 years</li>
-              <li>Audit log streamed to your SIEM</li>
-              <li>Data residency in the US or EU</li>
-              <li>A named contact and a 99.9% uptime commitment</li>
-            </ul>
-            <div style={{ marginTop: "auto", display: "flex" }}>
-              <ButtonLink href="#" variant="secondary" size="lg" className="btn-block" style={{ justifyContent: "center" }}>
-                Talk to sales
-              </ButtonLink>
-            </div>
-          </Plan>
-        </div>
-      </section>
-
-      <section className="site-wrap marketing-section" style={{ paddingBottom: 72 }}>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 56 }}>
-          <div style={{ flex: "1 1 360px" }} className="stack-4">
-            <h2
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: 36,
-                lineHeight: 1.1,
-                fontWeight: 600,
-                letterSpacing: "-0.02em",
-                color: "var(--ink)",
-                maxWidth: "14ch",
-              }}
-            >
-              What a month actually costs
-            </h2>
-            <p className="answer-text" style={{ maxWidth: "30em" }}>
-              A typical cited answer costs two to four cents. Here is a five-person research team asking
-              about 60 questions each working day.
-            </p>
-          </div>
-          <div style={{ flex: "1 1 420px", maxWidth: 520, fontSize: 15 }} className="cost-rows">
-            <div style={exampleRow}>
-              <span>5 seats × $30</span>
-              <span style={{ textAlign: "right" }}>$150</span>
-            </div>
-            <div style={exampleRow}>
-              <span>
-                About 1,300 answers × $0.03
-                <br />
-                <span style={{ fontSize: 13, color: "var(--ink-3)" }}>
-                  60 a day for 22 working days
-                </span>
-              </span>
-              <span style={{ textAlign: "right" }}>$40</span>
-            </div>
-            <div style={exampleRow}>
-              <span>Indexing 30 new documents</span>
-              <span style={{ textAlign: "right" }}>$4</span>
-            </div>
-            <div
-              style={{ ...exampleRow, borderTop: "1px solid var(--ink)", fontWeight: 600 }}
-            >
-              <span>About</span>
-              <span style={{ textAlign: "right" }}>$194 a month</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="site-wrap marketing-section" style={{ paddingBottom: 72 }}>
-        <div className="stack-5">
-          <h2
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: 36,
-              lineHeight: 1.1,
-              fontWeight: 600,
-              letterSpacing: "-0.02em",
-              color: "var(--ink)",
-            }}
-          >
-            Compare plans
-          </h2>
-          <div style={{ overflowX: "auto" }} className="compare-scroll">
-            <div role="table" aria-label="Plan comparison" style={{ minWidth: 640 }} className="compare-table">
-              <div
-                role="row"
-                style={{ ...compareGrid, borderTop: 0, fontSize: 13, color: "var(--ink-4)" }}
-              >
-                <span role="columnheader">
-                  <span className="sr-only">Feature</span>
-                </span>
-                <span role="columnheader">Trial</span>
-                <span role="columnheader">Team</span>
-                <span role="columnheader">Enterprise</span>
+            <div className="pm-inset" style={{ overflow: "hidden" }}>
+              <div className="pm-rc" style={{ borderTop: 0 }}>
+                <span>5 seats × $30</span>
+                <span>$150</span>
               </div>
-              {comparisonRows.map((row, index) => (
+              <div className="pm-rc">
+                <span>
+                  About 1,300 answers × $0.03
+                  <br />
+                  <span style={{ fontSize: 13, color: "var(--ink-3)" }}>60 a day for 22 working days</span>
+                </span>
+                <span>$40</span>
+              </div>
+              <div className="pm-rc">
+                <span>Indexing 30 new documents</span>
+                <span>$4</span>
+              </div>
+              <div className="pm-rc pm-rc-total" style={{ borderTopWidth: 1.5 }}>
+                <span>About</span>
+                <span style={{ fontWeight: 500 }}>$194 a month</span>
+              </div>
+            </div>
+          </section>
+
+          <section className="pm-sheet" style={{ overflow: "hidden", display: "flex", flexDirection: "column" }} aria-labelledby="compare-heading">
+            <h2 className="pm-h2" id="compare-heading" style={{ fontSize: 38, padding: "44px 28px 24px" }}>
+              Compare plans
+            </h2>
+            <div style={{ overflowX: "auto" }}>
+              <div role="table" aria-labelledby="compare-heading" className="pm-compare">
                 <div
-                  key={row[0]}
                   role="row"
-                  style={{
-                    ...compareGrid,
-                    borderBottom:
-                      index === comparisonRows.length - 1 ? "1px solid var(--rule)" : undefined,
-                  }}
+                  className="pm-cr pv-th"
+                  style={{ background: "var(--side)", borderTop: "1px solid var(--rule)", borderBottom: "1px solid var(--rule)", paddingTop: 14, paddingBottom: 14 }}
                 >
-                  <span role="cell" style={{ color: "var(--ink)" }}>{row[0]}</span>
-                  <span role="cell" style={{ color: "var(--ink-2)" }}>{row[1]}</span>
-                  <span role="cell" style={{ color: "var(--ink-2)" }}>{row[2]}</span>
-                  <span role="cell" style={{ color: "var(--ink-2)" }}>{row[3]}</span>
+                  <span role="columnheader">
+                    <span className="sr-only">Feature</span>
+                  </span>
+                  <span role="columnheader">Trial</span>
+                  <span role="columnheader" style={{ color: "var(--ink)" }}>
+                    Team
+                  </span>
+                  <span role="columnheader">Enterprise</span>
                 </div>
+                {comparisonRows.map((row, index) => (
+                  <div
+                    key={row[0]}
+                    role="row"
+                    className="pm-cr"
+                    style={{ borderTop: index === 0 ? 0 : undefined, paddingBottom: index === comparisonRows.length - 1 ? 22 : undefined }}
+                  >
+                    {row.map((cell, cellIndex) =>
+                      cellIndex > 0 && cell === "Yes" ? (
+                        <span key={cellIndex} role="cell" className="pm-y">
+                          <Icon name="check" size={13} strokeWidth={1.8} style={{ color: "var(--ink)" }} />
+                          Yes
+                        </span>
+                      ) : (
+                        <span key={cellIndex} role="cell">
+                          {cell}
+                        </span>
+                      ),
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="pm-sheet pm-feat pm-faq" style={{ padding: "48px 56px", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 680px)", gap: 56, alignItems: "start" }} aria-labelledby="faq-heading">
+            <h2 className="pm-h2" id="faq-heading" style={{ fontSize: 38, maxWidth: "10ch" }}>
+              Questions about the bill
+            </h2>
+            <div>
+              {faqs.map((faq, index) => (
+                <details key={faq.question} open={faq.open || undefined} style={index === faqs.length - 1 ? { paddingBottom: 0 } : undefined}>
+                  <summary>{faq.question}</summary>
+                  <p>{faq.answer}</p>
+                </details>
               ))}
             </div>
-          </div>
+          </section>
         </div>
-      </section>
+      </main>
 
-      <section className="site-wrap marketing-section" style={{ paddingBottom: 96 }}>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 56 }}>
-          <h2
-            style={{
-              flex: "1 1 280px",
-              fontFamily: "var(--font-serif)",
-              fontSize: 36,
-              lineHeight: 1.1,
-              fontWeight: 600,
-              letterSpacing: "-0.02em",
-              color: "var(--ink)",
-            }}
-          >
-            Questions about the bill
-          </h2>
-          <div style={{ flex: "2 1 520px", maxWidth: 680 }}>
-            {faqs.map((faq, index) => (
-              <details
-                key={faq.question}
-                open={faq.open || undefined}
-                style={{
-                  ...faqDetails,
-                  borderBottom: index === faqs.length - 1 ? "1px solid var(--rule)" : undefined,
-                }}
-              >
-                <summary style={faqSummary}>{faq.question}</summary>
-                <p style={faqAnswer}>{faq.answer}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div className="hairline-top">
-        <SiteFooter />
-      </div>
+      <SiteFooter />
     </div>
   );
 }

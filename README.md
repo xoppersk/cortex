@@ -60,6 +60,18 @@ rules. The tokens live in `src/app/globals.css`; the Premium v2 layer uses
   letter-spaced caps. Text never below 11px.
 - **Icons.** Small inline SVG strokes (1.5–1.8px) from
   `src/components/Icon.tsx`. No emoji, no icon fonts.
+- **Settings.** The same rail (the gear in the user row is the current page)
+  and, inside the panel, a tab bar grouped Workspace (General, Members, API
+  keys, Billing, Audit log) and You (Profile and preferences) with
+  "← Back to conversations". Pages open with `SettingsHeader` (breadcrumb,
+  serif title, lede); forms are white section cards with a consequence note
+  on the right (`pv-ss`); the section holding an unsaved change gets an ink
+  ring and the changed input a highlight ring.
+- **Public and system screens.** The `#F3F3F1` ground with white 16px
+  sheets (`pm-` classes): pill navigation in the site header (current page is
+  a white card), the C monogram brand, lifted cards for forms, an ink panel
+  for the sign-in quote and closing CTA, and a hairline legal line on
+  auth/system screens.
 - One primary (ink) button per view. Summaries are written sentences.
 
 ## Routes
@@ -71,12 +83,12 @@ rules. The tokens live in `src/app/globals.css`; the Premium v2 layer uses
 | Settings | `/settings/members`, `/settings/workspace`, `/settings/api-keys`, `/settings/billing`, `/settings/audit`, `/settings/profile` |
 | Public | `/`, `/pricing`, `/templates`, `/docs/citations`, `/changelog` |
 | System | `/login`, `/signup`, `/invite/[token]`, `/upgrade`, custom 404 |
-| Dev | `/dev/components` — every design-system component in its documented states |
 
 System states are reachable in context via query toggles, e.g.
 `/app/c/launch-evidence?state=sources-down` (catalog unreachable),
 `?state=limit` (monthly limit hit), `/app/new?state=viewer` (Viewer role),
-`/app/history?state=empty`, `/signup?state=error`.
+`/app/history?state=empty`. `/signup` opens in its designed personal-email
+error state (`?state=error` is the same; `?state=clean` starts empty).
 
 ## Develop
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { Button, type ButtonSize, type ButtonVariant } from "./Button";
 
 export function CopyButton({
@@ -10,6 +10,8 @@ export function CopyButton({
   variant = "quiet",
   size = "sm",
   style,
+  className,
+  icon,
 }: {
   text: string;
   label?: string;
@@ -17,6 +19,8 @@ export function CopyButton({
   variant?: ButtonVariant;
   size?: ButtonSize;
   style?: CSSProperties;
+  className?: string;
+  icon?: ReactNode;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -36,7 +40,8 @@ export function CopyButton({
   }
 
   return (
-    <Button variant={variant} size={size} style={style} onClick={copy} aria-live="polite">
+    <Button variant={variant} size={size} style={style} className={className} onClick={copy} aria-live="polite">
+      {icon}
       {copied ? copiedLabel : label}
     </Button>
   );
