@@ -61,14 +61,14 @@ export function SiteFooter({ wrapClass = "pm-wrap" }: { wrapClass?: string }) {
         <a href="#">Security</a>
         <a href="#">Privacy</a>
       </nav>
-      <span>© 2026 [Company]</span>
+      <span>© 2026 Sevyn Labs</span>
     </footer>
   );
 }
 
 /*
  * LegalFooter: one line on auth and standalone screens (Login, Signup,
- * Invite, Upgrade, 404) — © 2026 [Company] left; Privacy / Terms / Security /
+ * Invite, Upgrade, 404) — © 2026 Sevyn Labs left; Privacy / Terms / Security /
  * Status / Help right on a hairline. Help reaches Docs; the other items keep
  * the designs' "#" placeholders. Login passes its shorter set.
  */
@@ -89,7 +89,7 @@ export function LegalFooter({
 }) {
   return (
     <footer className="pm-foot pm-legal" style={style}>
-      <span>© 2026 [Company]</span>
+      <span>© 2026 Sevyn Labs</span>
       <nav aria-label="Legal">
         {items.map((item) =>
           item.href.startsWith("/") ? (
