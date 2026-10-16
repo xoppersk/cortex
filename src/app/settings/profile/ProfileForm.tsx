@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useSyncExternalStore, type ReactNode } from "react";
-import { Button } from "../../../components/Button";
-import { SettingsSection } from "../../../components/SettingsSection";
 import type { AdminData } from "../../../lib/types";
 
 type Profile = AdminData["profile"];
@@ -45,54 +43,55 @@ function getStoredTheme(): string | null {
   }
 }
 
-function MarginNote({ children }: { children: ReactNode }) {
-  return <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>{children}</p>;
-}
-
-function GridRow({ label, htmlFor, children }: { label: string; htmlFor?: string; children: ReactNode }) {
+function Section({
+  title,
+  note,
+  labelledBy,
+  children,
+}: {
+  title: string;
+  note: ReactNode;
+  labelledBy: string;
+  children: ReactNode;
+}) {
   return (
-    <div className="settings-grid" style={{ alignItems: "center", marginBottom: "var(--space-4)" }}>
-      {htmlFor ? (
-        <label className="settings-grid-label" htmlFor={htmlFor} style={{ paddingTop: 0 }}>
-          {label}
-        </label>
-      ) : (
-        <span className="settings-grid-label" style={{ paddingTop: 0 }}>
-          {label}
-        </span>
-      )}
-      <div>{children}</div>
-    </div>
+    <section className="card-sec ad-sec" aria-labelledby={labelledBy}>
+      <div className="card-sec-body">
+        <h2 id={labelledBy}>{title}</h2>
+        {children}
+      </div>
+      <p className="card-sec-note">{note}</p>
+    </section>
   );
 }
 
-function notificationLabel(label: string): ReactNode {
-  const suffix = " · admins only";
-  if (label.endsWith(suffix)) {
-    return (
-      <>
-        {label.slice(0, -suffix.length)}
-        <span style={{ color: "var(--ink-3)" }}>{suffix}</span>
-      </>
-    );
-  }
-  return label;
+function MonitorIcon() {
+  return (
+    <svg className="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" style={{ color: "var(--ink)" }}>
+      <rect x="2" y="3" width="12" height="8" rx="1" />
+      <path d="M1 13.5h14" />
+    </svg>
+  );
 }
 
-function sessionName(name: string): ReactNode {
-  const suffix = " · this device";
-  if (name.endsWith(suffix)) {
-    return (
-      <>
-        <span style={{ fontWeight: 500, color: "var(--ink)" }}>{name.slice(0, -suffix.length)}</span>
-        {suffix}
-      </>
-    );
-  }
-  return <span style={{ fontWeight: 500, color: "var(--ink)" }}>{name}</span>;
+function PhoneIcon() {
+  return (
+    <svg className="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+      <rect x="4.5" y="1.5" width="7" height="13" rx="1.5" />
+      <path d="M7 12.5h2" />
+    </svg>
+  );
 }
 
-export function ProfileForm({ profile, email }: { profile: Profile; email: string }) {
+export function ProfileForm({
+  profile,
+  email,
+  workspaceName,
+}: {
+  profile: Profile;
+  email: string;
+  workspaceName: string;
+}) {
   const [name, setName] = useState(profile.name);
   const [teamLabel, setTeamLabel] = useState(profile.teamLabel);
   const [notifications, setNotifications] = useState(profile.notifications.map((n) => n.checked));
@@ -124,156 +123,221 @@ export function ProfileForm({ profile, email }: { profile: Profile; email: strin
   const previewPx = TEXT_SIZE_PX[textSize] ?? 18;
   const sourcesBelow = placement === "Below each answer";
 
+  const initials = profile.name
+    .split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("");
+
   return (
     <div>
-      <div
-        className="bleed-head"
-        style={{ paddingTop: 28, paddingBottom: 18, marginBottom: "var(--space-2)" }}
-      >
-        <h1 className="page-title">Profile and preferences</h1>
-      </div>
-
-      <SettingsSection title="Profile" margin={<MarginNote>{profile.profileNote}</MarginNote>}>
-        <GridRow label="Name" htmlFor="profile-name">
-          <input
-            id="profile-name"
-            className="field-control field-control-32"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-          />
-        </GridRow>
-        <GridRow label="Email" htmlFor="profile-email">
-          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
-            <input id="profile-email" className="field-control field-control-32" value={email} readOnly />
-            <a href="#" onClick={(event) => event.preventDefault()} style={{ fontSize: 12, whiteSpace: "nowrap" }}>
-              Change
-            </a>
+      <header className="ph ad-ph ad-ph-center">
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <span className="av ad-ph-avatar" aria-hidden="true">
+            {initials}
+          </span>
+          <div className="ad-ph-left ad-ph-left-tight">
+            <span className="sub">
+              {workspaceName} <span className="sep">/</span> Settings
+            </span>
+            <h1>Profile and preferences</h1>
           </div>
-        </GridRow>
-        <GridRow label="Team label" htmlFor="profile-team">
-          <input
-            id="profile-team"
-            className="field-control field-control-32"
-            value={teamLabel}
-            onChange={(event) => setTeamLabel(event.target.value)}
-          />
-        </GridRow>
-      </SettingsSection>
+        </div>
+      </header>
 
-      <SettingsSection title="Email me when" margin={<MarginNote>{profile.notificationsNote}</MarginNote>}>
-        <div className="stack-3">
-          {profile.notifications.map((notification, index) => (
-            <label key={notification.label} className="check-row">
+      <form
+        className="ad-formwrap"
+        onSubmit={(event) => event.preventDefault()}
+      >
+        <Section title="Profile" labelledBy="pf-profile-h" note={profile.profileNote}>
+          <div className="fr">
+            <label htmlFor="profile-name">Name</label>
+            <input
+              id="profile-name"
+              className="inp"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+            />
+          </div>
+          <div className="fr">
+            <label htmlFor="profile-email">Email</label>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <input
-                type="checkbox"
-                checked={notifications[index] ?? false}
-                onChange={(event) =>
-                  setNotifications((previous) =>
-                    previous.map((value, i) => (i === index ? event.target.checked : value)),
-                  )
-                }
+                id="profile-email"
+                className="inp"
+                value={email}
+                readOnly
+                style={{ flex: 1, minWidth: 0, background: "var(--tint)", color: "var(--ink-2)" }}
               />
-              <span>{notificationLabel(notification.label)}</span>
-            </label>
-          ))}
-        </div>
-      </SettingsSection>
-
-      <SettingsSection
-        title="Reading"
-        margin={<MarginNote>Sources move below each answer automatically on narrow screens.</MarginNote>}
-      >
-        <GridRow label="Appearance">
-          <div className="segmented" role="radiogroup" aria-label="Appearance">
-            {APPEARANCE_OPTIONS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                role="radio"
-                aria-checked={appearance === option}
-                onClick={() => chooseAppearance(option)}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </GridRow>
-        <GridRow label="Answer text size" htmlFor="profile-text-size">
-          <select
-            id="profile-text-size"
-            className="field-control field-control-32"
-            style={{ width: 160 }}
-            value={textSize}
-            onChange={(event) => setTextSize(event.target.value)}
-          >
-            {profile.reading.textSizeOptions.map((option) => (
-              <option key={option}>{option}</option>
-            ))}
-          </select>
-        </GridRow>
-        <GridRow label="Show sources" htmlFor="profile-sources">
-          <select
-            id="profile-sources"
-            className="field-control field-control-32"
-            style={{ width: 220 }}
-            value={placement}
-            onChange={(event) => setPlacement(event.target.value)}
-          >
-            {profile.reading.sourcePlacementOptions.map((option) => (
-              <option key={option}>{option}</option>
-            ))}
-          </select>
-        </GridRow>
-        <div className="tint-box" aria-label="Reading preview">
-          <p
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: previewPx,
-              lineHeight: 1.6,
-              color: "var(--ink-body)",
-            }}
-          >
-            Preview: every claim stays attached to its source
-            {sourcesBelow ? null : <sup style={{ fontSize: 10, fontWeight: 600 }}>1</sup>}
-          </p>
-          {sourcesBelow ? (
-            <p style={{ fontSize: 12, color: "var(--ink-3)", marginTop: "var(--space-2)" }}>
-              <sup style={{ fontSize: 10, fontWeight: 600 }}>1</sup> Source
-            </p>
-          ) : null}
-        </div>
-      </SettingsSection>
-
-      <SettingsSection title="Signed in" margin={<MarginNote>{profile.twoStepNote}</MarginNote>}>
-        <div>
-          {sessions.map((session) => (
-            <div
-              key={session.name}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "minmax(0, 1fr) 140px 90px",
-                gap: "var(--space-4)",
-                alignItems: "baseline",
-                padding: "10px 0",
-                borderTop: "1px solid var(--rule)",
-                fontSize: 13,
-              }}
-            >
-              <span style={{ color: "var(--ink-body)" }}>{sessionName(session.name)}</span>
-              <span style={{ color: "var(--ink-2)" }}>{session.place}</span>
-              <span style={{ color: "var(--ink-3)" }}>{session.when}</span>
+              {/* Canvas placeholder (href="#"); no change-email screen exists in this phase. */}
+              <a href="#" onClick={(event) => event.preventDefault()} className="btn sm">
+                Change
+              </a>
             </div>
-          ))}
-        </div>
-        <div className="row" style={{ marginTop: "var(--space-4)" }}>
-          <Button variant="secondary" size="sm" onClick={() => setSessions((previous) => previous.slice(0, 1))}>
-            Sign out other devices
-          </Button>
-          <Button variant="quiet" size="sm">
-            Sign out
-          </Button>
-        </div>
-      </SettingsSection>
+          </div>
+          <div className="fr">
+            <label htmlFor="profile-team">Team label</label>
+            <input
+              id="profile-team"
+              className="inp"
+              value={teamLabel}
+              onChange={(event) => setTeamLabel(event.target.value)}
+            />
+          </div>
+        </Section>
+
+        <Section title="Email me when" labelledBy="pf-email-h" note={profile.notificationsNote}>
+          {profile.notifications.map((notification, index) => {
+            const suffix = " · admins only";
+            const hasSuffix = notification.label.endsWith(suffix);
+            return (
+              <label key={notification.label} className="ad-ck">
+                <input
+                  type="checkbox"
+                  checked={notifications[index] ?? false}
+                  onChange={(event) =>
+                    setNotifications((previous) =>
+                      previous.map((value, i) => (i === index ? event.target.checked : value)),
+                    )
+                  }
+                />
+                <span>
+                  {hasSuffix ? (
+                    <>
+                      {notification.label.slice(0, -suffix.length)}{" "}
+                      <span className="tag ln" style={{ marginLeft: 4 }}>
+                        admins only
+                      </span>
+                    </>
+                  ) : (
+                    notification.label
+                  )}
+                </span>
+              </label>
+            );
+          })}
+        </Section>
+
+        <Section
+          title="Reading"
+          labelledBy="pf-reading-h"
+          note="Sources move below each answer automatically on narrow screens."
+        >
+          <div className="fr">
+            <span id="profile-appearance">Appearance</span>
+            <div role="radiogroup" aria-labelledby="profile-appearance" className="seg" style={{ justifySelf: "start" }}>
+              {APPEARANCE_OPTIONS.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  role="radio"
+                  aria-checked={appearance === option}
+                  onClick={() => chooseAppearance(option)}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="fr">
+            <label htmlFor="profile-text-size">Answer text size</label>
+            <select
+              id="profile-text-size"
+              className="sel ad-sel"
+              style={{ width: 180 }}
+              value={textSize}
+              onChange={(event) => setTextSize(event.target.value)}
+            >
+              {profile.reading.textSizeOptions.map((option) => (
+                <option key={option}>{option}</option>
+              ))}
+            </select>
+          </div>
+          <div className="fr">
+            <label htmlFor="profile-sources">Show sources</label>
+            <select
+              id="profile-sources"
+              className="sel ad-sel"
+              style={{ width: 220 }}
+              value={placement}
+              onChange={(event) => setPlacement(event.target.value)}
+            >
+              {profile.reading.sourcePlacementOptions.map((option) => (
+                <option key={option}>{option}</option>
+              ))}
+            </select>
+          </div>
+          <p className="ad-preview" style={{ fontSize: previewPx }} aria-label="Reading preview">
+            <span className="ad-preview-label">Preview:</span>
+            every claim stays attached to its source
+            {sourcesBelow ? null : (
+              <>
+                <span className="cite">1</span>.
+              </>
+            )}
+            {sourcesBelow ? (
+              <span
+                style={{
+                  display: "block",
+                  marginTop: "var(--space-2)",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 12,
+                  color: "var(--ink-3)",
+                }}
+              >
+                <span className="cite">1</span> Source
+              </span>
+            ) : null}
+          </p>
+        </Section>
+
+        <Section title="Signed in" labelledBy="pf-signedin-h" note={profile.twoStepNote}>
+          <div className="ad-sessions" role="table" aria-label="Active sessions">
+            {sessions.map((session, index) => {
+              const suffix = " · this device";
+              const isThisDevice = session.name.endsWith(suffix);
+              const displayName = isThisDevice ? session.name.slice(0, -suffix.length) : session.name;
+              const isPhone = displayName.includes("iPhone");
+              return (
+                <div key={session.name} role="row" className="ad-sr2" style={index === 0 ? { borderTop: 0 } : undefined}>
+                  <span role="cell" aria-hidden="true">
+                    {isPhone ? <PhoneIcon /> : <MonitorIcon />}
+                  </span>
+                  <span role="cell">
+                    <b style={{ fontWeight: 600, color: "var(--ink)" }}>{displayName}</b>
+                    {isThisDevice ? (
+                      <span className="tag dk" style={{ marginLeft: 8 }}>
+                        this device
+                      </span>
+                    ) : null}
+                  </span>
+                  <span role="cell" className="ad-sr2-place" style={{ color: "var(--ink-2)" }}>
+                    {session.place}
+                  </span>
+                  <span role="cell">
+                    {session.when === "Now" ? (
+                      <span style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--ink)" }}>
+                        <span className="ad-dot" aria-hidden="true" />
+                        Now
+                      </span>
+                    ) : (
+                      <span style={{ color: "var(--ink-3)" }}>{session.when}</span>
+                    )}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            <button type="button" className="btn" onClick={() => setSessions((previous) => previous.slice(0, 1))}>
+              Sign out other devices
+            </button>
+            <button type="button" className="btn gh">
+              Sign out
+            </button>
+          </div>
+        </Section>
+      </form>
     </div>
   );
 }

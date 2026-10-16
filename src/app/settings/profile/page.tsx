@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: { absolute: "Cortex — Profile and p
 
 export default function ProfilePage() {
   const { profile } = getAdminData();
-  const { currentUser } = getWorkspaceData();
+  const { currentUser, workspace } = getWorkspaceData();
 
-  return <ProfileForm profile={profile} email={currentUser.email} />;
+  return <ProfileForm profile={profile} email={currentUser.email} workspaceName={workspace.name} />;
 }
