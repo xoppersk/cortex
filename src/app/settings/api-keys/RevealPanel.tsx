@@ -1,7 +1,51 @@
 "use client";
 
-import { Button } from "../../../components/Button";
-import { CopyButton } from "../../../components/CopyButton";
+import { useState } from "react";
+
+/* AUD-16: the screen's Copy key button carries the copy glyph left of the
+   label. Rendered as a local button (not the shared CopyButton) so the
+   glyph can sit inside it; clipboard behaviour mirrors CopyButton. */
+function CopyKeyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      textarea.remove();
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <button
+      type="button"
+      className="btn"
+      style={{ height: 38, padding: "0 14px", borderColor: "#FFFFFF" }}
+      onClick={copy}
+      aria-live="polite"
+    >
+      <svg
+        className="ad-copy-ic"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        aria-hidden="true"
+      >
+        <rect x="5.5" y="5.5" width="8" height="8" rx="1.5" />
+        <path d="M10.5 5.5v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2" />
+      </svg>
+      {copied ? "Copied" : "Copy key"}
+    </button>
+  );
+}
 
 export interface RevealView {
   heading: string;
@@ -21,73 +65,53 @@ export function RevealPanel({
   onStored: () => void;
 }) {
   return (
-    <section
-      aria-labelledby="reveal-heading"
-      style={{
-        border: "1px solid var(--ink)",
-        borderRadius: "var(--radius-l)",
-        background: "var(--paper)",
-        padding: "20px 22px",
-        display: "flex",
-        gap: "var(--space-6)",
-        flexWrap: "wrap",
-      }}
-    >
-      <div className="stack-4" style={{ flex: "1 1 340px", minWidth: 0 }}>
-        <div className="stack-2">
-          <h2 id="reveal-heading" style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)" }}>
-            {reveal.heading}
-          </h2>
-          <p className="ui-text">{reveal.body}</p>
-        </div>
-        <div className="stack-2">
-          <label className="field-label" htmlFor="reveal-key">
+    <section aria-labelledby="reveal-heading" className="ad-reveal">
+      <div className="ad-reveal-main">
+        <h2 id="reveal-heading" className="ad-reveal-title">
+          <span className="ad-reveal-badge" aria-hidden="true">
+            <svg
+              viewBox="0 0 16 16"
+              width="13"
+              height="13"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              aria-hidden="true"
+            >
+              <path d="m3 8.5 3 3 7-7" />
+            </svg>
+          </span>
+          {reveal.heading}
+        </h2>
+        <p className="ad-reveal-body">{reveal.body}</p>
+        <div className="ad-reveal-row">
+          <label className="sr-only" htmlFor="reveal-key">
             {reveal.label}
           </label>
-          <input
-            id="reveal-key"
-            className="code"
-            readOnly
-            value={reveal.key}
-            aria-readonly="true"
+          <input id="reveal-key" className="ad-reveal-input" readOnly value={reveal.key} aria-readonly="true" />
+          <CopyKeyButton text={reveal.key} />
+          <button
+            type="button"
+            className="btn"
             style={{
-              width: "100%",
-              height: 36,
-              padding: "0 10px",
-              border: "1px solid var(--rule-strong)",
-              borderRadius: "var(--radius-m)",
-              background: "var(--tint)",
-              color: "var(--ink)",
-              fontSize: 13,
+              height: 38,
+              background: "transparent",
+              borderColor: "var(--ink-2)",
+              color: "#FFFFFF",
             }}
-          />
-        </div>
-        <div className="row">
-          <CopyButton text={reveal.key} label="Copy key" variant="primary" size="md" />
-          <Button variant="quiet" size="md" onClick={onStored}>
+            onClick={onStored}
+          >
             I&rsquo;ve stored it
-          </Button>
+          </button>
         </div>
       </div>
-      <dl
-        style={{
-          display: "grid",
-          gridTemplateColumns: "auto minmax(0, 1fr)",
-          gap: "6px 14px",
-          fontSize: 12,
-          lineHeight: 1.5,
-          flex: "1 1 200px",
-          maxWidth: 260,
-          alignContent: "start",
-          margin: 0,
-        }}
-      >
-        <dt style={{ color: "var(--ink-4)" }}>Can</dt>
-        <dd style={{ color: "var(--ink-2)" }}>{reveal.can}</dd>
-        <dt style={{ color: "var(--ink-4)" }}>Cannot</dt>
-        <dd style={{ color: "var(--ink-2)" }}>{reveal.cannot}</dd>
-        <dt style={{ color: "var(--ink-4)" }}>Expires</dt>
-        <dd style={{ color: "var(--ink-2)" }}>{reveal.expires}</dd>
+      <dl className="ad-reveal-dl">
+        <dt>Can</dt>
+        <dd>{reveal.can}</dd>
+        <dt>Cannot</dt>
+        <dd>{reveal.cannot}</dd>
+        <dt>Expires</dt>
+        <dd>{reveal.expires}</dd>
       </dl>
     </section>
   );

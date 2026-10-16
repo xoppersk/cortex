@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Button } from "../../../components/Button";
-import { getAdminData } from "../../../lib/api";
+import { useState, type CSSProperties } from "react";
+import { getAdminData, getWorkspaceData } from "../../../lib/api";
 import { RevealPanel, type RevealView } from "./RevealPanel";
 
 interface KeyRow {
@@ -32,8 +31,26 @@ function generateKeyMaterial(seed: number): { full: string; masked: string } {
   return { full: `cx_live_${head}${middle}${tail}`, masked: `cx_live_${head}…${tail}` };
 }
 
+const TILE_FRESH: CSSProperties = { background: "var(--highlight)", color: "var(--ink)" };
+const TILE_NORMAL: CSSProperties = { background: "var(--rail)", color: "var(--ink)" };
+const TILE_TEST: CSSProperties = {
+  background: "var(--paper)",
+  boxShadow: "inset 0 0 0 1px var(--control)",
+  color: "var(--ink-2)",
+};
+
+function KeyIcon() {
+  return (
+    <svg className="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" style={{ color: "inherit" }}>
+      <circle cx="5.5" cy="10.5" r="3" />
+      <path d="m7.6 8.4 5.9-5.9M11 5l1.5 1.5" />
+    </svg>
+  );
+}
+
 export default function ApiKeysPage() {
   const { apiKeys } = getAdminData();
+  const { workspace } = getWorkspaceData();
   const [rows, setRows] = useState<KeyRow[]>(
     apiKeys.rows.map((row) => ({
       id: row.id,
@@ -90,99 +107,110 @@ export default function ApiKeysPage() {
     setRows((previous) => previous.filter((row) => row.id !== id));
   }
 
+  function tileStyle(row: KeyRow, index: number): CSSProperties {
+    if (row.masked.startsWith("cx_test_")) return TILE_TEST;
+    if (index === 0 && row.createdNote.includes("just now")) return TILE_FRESH;
+    return TILE_NORMAL;
+  }
+
   return (
     <>
-      <header className="page-head">
-        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "var(--space-4)", flexWrap: "wrap" }}>
-          <div style={{ maxWidth: 620 }}>
-            <h1 className="page-title">API keys</h1>
-            <p className="summary-sentence" style={{ marginTop: "var(--space-3)" }}>
-              {apiKeys.summary}
-            </p>
-          </div>
-          <Button variant="primary" onClick={createKey} style={{ minHeight: 32 }}>
-            Create key
-          </Button>
+      <header className="ph ad-ph">
+        <div className="ad-ph-left">
+          <span className="sub">
+            {workspace.name} <span className="sep">/</span> Settings
+          </span>
+          <h1>API keys</h1>
+          <p className="ad-lede">{apiKeys.summary}</p>
         </div>
+        <button type="button" className="btn dk" onClick={createKey}>
+          <svg
+            viewBox="0 0 16 16"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            aria-hidden="true"
+          >
+            <path d="M8 3v10M3 8h10" />
+          </svg>
+          Create key
+        </button>
       </header>
 
-      <div className="stack-6">
+      <div className="ad-keys-wrap">
         {reveal ? <RevealPanel reveal={reveal} onStored={() => setReveal(null)} /> : null}
 
-        <section aria-label="All keys">
+        <div className="card" style={{ overflow: "hidden" }}>
           <div className="table-scroll">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th scope="col">Key</th>
-                  <th scope="col">Access</th>
-                  <th scope="col">Last used</th>
-                  <th scope="col">
-                    <span className="sr-only">Actions</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => (
-                  <tr key={row.id}>
-                    <td>
-                      <span className="ui-strong" style={{ fontSize: 13 }}>
-                        {row.name}
-                      </span>
-                      <br />
-                      <span
-                        style={{
-                          fontFamily: "var(--font-mono)",
-                          fontSize: 12,
-                          lineHeight: 1.4,
-                          color: "var(--ink-2)",
-                        }}
-                      >
+            <div role="table" aria-label="API keys">
+              <div role="row" className="ad-kr ad-kr-head th">
+                <span role="columnheader">Key</span>
+                <span role="columnheader">Access</span>
+                <span role="columnheader">Last used</span>
+                <span role="columnheader">
+                  <span className="sr-only">Actions</span>
+                </span>
+              </div>
+              {rows.map((row, index) => (
+                <div
+                  key={row.id}
+                  role="row"
+                  className="ad-kr"
+                  style={
+                    index === 0 && row.createdNote.includes("just now") ? { background: "#FDFBEF" } : undefined
+                  }
+                >
+                  <span role="cell" className="ad-ki">
+                    <span className="ad-key-tile" style={tileStyle(row, index)} aria-hidden="true">
+                      <KeyIcon />
+                    </span>
+                    <span className="ad-ki-stack">
+                      <span className="ad-ki-name">{row.name}</span>
+                      <span className="ad-ki-code">
                         {row.masked} · {row.createdNote}
                       </span>
-                    </td>
-                    <td>
-                      {row.flag ? (
-                        <span style={{ color: "var(--warn)", fontWeight: 500 }}>{row.access}</span>
-                      ) : (
-                        row.access
-                      )}
-                      {row.flag ? (
-                        <>
-                          <br />
-                          <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{row.flag}</span>
-                        </>
-                      ) : null}
-                    </td>
-                    <td>
+                    </span>
+                  </span>
+                  <span role="cell">
+                    {row.flag ? (
+                      <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 5 }}>
+                        <span className="tag warn">{row.access}</span>
+                        <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{row.flag}</span>
+                      </span>
+                    ) : (
+                      <span style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                        <span className="tag">{row.access}</span>
+                      </span>
+                    )}
+                  </span>
+                  <span role="cell">
+                    <span style={{ display: "flex", flexDirection: "column", gap: 4, color: "var(--ink)" }}>
                       {row.lastUsed}
                       {row.cost ? (
-                        <>
-                          <br />
-                          <span className="meta-ink4">${row.cost} this cycle</span>
-                        </>
+                        <span className="mono" style={{ fontSize: 12, color: "var(--ink-4)" }}>
+                          ${row.cost} this cycle
+                        </span>
                       ) : null}
                       {row.expiresNote ? (
-                        <>
-                          <br />
-                          <span style={{ fontSize: 12, color: "var(--warn)" }}>{row.expiresNote}</span>
-                        </>
+                        <span style={{ fontSize: 12, color: "var(--warn)" }}>{row.expiresNote}</span>
                       ) : null}
-                    </td>
-                    <td>
-                      <Button variant="quiet" size="sm" style={{ minHeight: 26, padding: "0 6px" }} onClick={() => revoke(row.id)}>
-                        Revoke
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </span>
+                  </span>
+                  <span role="cell" style={{ textAlign: "right" }}>
+                    <button type="button" className="btn gh sm" onClick={() => revoke(row.id)}>
+                      Revoke
+                    </button>
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-          <p style={{ fontSize: 12, lineHeight: 1.45, color: "var(--ink-3)", marginTop: "var(--space-4)" }}>
+          <p className="ad-keys-foot">
             {apiKeys.footerSegments.map((segment, index) =>
               "href" in segment && segment.href ? (
-                <Link key={index} href={segment.href} style={{ color: "var(--ink-2)" }}>
+                <Link key={index} href={segment.href}>
                   {segment.text}
                 </Link>
               ) : (
@@ -190,7 +218,7 @@ export default function ApiKeysPage() {
               ),
             )}
           </p>
-        </section>
+        </div>
       </div>
     </>
   );
