@@ -3,22 +3,37 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import type { MouseEvent } from "react";
-import { withDottedInputs } from "../app/playbooks/playbooks-tabs";
+import type { ReactNode } from "react";
+import { IconArrowRight, IconBook, IconSearch } from "../../components/icons";
 import type { TemplateItem, TemplatesData } from "../../lib/types";
 
 /*
- * P-03 Templates: category filters + search (mirrored in the URL query),
- * the featured template expanded with its instructions, the first six rows,
- * and a "Show N more" reveal for the rest. Layout follows
- * screens/Templates.html: grid columns 1fr / 170px / 130px with "Copied"
- * right-aligned, the featured detail as document + margin side-by-side,
- * and the instructions as a tint fragment. Rows keep the design's "#"
- * href; "Copy to my workspace" goes to the PlaybookBuilder route (W-05).
- * The 17 non-designed fixture entries carry only inputs/sources, so rows
- * fall back to those fixture fields (expects ← sources, description ←
- * inputs, copied ← "—") instead of rendering blank cells.
+ * P-03 Templates — Premium v2 (screens/Templates.html): category segmented
+ * control + search (both mirrored in the URL query, brief §10), the featured
+ * template expanded inside the table sheet, six rows, and "Show N more".
+ * The 17 non-designed fixture entries carry only inputs/sources: their rows
+ * take expects ← sources and copied ← "—" (no copied data exists for them
+ * anywhere in the package), and render name-only — the inputs spec string is
+ * not a description, so the description line is omitted rather than faked.
  */
+
+function renderVars(text: string): ReactNode {
+  const parts = text.split(/(\[[^\]]+\])/g);
+  return (
+    <>
+      {parts.map((part, index) =>
+        part.startsWith("[") && part.endsWith("]") ? (
+          <span key={index} className="pub-var">
+            {part.slice(1, -1)}
+          </span>
+        ) : (
+          <span key={index}>{part}</span>
+        ),
+      )}
+    </>
+  );
+}
+
 export function TemplatesBrowser({ data }: { data: TemplatesData }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -59,164 +74,100 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
     setExpanded(false);
   }
 
-  function rowHover(event: MouseEvent<HTMLAnchorElement>, on: boolean) {
-    event.currentTarget.style.background = on ? "var(--paper-sunk)" : "";
-  }
-
   const featured = data.featured;
-  const grid = {
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) 170px 130px",
-    gap: 24,
-    alignItems: "baseline",
-  } as const;
 
   return (
-    <div className="stack-2">
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 12,
-          paddingBottom: 10,
-        }}
-      >
-        <div className="filter-row" role="group" aria-label="Filter templates by category">
+    <>
+      <div className="pub-controls">
+        <div className="seg pub-seg" role="group" aria-label="Filter templates by category">
           {data.categories.map((item) => (
             <button
               key={item.name}
               type="button"
-              className="filter-button"
-              style={{ fontSize: 14 }}
               aria-pressed={category === item.name}
               onClick={() => updateParams({ category: item.name })}
             >
-              {item.name === "All" ? `All ${item.count}` : item.name}
+              {item.name === "All" ? (
+                <>
+                  All <span className="pub-seg-count">{item.count}</span>
+                </>
+              ) : (
+                item.name
+              )}
             </button>
           ))}
         </div>
-        <div>
-          <label htmlFor="template-search" className="sr-only">
+        <span className="pub-search">
+          <IconSearch />
+          <label htmlFor="ts" className="sr-only">
             Search templates
           </label>
           <input
-            id="template-search"
+            id="ts"
             type="search"
+            className="inp"
             placeholder="Search templates"
-            className="field-control"
-            style={{ width: 240, minHeight: 34, fontSize: 14 }}
             value={query}
             onChange={(event) => updateParams({ q: event.target.value })}
           />
-        </div>
+        </span>
       </div>
 
-      <div className="table-scroll">
-      <div role="table" aria-label="Templates">
-        <div
-          role="row"
-          className="templates-row"
-          style={{ ...grid, padding: "0 0 10px", fontSize: 13, color: "var(--ink-4)" }}
-        >
-          <span role="columnheader">Template</span>
-          <span role="columnheader">Expects</span>
-          <span role="columnheader" style={{ textAlign: "right" }}>
+      <div role="table" aria-label="Templates" className="sheet pub-table">
+        <div role="row" className="pub-tr pub-tr-head">
+          <span role="columnheader" className="th">
+            Template
+          </span>
+          <span role="columnheader" className="th">
+            Expects
+          </span>
+          <span role="columnheader" className="th" style={{ textAlign: "right" }}>
             Copied
           </span>
         </div>
 
         {featuredMatches ? (
-          <div
-            role="row"
-            style={{
-              borderTop: "1px solid var(--ink)",
-              padding: "22px 0 28px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 18,
-            }}
-          >
-            <div style={grid} className="templates-row">
-              <span role="cell" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <strong
-                  style={{
-                    fontFamily: "var(--font-serif)",
-                    fontSize: 22,
-                    lineHeight: 1.2,
-                    fontWeight: 600,
-                    color: "var(--ink)",
-                  }}
-                >
-                  {featured.name}
-                </strong>
-                <span
-                  style={{
-                    fontFamily: "var(--font-serif)",
-                    fontSize: 16,
-                    lineHeight: 1.5,
-                    color: "var(--ink-2)",
-                  }}
-                >
-                  {featured.description}
+          <div role="row" className="pub-featured">
+            <div className="pub-tr">
+              <span role="cell" className="pub-tn">
+                <span className="ib pub-ib-dark">
+                  <IconBook />
+                </span>
+                <span className="pub-tn-text" style={{ gap: 8 }}>
+                  <b className="pub-featured-title">{featured.name}</b>
+                  <span className="pub-featured-desc">{featured.description}</span>
                 </span>
               </span>
-              <span role="cell" style={{ fontSize: 14, color: "var(--ink-2)" }}>
+              <span role="cell" className="pub-expects" style={{ paddingTop: 6 }}>
                 {featured.expects}
               </span>
-              <span role="cell" style={{ fontSize: 14, color: "var(--ink)", textAlign: "right" }}>
+              <span role="cell" className="pub-cnt" style={{ paddingTop: 8 }}>
                 {featured.copied}
               </span>
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 40 }}>
+            <div className="pub-feat-detail">
               {featured.instructions ? (
-                <p
-                  style={{
-                    flex: "1 1 460px",
-                    maxWidth: 640,
-                    margin: 0,
-                    padding: "18px 20px",
-                    background: "var(--tint)",
-                    borderRadius: "var(--radius-l)",
-                    fontFamily: "var(--font-serif)",
-                    fontSize: 17,
-                    lineHeight: 1.65,
-                    color: "var(--ink-body)",
-                  }}
-                >
-                  {withDottedInputs(featured.instructions)}
-                </p>
+                <p className="pub-instructions">{renderVars(featured.instructions)}</p>
               ) : null}
-              <dl
-                style={{
-                  flex: "1 1 220px",
-                  maxWidth: 280,
-                  margin: 0,
-                  display: "grid",
-                  gridTemplateColumns: "auto minmax(0, 1fr)",
-                  gap: "8px 16px",
-                  fontSize: 13,
-                  lineHeight: 1.45,
-                  color: "var(--ink-2)",
-                  alignContent: "start",
-                }}
-              >
-                <dt style={{ color: "var(--ink-4)" }}>Inputs</dt>
-                <dd style={{ margin: 0 }}>{featured.inputs}</dd>
-                <dt style={{ color: "var(--ink-4)" }}>Checks</dt>
-                <dd style={{ margin: 0 }}>{featured.checks}</dd>
-                <dt style={{ color: "var(--ink-4)" }}>Typical run</dt>
-                <dd style={{ margin: 0 }}>{featured.typicalRun}</dd>
+              <dl className="inset pub-meta-dl">
+                <dt>Inputs</dt>
+                <dd className="mono">{featured.inputs}</dd>
+                <dt>Checks</dt>
+                <dd>{featured.checks}</dd>
+                <dt>Typical run</dt>
+                <dd>{featured.typicalRun}</dd>
               </dl>
             </div>
-            <div>
-              <Link
-                href={`/app/playbooks/${featured.id}/edit`}
-                className="btn btn-primary btn-md"
-                style={{ fontSize: 14 }}
-              >
-                Copy to my workspace
+            <div className="pub-feat-actions">
+              {/*
+               * The design links this CTA to PlaybookBuilder.html — the
+               * playbook builder. In this app the builder exists for the
+               * Launch brief playbook only (the editor route 404s any other
+               * id by design), so the copied template opens there; building
+               * the href from the template's own id dead-ended on a 404.
+               */}
+              <Link href="/app/playbooks/launch-brief/edit" className="btn dk">
+                Copy to my workspace <IconArrowRight />
               </Link>
             </div>
           </div>
@@ -226,70 +177,40 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
           <Link
             key={template.id}
             role="row"
-            className="templates-row"
+            className="pub-tr"
             href="#"
-            onMouseEnter={(event) => rowHover(event, true)}
-            onMouseLeave={(event) => rowHover(event, false)}
-            style={{
-              ...grid,
-              padding: "18px 0",
-              borderTop: "1px solid var(--rule)",
-              borderBottom:
-                index === visible.length - 1 && hiddenCount === 0
-                  ? "1px solid var(--rule)"
-                  : undefined,
-              textDecoration: "none",
-              color: "var(--ink)",
-            }}
+            style={index === 0 ? { borderTop: 0 } : undefined}
           >
-            <span role="cell" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <strong style={{ fontSize: 16, fontWeight: 500 }}>{template.name}</strong>
-              <span
-                style={{
-                  fontFamily: "var(--font-serif)",
-                  fontSize: 15,
-                  lineHeight: 1.5,
-                  color: "var(--ink-3)",
-                }}
-              >
-                {template.description ?? template.inputs}
+            <span role="cell" className="pub-tn">
+              <span className="ib">
+                <IconBook />
+              </span>
+              <span className="pub-tn-text">
+                <b className="pub-tn-title">{template.name}</b>
+                {template.description ? (
+                  <span className="pub-tn-desc">{template.description}</span>
+                ) : null}
               </span>
             </span>
-            <span role="cell" style={{ fontSize: 14, color: "var(--ink-2)" }}>
+            <span role="cell" className="pub-expects">
               {template.expects ?? template.sources}
             </span>
-            <span role="cell" style={{ fontSize: 14, color: "var(--ink)", textAlign: "right" }}>
+            <span role="cell" className="pub-cnt">
               {template.copied ?? "—"}
             </span>
           </Link>
         ))}
 
         {filtered.length === 0 && !featuredMatches ? (
-          <p className="ui-text muted-3" style={{ padding: "18px 0", borderTop: "1px solid var(--rule)" }}>
-            No templates match that search.
-          </p>
+          <p className="pub-no-match">No templates match that search.</p>
         ) : null}
-      </div>
       </div>
 
       {hiddenCount > 0 ? (
-        <div style={{ marginTop: 14 }}>
-          <button
-            type="button"
-            onClick={() => setExpanded(true)}
-            style={{
-              background: "none",
-              border: 0,
-              padding: 0,
-              fontSize: 14,
-              color: "var(--ink-2)",
-              cursor: "pointer",
-            }}
-          >
-            Show {hiddenCount} more
-          </button>
-        </div>
+        <button type="button" className="btn pub-show-more" onClick={() => setExpanded(true)}>
+          Show {hiddenCount} more
+        </button>
       ) : null}
-    </div>
+    </>
   );
 }

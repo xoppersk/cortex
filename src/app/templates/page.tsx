@@ -6,7 +6,7 @@ import { TemplatesBrowser } from "./TemplatesBrowser";
 
 export const metadata: Metadata = { title: { absolute: "Cortex — Playbook templates" } };
 
-/* P-03 Templates. Headline copy follows the canvas reference exactly. */
+/* P-03 Templates — Premium v2 (screens/Templates.html). */
 export default function TemplatesPage() {
   const data = getTemplates();
 
@@ -14,19 +14,15 @@ export default function TemplatesPage() {
     <div>
       <SiteHeader current="/templates" />
 
-      <section className="site-wrap" style={{ paddingTop: 72, paddingBottom: 40 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-          <h1 className="display-l" style={{ fontSize: 56, maxWidth: "16ch" }}>
-            Playbooks other teams already trust.
-          </h1>
-          <p className="serif-lead" style={{ maxWidth: "34em" }}>
-            Each template comes with its inputs, the kind of sources it expects and the checks it runs.
-            Copy one into your workspace and point it at your own documents.
-          </p>
-        </div>
+      <section className="wrap pub-templates-hero">
+        <h1 className="pub-page-h1">Playbooks other teams already trust.</h1>
+        <p className="lead pub-templates-lead">
+          Each template comes with its inputs, the kind of sources it expects and the checks it runs. Copy
+          one into your workspace and point it at your own documents.
+        </p>
       </section>
 
-      <section className="site-wrap" style={{ paddingBottom: 96 }}>
+      <section className="wrap pub-templates-body">
         <Suspense
           fallback={
             <p className="ui-text muted-3" role="status">
@@ -38,9 +34,7 @@ export default function TemplatesPage() {
         </Suspense>
       </section>
 
-      <div className="hairline-top">
-        <SiteFooter />
-      </div>
+      <SiteFooter />
     </div>
   );
 }
