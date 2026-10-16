@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import type { CSSProperties, ReactNode } from "react";
-import { Button } from "../../../components/Button";
+import type { ReactNode } from "react";
+import { Button, ButtonLink } from "../../../components/Button";
 import { getEvaluations } from "../../../lib/api";
 
 export const metadata: Metadata = { title: { absolute: "Cortex — Evaluations" } };
@@ -19,20 +19,28 @@ type FailureExtra = {
   gotDoc?: string;
 };
 
-const TB_LINK_STYLE: CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  minHeight: 30,
-  padding: "0 12px",
-  border: "1px solid var(--ink)",
-  borderRadius: "var(--radius-m)",
-  background: "var(--paper)",
-  color: "var(--ink)",
-  fontSize: 13,
-  fontWeight: 500,
-  textDecoration: "none",
-  whiteSpace: "nowrap",
-};
+function IconEdit() {
+  return (
+    <svg
+      className="ic"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
+      <path d="M10.5 2.5 13.5 5.5 6 13H3v-3z" />
+    </svg>
+  );
+}
+
+function IconPlay() {
+  return (
+    <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true">
+      <path d="M4.5 3v10l8.5-5z" />
+    </svg>
+  );
+}
 
 function withDocTitle(text: string, doc?: string): ReactNode {
   if (!doc || !text.includes(doc)) return text;
@@ -46,26 +54,58 @@ function withDocTitle(text: string, doc?: string): ReactNode {
   );
 }
 
+/** Numbers in the "Why" line are set in mono, per the screen (0.66, 0.70). */
+function withMonoNumbers(text: string): ReactNode {
+  const parts = text.split(/(\d+\.\d+)/g);
+  if (parts.length === 1) return text;
+  return (
+    <>
+      {parts.map((part, index) =>
+        /^\d+\.\d+$/.test(part) ? (
+          <span key={index} className="mono">
+            {part}
+          </span>
+        ) : (
+          <span key={index}>{part}</span>
+        ),
+      )}
+    </>
+  );
+}
+
 function FailureActions({ failure }: { failure: FailureExtra }) {
   if (failure.id === "Q17") {
     return (
-      <div className="row" style={{ gap: 6 }}>
-        <Button variant="secondary" size="sm" style={{ borderColor: "var(--ink)" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <Button variant="primary" size="sm">
           {failure.actions[0]}
         </Button>
-        <Link href="/app/knowledge/documents/customer-interview-synthesis" style={TB_LINK_STYLE}>
+        <ButtonLink href="/app/knowledge/documents/customer-interview-synthesis" size="sm">
           Inspect passage
-        </Link>
+        </ButtonLink>
       </div>
     );
   }
-  // Q31 and Q42: the fix action is a link to Documents, per the design.
+  // Q31 and Q42: the fix action is a dark link button to Documents, per the design.
   return (
-    <div className="row" style={{ gap: 6 }}>
-      <Link href="/app/knowledge/documents" style={TB_LINK_STYLE}>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+      <ButtonLink href="/app/knowledge/documents" variant="primary" size="sm">
         {failure.fixLabel}
-      </Link>
+      </ButtonLink>
     </div>
+  );
+}
+
+/** The summary sentence with its pass count highlighted, as on the screen. */
+function SummaryLede({ summary, passedPhrase }: { summary: string; passedPhrase: string }) {
+  const at = summary.indexOf(passedPhrase);
+  if (at === -1) return <p className="kb-lede">{summary}</p>;
+  return (
+    <p className="kb-lede">
+      {summary.slice(0, at)}
+      <mark>{passedPhrase}</mark>
+      {summary.slice(at + passedPhrase.length)}
+    </p>
   );
 }
 
@@ -73,178 +113,133 @@ export default function EvaluationsPage() {
   const evaluations = getEvaluations();
   const { set, runs, otherSets } = evaluations;
   const failures = evaluations.failures as FailureExtra[];
+  const passedPhrase = `${runs[0]?.passed} of ${set.questions}`;
 
   return (
-    <div style={{ maxWidth: 1000 }}>
-      <div
-        className="page-head"
-        style={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          gap: "var(--space-4)",
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 640 }}>
-          <p style={{ fontSize: 12, color: "var(--ink-3)" }}>
+    <>
+      <header className="ph" style={{ alignItems: "flex-end", padding: "24px 28px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 700 }}>
+          <span className="sub">
             {set.name} · {set.questions} questions · {set.schedule}
-          </p>
-          <h1 className="page-title">Evaluations</h1>
-          <p className="summary-sentence">{evaluations.summary}</p>
+          </span>
+          <h1>Evaluations</h1>
+          <SummaryLede summary={evaluations.summary} passedPhrase={passedPhrase} />
         </div>
-        <div className="row" style={{ gap: 6, flexWrap: "nowrap" }}>
-          <Button variant="secondary" size="sm">
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <Button>
+            <IconEdit />
             Edit questions
           </Button>
-          <Button variant="primary" size="sm">
+          <Button variant="primary">
+            <IconPlay />
             Run now · about ${evaluations.runCost.toFixed(2)}
           </Button>
         </div>
-      </div>
+      </header>
 
-      <div className="doc-margin">
-        <section style={{ flex: "1 1 480px", maxWidth: 660, minWidth: 0 }}>
-          <h2 className="section-label" style={{ marginBottom: 4 }}>
+      <div className="kb-split kb-split-320">
+        <section aria-labelledby="fh" className="kb-main-evals">
+          <h2 id="fh" className="kb-section-title">
             Failures, October 5
           </h2>
-          <div>
-            {failures.map((failure, index) => (
-              <article
-                key={failure.id}
-                className="failure-card"
-                style={{
-                  padding: "20px 0",
-                  borderBottom:
-                    index === failures.length - 1 ? "1px solid var(--rule)" : undefined,
-                }}
-              >
-                <div className="row-between" style={{ flexWrap: "nowrap", alignItems: "baseline" }}>
-                  <p style={{ fontSize: 15, fontWeight: 500, color: "var(--ink)" }}>
-                    {failure.id} · {failure.question}
-                  </p>
-                  <span
-                    style={{
-                      fontSize: 12,
-                      color: "var(--danger)",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {failure.tag}
-                  </span>
-                </div>
-                <dl
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "80px minmax(0, 1fr)",
-                    gap: "var(--space-2) var(--space-4)",
-                    fontSize: 13,
-                    lineHeight: 1.5,
-                  }}
-                >
-                  <dt style={{ color: "var(--ink-4)" }}>Expected</dt>
-                  <dd style={{ color: "var(--ink-body)" }}>
-                    {withDocTitle(failure.expected, failure.expectedDoc)}
-                  </dd>
-                  <dt style={{ color: "var(--ink-4)" }}>Got</dt>
-                  <dd style={{ color: "var(--ink-body)" }}>
-                    {withDocTitle(failure.got, failure.gotDoc)}
-                  </dd>
-                  <dt style={{ color: "var(--ink-4)" }}>Why</dt>
-                  <dd style={{ color: "var(--ink-body)" }}>{failure.why}</dd>
-                </dl>
-                <FailureActions failure={failure} />
-              </article>
-            ))}
-          </div>
+          {failures.map((failure) => (
+            <article key={failure.id} className="card kb-fl">
+              <div className="kb-fl-q">
+                <b>
+                  <span className="kb-fl-id">{failure.id}</span>
+                  {failure.question}
+                </b>
+                <span className="tag kb-tag-bad">{failure.tag}</span>
+              </div>
+              <dl className="kb-cmp">
+                <dt>Expected</dt>
+                <dd>{withDocTitle(failure.expected, failure.expectedDoc)}</dd>
+                <dt>Got</dt>
+                <dd>{withDocTitle(failure.got, failure.gotDoc)}</dd>
+                <dt>Why</dt>
+                <dd>{withMonoNumbers(failure.why)}</dd>
+              </dl>
+              <FailureActions failure={failure} />
+            </article>
+          ))}
         </section>
 
-        <aside aria-label="Run history" className="margin-column" style={{ maxWidth: 300, gap: 22 }}>
-          <section>
-            <h2 className="section-label" style={{ marginBottom: 6 }}>
-              Recent runs
-            </h2>
+        <aside aria-label="Run history" className="kb-side" style={{ paddingTop: 26, gap: 14 }}>
+          <h2 className="lbl">Recent runs</h2>
+          <section className="card card-lift" style={{ padding: 0, overflow: "hidden" }}>
             <div role="table" aria-label="Recent runs">
-              <div
-                role="row"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "54px minmax(0, 1fr) 44px",
-                  gap: 14,
-                  padding: "10px 0",
-                  fontSize: 12,
-                  color: "var(--ink-4)",
-                }}
-              >
+              <div role="row" className="kb-rr kb-rr-head th">
                 <span role="columnheader">Date</span>
                 <span role="columnheader">Passed of {set.questions}</span>
                 <span role="columnheader" style={{ textAlign: "right" }}>
                   Cost
                 </span>
               </div>
-              {runs.map((run) => {
+              {runs.map((run, index) => {
                 const percent = Math.round((run.passed / set.questions) * 100);
                 return (
-                  <div
-                    key={run.date}
-                    role="row"
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "54px minmax(0, 1fr) 44px",
-                      gap: 14,
-                      padding: "10px 0",
-                      borderTop: "1px solid var(--rule)",
-                      fontSize: 13,
-                      alignItems: "baseline",
-                    }}
-                  >
-                    <span role="cell">{run.date}</span>
-                    <span role="cell" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div key={run.date} role="row" className="kb-rr">
+                    <span role="cell" style={index === 0 ? { fontWeight: 600 } : undefined}>
+                      {run.date}
+                    </span>
+                    <span role="cell" className="kb-rr-passed">
                       <span
-                        style={{ flex: 1, height: 6, background: "var(--rule)", display: "block" }}
+                        className="kb-bar kb-bar-6"
                         role="img"
-                        aria-label={`${percent}% passed`}
+                        aria-label={`${run.passed} of ${set.questions} passed`}
                       >
-                        <span
+                        <i
                           style={{
-                            display: "block",
                             width: `${percent}%`,
-                            height: 6,
-                            background: "var(--ink)",
+                            background: index === 0 ? undefined : "var(--ink-4)",
                           }}
                         />
                       </span>
-                      {run.passed}
+                      <span className="mono" style={index === 0 ? { fontWeight: 500 } : undefined}>
+                        {run.passed}
+                      </span>
                     </span>
-                    <span role="cell" style={{ textAlign: "right", color: "var(--ink-2)" }}>
+                    <span
+                      role="cell"
+                      className="mono"
+                      style={{ textAlign: "right", color: "var(--ink-2)", fontSize: 12 }}
+                    >
                       ${run.cost.toFixed(2)}
                     </span>
                   </div>
                 );
               })}
             </div>
-            <p className="caption" style={{ marginTop: 8, color: "var(--ink-3)" }}>
+            <p
+              style={{
+                margin: 0,
+                padding: "12px 16px",
+                borderTop: "1px solid #f0f0ec",
+                fontSize: 12,
+                lineHeight: 1.5,
+                color: "var(--ink-3)",
+              }}
+            >
               {evaluations.runsNote}
             </p>
           </section>
-
-          <section
-            className="stack-2"
-            style={{ borderTop: "1px solid var(--rule)", paddingTop: 18 }}
-          >
-            <h2 className="margin-box-title">Other question sets</h2>
+          <div className="kb-side-divider" aria-hidden="true" />
+          <h2 className="lbl">Other question sets</h2>
+          <section className="card kb-side-card" style={{ padding: "4px 16px", gap: 0 }}>
             {otherSets.map((other) => (
-              <p key={other.name} style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>
-                <b style={{ color: "var(--ink)", fontWeight: 500 }}>{other.name}</b> ·{" "}
-                {other.questions} questions · {other.latest}
-              </p>
+              <span key={other.name} className="kb-other-row">
+                <span>
+                  <b>{other.name}</b> · {other.questions} questions
+                </span>
+                <span className="sub">{other.latest}</span>
+              </span>
             ))}
-            <p style={{ fontSize: 12, lineHeight: 1.5 }}>
-              <Link href="#">New question set</Link>
-            </p>
+            <Link href="#" style={{ padding: "12px 0" }}>
+              New question set
+            </Link>
           </section>
         </aside>
       </div>
-    </div>
+    </>
   );
 }
