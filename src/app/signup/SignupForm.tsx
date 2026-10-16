@@ -4,33 +4,35 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Button } from "../../components/Button";
+import { IconArrowRight } from "../../components/icons";
 
 /*
- * S-02 Signup form, per screens/Signup.html. The design screen IS the
- * personal-email error state (prefilled name/email, danger border, the
- * error sentence shown once in --danger as the field's described-by
- * text), so the form loads in that state and re-validates on change.
- * A valid step 1 continues to step 2 — naming the workspace, as the
- * eyebrow promises ("Step 1 of 2 · then name your workspace"). The
- * design ships no step-2 UI; step 2 below follows the same field/button
- * pattern in the brief's words. Google sign-up is an auth action button
- * (type="button" in the design), not a link into the app.
+ * S-02 Signup form, per screens/Signup.html (v2): the form itself is the
+ * .sheet.lift card. The design screen IS the personal-email error state
+ * (prefilled name/email, danger border + #F6E4E0 ring, the error sentence
+ * in --danger with a warning-triangle icon as the field's described-by
+ * text), so the form loads in that state and re-validates on change once
+ * submitted. A valid step 1 continues to step 2 — naming the workspace,
+ * as the step label promises ("Step 1 of 2 · then name your workspace").
+ * The design ships no step-2 UI; step 2 below follows the same card,
+ * field and button pattern in the brief's words. Google sign-up is an
+ * auth action button (type="button" in the design), not a link into
+ * the app.
  */
 const PERSONAL_DOMAINS = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com"];
-
-const labelStyle = { fontSize: 13, color: "var(--ink)" } as const;
-const fieldWrap = { display: "flex", flexDirection: "column", gap: 6 } as const;
 
 export function SignupForm({
   signupError,
   initialErrorState = true,
   errorName = "",
   errorEmail = "",
+  stepLabel = "Step 1 of 2 · then name your workspace",
 }: {
   signupError: string;
   initialErrorState?: boolean;
   errorName?: string;
   errorEmail?: string;
+  stepLabel?: string;
 }) {
   const router = useRouter();
   const [step, setStep] = useState<1 | 2>(1);
@@ -63,53 +65,36 @@ export function SignupForm({
 
   if (step === 2) {
     return (
-      <form
-        onSubmit={onSubmitStep2}
-        noValidate
-        style={{ display: "flex", flexDirection: "column", gap: 16 }}
-      >
-        <span style={{ fontSize: 13, color: "var(--ink-3)" }}>Step 2 of 2 · name your workspace</span>
-        <h1
-          style={{
-            margin: "0 0 4px",
-            fontFamily: "var(--font-serif)",
-            fontSize: 36,
-            lineHeight: 1.1,
-            fontWeight: 600,
-            letterSpacing: "-0.02em",
-            color: "var(--ink)",
-          }}
-        >
-          Name your workspace
-        </h1>
-        <div style={fieldWrap}>
-          <label htmlFor="signup-workspace" style={labelStyle}>
-            Workspace name
-          </label>
+      <form onSubmit={onSubmitStep2} noValidate className="sheet lift sys-signup-form">
+        <span className="sys-progress">
+          <span className="sys-progress-bars" aria-hidden="true">
+            <i />
+            <i />
+          </span>
+          Step 2 of 2 · name your workspace
+        </span>
+        <h1 className="sys-form-title">Name your workspace</h1>
+        <div className="field">
+          <label htmlFor="signup-workspace">Workspace name</label>
           <input
             id="signup-workspace"
             name="workspace"
             type="text"
             autoComplete="organization"
             required
-            className="field-control field-control-44"
-            style={workspaceError ? { borderColor: "var(--danger)" } : undefined}
+            className="inp lg"
             value={workspace}
             onChange={(event) => setWorkspace(event.target.value)}
             aria-invalid={workspaceError ? true : undefined}
             aria-describedby={workspaceError ? "signup-workspace-error" : undefined}
           />
           {workspaceError ? (
-            <span
-              id="signup-workspace-error"
-              role="alert"
-              style={{ fontSize: 13, lineHeight: 1.45, color: "var(--danger)" }}
-            >
+            <span id="signup-workspace-error" role="alert" className="sys-set-error">
               {workspaceError}
             </span>
           ) : null}
         </div>
-        <Button type="submit" variant="primary" size="lg" className="btn-block">
+        <Button type="submit" variant="primary" size="lg" className="sys-btn-block sys-signup-submit">
           Create workspace
         </Button>
       </form>
@@ -117,87 +102,71 @@ export function SignupForm({
   }
 
   return (
-    <form
-      onSubmit={onSubmitStep1}
-      noValidate
-      style={{ display: "flex", flexDirection: "column", gap: 16 }}
-    >
-      <span style={{ fontSize: 13, color: "var(--ink-3)" }}>Step 1 of 2 · then name your workspace</span>
-      <h1
-        style={{
-          margin: "0 0 4px",
-          fontFamily: "var(--font-serif)",
-          fontSize: 36,
-          lineHeight: 1.1,
-          fontWeight: 600,
-          letterSpacing: "-0.02em",
-          color: "var(--ink)",
-        }}
-      >
-        Start a 14-day trial
-      </h1>
-      <Button type="button" variant="secondary" size="lg" className="btn-block">
+    <form onSubmit={onSubmitStep1} noValidate className="sheet lift sys-signup-form">
+      <span className="sys-progress">
+        <span className="sys-progress-bars" aria-hidden="true">
+          <i />
+          <i className="off" />
+        </span>
+        {stepLabel}
+      </span>
+      <h1 className="sys-form-title">Start a 14-day trial</h1>
+      <Button type="button" variant="secondary" size="lg" className="sys-btn-block">
         Sign up with Google
       </Button>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          fontSize: 13,
-          color: "var(--ink-4)",
-        }}
-      >
-        <span style={{ flex: 1, height: 1, background: "var(--rule)" }} />
-        or
-        <span style={{ flex: 1, height: 1, background: "var(--rule)" }} />
-      </div>
-      <div style={fieldWrap}>
-        <label htmlFor="signup-name" style={labelStyle}>
-          Your name
-        </label>
+      <div className="or sys-signup-or">or</div>
+      <div className="field">
+        <label htmlFor="signup-name">Your name</label>
         <input
           id="signup-name"
           name="name"
           type="text"
           autoComplete="name"
           required
-          className="field-control field-control-44"
+          className="inp lg"
           value={name}
           onChange={(event) => setName(event.target.value)}
         />
       </div>
-      <div style={fieldWrap}>
-        <label htmlFor="signup-email" style={labelStyle}>
-          Work email
-        </label>
+      <div className="field">
+        <label htmlFor="signup-email">Work email</label>
         <input
           id="signup-email"
           name="email"
           type="email"
           autoComplete="email"
           required
-          className="field-control field-control-44"
-          style={emailError ? { borderColor: "var(--danger)" } : undefined}
+          className={emailError ? "inp lg sys-inp-error" : "inp lg"}
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           aria-invalid={emailError ? true : undefined}
           aria-describedby={emailError ? "signup-email-error" : undefined}
         />
         {emailError ? (
-          <span
-            id="signup-email-error"
-            role="alert"
-            style={{ fontSize: 13, lineHeight: 1.45, color: "var(--danger)" }}
-          >
-            {emailError}
+          <span id="signup-email-error" role="alert" className="sys-signup-error">
+            <svg
+              className="ic"
+              viewBox="0 0 16 16"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M8 2.5 14 13H2z" />
+              <path d="M8 6.5v3M8 11.2v.3" />
+            </svg>
+            <span>{emailError}</span>
           </span>
         ) : null}
       </div>
-      <Button type="submit" variant="primary" size="lg" className="btn-block">
-        Continue
+      <Button type="submit" variant="primary" size="lg" className="sys-btn-block sys-signup-submit">
+        Continue <IconArrowRight style={{ width: 15, height: 15, color: "var(--on-ink)" }} />
       </Button>
-      <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5, color: "var(--ink-3)" }}>
+      <p className="sys-legal-note">
         By continuing you agree to the{" "}
         <a href="#" style={{ color: "var(--ink)" }}>
           terms

@@ -12,6 +12,67 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 /* Bold lead-ins for the trial facts, verbatim prefixes of the fixture strings (design S-02). */
 const factLeads = ["14 days", "$20 of model use", "Up to 3 people"];
 
+/* Perk icons from screens/Signup.html: clock, check, person (15px strokes). */
+const perkIcons = [
+  <svg
+    key="clock"
+    className="ic"
+    viewBox="0 0 16 16"
+    width="15"
+    height="15"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    style={{ width: 15, height: 15 }}
+  >
+    <circle cx="8" cy="8" r="5.5" />
+    <path d="M8 5v3l2 1.5" />
+  </svg>,
+  <svg
+    key="check"
+    className="ic"
+    viewBox="0 0 16 16"
+    width="15"
+    height="15"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    style={{ width: 15, height: 15 }}
+  >
+    <path d="m3 8.5 3 3 7-7" />
+  </svg>,
+  <svg
+    key="person"
+    className="ic"
+    viewBox="0 0 16 16"
+    width="15"
+    height="15"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    style={{ width: 15, height: 15 }}
+  >
+    <circle cx="8" cy="5.5" r="2.5" />
+    <path d="M3 13.5c.6-2.4 2.6-4 5-4s4.4 1.6 5 4" />
+  </svg>,
+];
+
+/*
+ * S-02 Signup, per screens/Signup.html (v2): header (brand + sign-in note)
+ * → centred row: the .sheet.lift form card (flex 1 1 380px, max 460px)
+ * beside the "In the trial" .sheet aside (flex 1 1 300px, max 360px,
+ * margin-top 24px) with icon perks and the closing inset note →
+ * LegalFooter.
+ */
 async function SignupInner({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const { auth, signup } = getStates();
@@ -23,90 +84,48 @@ async function SignupInner({ searchParams }: { searchParams: SearchParams }) {
   const closingFact = auth.trialFacts[3];
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "var(--paper)",
-        color: "var(--ink)",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <header
-        className="signup-topbar"
-        style={{
-          padding: "28px 48px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Link href="/" className="wordmark" style={{ fontSize: 22 }}>
-          Cortex
+    <div className="sys-page">
+      <header className="sys-topbar">
+        <Link href="/" className="brand" aria-label="Cortex home">
+          <i aria-hidden="true">C</i>
+          <b>Cortex</b>
         </Link>
-        <span style={{ fontSize: 14, color: "var(--ink-3)" }}>
-          Already have a workspace?{" "}
-          <Link href="/login" style={{ color: "var(--ink)" }}>
-            Sign in
-          </Link>
+        <span className="sys-topbar-note">
+          Already have a workspace? <Link href="/login">Sign in</Link>
         </span>
       </header>
 
-      <div
-        style={{
-          flex: 1,
-          padding: "40px 48px 64px",
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          gap: 72,
-        }}
-      >
-        <div style={{ flex: "1 1 360px", maxWidth: 400 }}>
-          <SignupForm
-            signupError={auth.signupError}
-            initialErrorState={errorState}
-            errorName={signup.errorName}
-            errorEmail={signup.errorEmail}
-          />
-        </div>
+      <div className="sys-main">
+        <SignupForm
+          signupError={auth.signupError}
+          initialErrorState={errorState}
+          errorName={signup.errorName}
+          errorEmail={signup.errorEmail}
+          stepLabel={signup.stepLabel}
+        />
 
-        <aside
-          aria-label="What the trial includes"
-          style={{
-            flex: "1 1 300px",
-            maxWidth: 360,
-            paddingTop: 34,
-            display: "flex",
-            flexDirection: "column",
-            gap: 14,
-            fontSize: 14,
-            lineHeight: 1.5,
-            color: "var(--ink-2)",
-          }}
-        >
-          <h2 style={{ margin: 0, fontSize: 13, fontWeight: 400, color: "var(--ink-4)" }}>
-            In the trial
-          </h2>
+        <aside aria-label="What the trial includes" className="sheet sys-trial-aside">
+          <h2 className="lbl sys-trial-title">In the trial</h2>
           {facts.map((fact, index) => {
             const lead = factLeads[index];
             const hasLead = lead && fact.startsWith(lead);
             return (
-              <span key={fact}>
-                {hasLead ? (
-                  <>
-                    <b style={{ color: "var(--ink)", fontWeight: 500 }}>{lead}</b>
-                    {fact.slice(lead.length)}
-                  </>
-                ) : (
-                  fact
-                )}
+              <span key={fact} className="sys-perk">
+                <span className="ib">{perkIcons[index]}</span>
+                <span>
+                  {hasLead ? (
+                    <>
+                      <b>{lead}</b>
+                      {fact.slice(lead.length)}
+                    </>
+                  ) : (
+                    fact
+                  )}
+                </span>
               </span>
             );
           })}
-          {closingFact ? (
-            <span style={{ paddingTop: 14, borderTop: "1px solid var(--rule)" }}>{closingFact}</span>
-          ) : null}
+          {closingFact ? <span className="sys-trial-note">{closingFact}</span> : null}
         </aside>
       </div>
 
