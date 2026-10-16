@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans, Source_Serif_4 } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
+import "../styles/public.css";
+import "../styles/system.css";
 
 const serif = Source_Serif_4({
   subsets: ["latin"],
-  weight: ["400", "600"],
+  weight: ["400", "500", "600"],
   variable: "--font-serif",
   display: "swap",
 });

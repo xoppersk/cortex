@@ -1,432 +1,294 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ButtonLink } from "../components/Button";
-import { RichSegments } from "../components/Footnote";
-import { Meter } from "../components/Meter";
+import type { SVGProps } from "react";
+import { IconArrowRight, IconBook, IconDatabase } from "../components/icons";
 import { SiteFooter, SiteHeader } from "../components/SiteHeader";
-import { getPlaybooks, getWorkspaceData } from "../lib/api";
-import type { MarginNoteData } from "../lib/types";
 
 export const metadata: Metadata = {
   title: { absolute: "Cortex — Answers that can show their work" },
 };
 
 /*
- * P-01 Landing. Copy and layout follow the canvas reference
- * (.canvas-ref/screens/P-01-landing/body-clean.html) section by section.
- * The excerpt answer and its footnotes come from the shared thread fixture;
- * the margin notes use the canvas wording (title + match line).
+ * P-01 Landing — Premium v2 (screens/Landing.html), section by section:
+ * hero, product excerpt sheet (answer + sources column), numbered feature
+ * sheets 1 Evidence / 2 Playbooks / 3 Cost, four trust cards, black CTA
+ * band, footer. Copy transcribed verbatim from the screen.
  */
-const excerptNotes: MarginNoteData[] = [
-  {
-    id: "note-1",
-    n: 1,
-    paragraphId: "landing-excerpt",
-    documentTitle: "Customer interview synthesis, p. 14",
-    catalog: "Catalog 02",
-    meta: "Match 0.91 · Oct 2",
-    excerpt: [],
-  },
-  {
-    id: "note-2",
-    n: 2,
-    paragraphId: "landing-excerpt",
-    documentTitle: "Procurement call notes, Northwind",
-    catalog: "Catalog 02",
-    meta: "Match 0.86 · Sep 30",
-    excerpt: [],
-  },
-  {
-    id: "note-3",
-    n: 3,
-    paragraphId: "landing-excerpt",
-    documentTitle: "Product council synthesis",
-    catalog: "Catalog 04",
-    meta: "Match 0.81 · Oct 1",
-    excerpt: [
-      { text: "“…whether the source was " },
-      { text: "current on the day the answer was given", mark: true },
-      { text: ".”" },
-    ],
-  },
+
+function TrustIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      {...props}
+      className="ic"
+    />
+  );
+}
+
+const traceRows = [
+  { cite: "1", aside: false, passage: "Customer interview synthesis · 118", match: "0.91", width: "91%", note: "" },
+  { cite: "2", aside: false, passage: "Procurement call notes · 22", match: "0.86", width: "86%", note: "" },
+  { cite: "—", aside: true, passage: "Interview round 1 · 7", match: "0.72", width: "72%", note: " · over 30 days old" },
+  { cite: "—", aside: true, passage: "Customer interview synthesis · 77 · below 0.70", match: "0.66", width: "66%", note: "" },
 ];
 
 const trustPoints = [
   {
     term: "Your documents train nothing.",
     definition: "They are used to answer your questions and nothing else.",
+    icon: (
+      <TrustIcon>
+        <path d="M8 2 3 4v4c0 3 2.2 5 5 6 2.8-1 5-3 5-6V4z" />
+      </TrustIcon>
+    ),
   },
   {
     term: "Old answers keep their evidence.",
     definition: "Cited passages are stored as they were, for up to seven years.",
+    icon: (
+      <TrustIcon>
+        <path d="M4 2.5h5l3 3v8H4z" />
+        <path d="M9 2.5v3h3" />
+      </TrustIcon>
+    ),
   },
   {
     term: "Every change is logged.",
     definition: "Roles, keys, settings and exports, in a log nobody can edit.",
+    icon: (
+      <TrustIcon>
+        <path d="M3 4h10M3 8h10M3 12h6" />
+      </TrustIcon>
+    ),
   },
   {
     term: "Single sign-on on Enterprise.",
     definition: "Okta, Entra and Google, with audit export to your SIEM.",
+    icon: (
+      <TrustIcon>
+        <circle cx="5.5" cy="10.5" r="2.5" />
+        <path d="m7.3 8.7 5.2-5.2M10.5 5.5l1.5 1.5" />
+      </TrustIcon>
+    ),
   },
 ];
 
-const traceRows = [
-  { cite: "1", passage: "Customer interview synthesis · 118", match: "0.91", aside: false, warn: "" },
-  { cite: "2", passage: "Procurement call notes · 22", match: "0.86", aside: false, warn: "" },
-  { cite: "—", passage: "Interview round 1 · 7", match: "0.72", aside: true, warn: " · over 30 days old" },
-  { cite: "—", passage: "Customer interview synthesis · 77 · below 0.70", match: "0.66", aside: true, warn: "" },
-];
-
-function MarketingH2({ children }: { children: string }) {
-  return (
-    <h2
-      style={{
-        fontFamily: "var(--font-serif)",
-        fontSize: 40,
-        lineHeight: 1.1,
-        fontWeight: 600,
-        letterSpacing: "-0.02em",
-        color: "var(--ink)",
-        maxWidth: "16ch",
-      }}
-    >
-      {children}
-    </h2>
-  );
-}
-
-const excerptQuestion = "Why do buyers hesitate to forward AI answers to legal?";
-const excerptSegments = [
-  { text: "Seven of nine teams said an answer is only forwardable if the reviewer can open the document behind it" },
-  { text: "", footnote: 1 },
-  { text: ". Legal wants to know which version of a policy was read" },
-  { text: "", footnote: 2 },
-  { text: ", and whether it was " },
-  { text: "still current when the answer was written", mark: true },
-  { text: "", footnote: 3 },
-  { text: "." },
-];
-
 export default function LandingPage() {
-  const workspace = getWorkspaceData().workspace;
-  const featured = getPlaybooks().featured;
-
   return (
     <div>
       <SiteHeader current="/" />
 
       {/* Hero */}
-      <section className="site-wrap" style={{ paddingTop: 96, paddingBottom: 72 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-          <h1 className="display-xl" style={{ maxWidth: "12ch" }}>
-            Answers that can show their work.
-          </h1>
-          <p className="serif-lead" style={{ fontSize: 22, maxWidth: "34em" }}>
-            Cortex is a research workspace for teams that have to forward what they find. Every claim is
-            footnoted to the passage it came from, every good prompt becomes a playbook, and every answer
-            shows its cost before it is written.
-          </p>
-          <div className="row" style={{ gap: 10 }}>
-            <ButtonLink href="/app/new" variant="primary" size="lg">
-              Start free for 14 days
-            </ButtonLink>
-            <ButtonLink
-              href="/app/c/launch-evidence"
-              variant="secondary"
-              size="lg"
-              style={{ padding: "0 18px" }}
-            >
-              See a real thread
-            </ButtonLink>
-            <span className="ui-text muted-3" style={{ marginLeft: 6 }}>
-              No card. $20 of model use included.
-            </span>
-          </div>
+      <section className="wrap pub-hero">
+        <h1 className="pub-hero-h1">Answers that can show their work.</h1>
+        <p className="lead pub-hero-lead">
+          Cortex is a research workspace for teams that have to forward what they find. Every claim is
+          footnoted to the passage it came from, every good prompt becomes a playbook, and every answer
+          shows its cost before it is written.
+        </p>
+        <div className="pub-hero-actions">
+          <Link href="/app/new" className="btn dk lg">
+            Start free for 14 days <IconArrowRight style={{ width: 15, height: 15, color: "var(--on-ink)" }} />
+          </Link>
+          <Link href="/app/c/launch-evidence" className="btn lg">
+            See a real thread
+          </Link>
+          <span className="pub-hero-note">No card. $20 of model use included.</span>
         </div>
       </section>
 
       {/* Product excerpt */}
-      <section aria-label="Example answer" className="site-wrap" style={{ paddingBottom: 104 }}>
-        <div
-          style={{
-            borderTop: "1px solid var(--ink)",
-            paddingTop: 28,
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 56,
-          }}
-        >
-          <div style={{ flex: "1 1 520px", maxWidth: 680 }} className="stack-4">
-            <span className="caption" style={{ color: "var(--ink-4)", fontSize: 13 }}>
-              Asked of 426 interview passages · $0.014
+      <section aria-label="Example answer" className="wrap" style={{ paddingBottom: 72 }}>
+        <div className="sheet lift pub-excerpt">
+          <div className="pub-excerpt-main">
+            <span className="chip" style={{ alignSelf: "flex-start" }}>
+              <IconDatabase style={{ width: 13, height: 13 }} />
+              Asked of 426 interview passages · <span className="mono" style={{ color: "var(--ink)" }}>$0.014</span>
             </span>
-            <p
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: 30,
-                lineHeight: 1.25,
-                fontWeight: 600,
-                letterSpacing: "-0.015em",
-                color: "var(--ink)",
-              }}
-            >
-              {excerptQuestion}
-            </p>
-            <p className="answer-text" style={{ fontSize: 20 }}>
-              <RichSegments segments={excerptSegments} />
+            <p className="pub-excerpt-q">Why do buyers hesitate to forward AI answers to legal?</p>
+            <p className="prose pub-excerpt-prose">
+              Seven of nine teams said an answer is only forwardable if the reviewer can open the document
+              behind it
+              <a className="fn" href="#e1" style={{ fontFamily: "var(--font-sans)" }}>
+                1
+              </a>
+              . Legal wants to know which version of a policy was read
+              <a className="fn" href="#e2" style={{ fontFamily: "var(--font-sans)" }}>
+                2
+              </a>
+              , and whether it was <mark>still current when the answer was written</mark>
+              <a className="fn on" href="#e3" style={{ fontFamily: "var(--font-sans)" }}>
+                3
+              </a>
+              .
             </p>
           </div>
-          <ol
-            style={{
-              flex: "1 1 240px",
-              maxWidth: 300,
-              margin: 0,
-              padding: "30px 0 0",
-              listStyle: "none",
-              display: "flex",
-              flexDirection: "column",
-              gap: 16,
-              fontSize: 13,
-              lineHeight: 1.5,
-              color: "var(--ink-2)",
-            }}
-          >
-            {excerptNotes.map((note) => (
-              <li
-                key={note.id}
-                id={note.id}
-                tabIndex={-1}
-                className="margin-note"
-                style={{ fontSize: 13, lineHeight: 1.5 }}
-              >
-                <span>
-                  <span className="margin-note-number">{note.n}</span>{" "}
-                  <span style={{ color: "var(--ink-2)", fontWeight: 400 }}>{note.documentTitle}</span>
-                  <br />
-                  <span style={{ fontSize: 13, color: "var(--ink-4)" }}>{note.meta}</span>
+          <ol className="pub-sources">
+            <li id="e1" className="src">
+              <span className="n">1</span>
+              <span>
+                <b>Customer interview synthesis, p. 14</b>
+                <br />
+                Match <span className="mono">0.91</span> · Oct 2
+              </span>
+            </li>
+            <li id="e2" className="src">
+              <span className="n">2</span>
+              <span>
+                <b>Procurement call notes, Northwind</b>
+                <br />
+                Match <span className="mono">0.86</span> · Sep 30
+              </span>
+            </li>
+            <li id="e3" className="pub-src-selected">
+              <span className="src">
+                <span className="n" style={{ background: "var(--ink)", color: "var(--on-ink)" }}>
+                  3
                 </span>
-                {note.excerpt && note.excerpt.length > 0 ? (
-                  <span className="margin-note-excerpt">
-                    <RichSegments segments={note.excerpt} />
-                  </span>
-                ) : null}
-              </li>
-            ))}
+                <span>
+                  <b>Product council synthesis</b>
+                  <br />
+                  Match <span className="mono">0.81</span> · Oct 1
+                </span>
+              </span>
+              <span className="pub-src-excerpt">
+                “…whether the source was <mark>current on the day the answer was given</mark>.”
+              </span>
+            </li>
           </ol>
         </div>
       </section>
 
-      {/* 1 · Evidence */}
-      <section className="site-wrap marketing-section">
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 56 }}>
-          <div style={{ flex: "1 1 420px" }} className="stack-4">
-            <span className="section-number">1 · Evidence</span>
-            <MarketingH2>Every claim opens the passage behind it.</MarketingH2>
-            <p className="serif-lead" style={{ fontSize: 19, lineHeight: 1.6, maxWidth: "34em" }}>
+      <div className="wrap pub-feats">
+        {/* 1 · Evidence */}
+        <section className="sheet pub-feat">
+          <div className="pub-feat-copy">
+            <span className="sn">
+              <span className="nb">1</span>· Evidence
+            </span>
+            <h2 className="h2">Every claim opens the passage behind it.</h2>
+            <p className="lead">
               Cortex reads your documents in passages, not pages. It shows you which ones it used, which it
               set aside, and why — so when an answer is wrong you can see whether the problem was the
               question, the source or the search.
             </p>
           </div>
           <div
-            className="fragment evidence-trace"
+            className="pub-frag"
             role="img"
             aria-label="Retrieval trace: four passages cited, one set aside because it was over 30 days old, one below the match minimum."
-            style={{ flex: "1 1 420px", maxWidth: 520, alignSelf: "flex-start", fontSize: 13 }}
           >
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "26px minmax(0, 1fr) 46px",
-                gap: 12,
-                padding: "8px 0",
-                color: "var(--ink-4)",
-                fontSize: 12,
-              }}
-            >
-              <span>Cite</span>
-              <span>Passage</span>
-              <span style={{ textAlign: "right" }}>Match</span>
+            <div className="pub-trow pub-trow-head">
+              <span className="th">Cite</span>
+              <span className="th">Passage</span>
+              <span className="th" style={{ textAlign: "right" }}>
+                Match
+              </span>
             </div>
-            {traceRows.map((row) => (
-              <div
-                key={`${row.passage}-${row.match}`}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "26px minmax(0, 1fr) 46px",
-                  gap: 12,
-                  padding: "9px 0",
-                  borderTop: "1px solid #E4E4E0",
-                  color: row.aside ? "var(--ink-3)" : undefined,
-                }}
-              >
-                <strong style={{ fontWeight: row.aside ? 400 : 600 }}>{row.cite}</strong>
+            {traceRows.map((row, index) => (
+              <div key={`${row.passage}-${row.match}`} className={`pub-trow${row.aside ? " pub-trow-aside" : ""}`} style={index === 0 ? { borderTop: 0 } : undefined}>
+                <span className={`nb${row.aside ? " pub-nb-dash" : ""}`}>{row.cite}</span>
                 <span>
                   {row.passage}
-                  {row.warn ? <span className="warn-text">{row.warn}</span> : null}
+                  {row.note ? <span style={{ color: "var(--warn)" }}>{row.note}</span> : null}
                 </span>
-                <span style={{ textAlign: "right" }}>{row.match}</span>
+                <span className={`pub-bar${row.aside ? " pub-bar-aside" : ""}`}>
+                  <i aria-hidden="true">
+                    <b style={{ width: row.width }} />
+                  </i>
+                  {row.match}
+                </span>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* 2 · Playbooks */}
-      <section className="site-wrap marketing-section">
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 56 }}>
-          <div style={{ flex: "1 1 420px" }} className="stack-4">
-            <span className="section-number">2 · Playbooks</span>
-            <MarketingH2>The prompt that worked becomes the team’s.</MarketingH2>
-            <p className="serif-lead" style={{ fontSize: 19, lineHeight: 1.6, maxWidth: "34em" }}>
+        {/* 2 · Playbooks */}
+        <section className="sheet pub-feat">
+          <div className="pub-feat-copy">
+            <span className="sn">
+              <span className="nb">2</span>· Playbooks
+            </span>
+            <h2 className="h2">The prompt that worked becomes the team’s.</h2>
+            <p className="lead">
               Save a good request as a playbook with inputs, approved sources and checks. Anyone on the team
               can run it; a run that fails its checks is marked, never quietly shared.
             </p>
           </div>
-          <div
-            className="fragment stack-3"
-            style={{ flex: "1 1 420px", maxWidth: 520, alignSelf: "flex-start" }}
-          >
-            <span className="caption" style={{ color: "var(--ink-4)" }}>
-              {featured.name} · {featured.runs} runs this month · 39 passed checks
+          <div className="pub-frag" style={{ padding: "22px 24px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
+            <span className="pub-play-head">
+              <IconBook />
+              <span>Launch brief · 41 runs this month · 39 passed checks</span>
             </span>
-            <p
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: 17,
-                lineHeight: 1.65,
-                color: "var(--ink-body)",
-              }}
-            >
-              Write a launch brief for{" "}
-              <span className="dotted-input" style={{ fontFamily: "var(--font-sans)", fontSize: 15 }}>
-                product
-              </span>{" "}
-              aimed at{" "}
-              <span className="dotted-input" style={{ fontFamily: "var(--font-sans)", fontSize: 15 }}>
-                audience
-              </span>
-              . State the single promise in one sentence, then the three strongest pieces of proof…
+            <p className="pub-play-text">
+              Write a launch brief for <b className="pick">product</b> aimed at <b className="pick">audience</b>.
+              State the single promise in one sentence, then the three strongest pieces of proof…
             </p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* 3 · Cost */}
-      <section className="site-wrap marketing-section">
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 56 }}>
-          <div style={{ flex: "1 1 420px" }} className="stack-4">
-            <span className="section-number">3 · Cost</span>
-            <MarketingH2>You see the price before the answer.</MarketingH2>
-            <p className="serif-lead" style={{ fontSize: 19, lineHeight: 1.6, maxWidth: "34em" }}>
+        {/* 3 · Cost */}
+        <section className="sheet pub-feat">
+          <div className="pub-feat-copy">
+            <span className="sn">
+              <span className="nb">3</span>· Cost
+            </span>
+            <h2 className="h2">You see the price before the answer.</h2>
+            <p className="lead">
               Set a ceiling per answer and a limit per month. Cortex estimates each reply before writing it
               and stops at the line you drew, without touching anything already written.
             </p>
           </div>
-          <div
-            className="fragment"
-            style={{ flex: "1 1 420px", maxWidth: 520, alignSelf: "flex-start" }}
-          >
-            <Meter
-              sentence={
-                <>
-                  <strong style={{ fontWeight: 600 }}>${workspace.spend}</strong> of the $
-                  {workspace.monthlyLimit} limit is spent with three days left. At this pace the workspace
-                  reaches the limit around <strong style={{ fontWeight: 600 }}>October 8</strong>.
-                </>
-              }
-              value={workspace.spend}
-              max={workspace.monthlyLimit}
-              caption={
-                <span style={{ fontSize: 13 }}>
-                  About $0.012 for this reply. $0.030 left of this thread’s $0.08 limit.
-                </span>
-              }
-              label={`$${workspace.spend} of $${workspace.monthlyLimit} spent`}
-            />
+          <div className="pub-frag" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+            <p className="pub-cost-sentence">
+              <b style={{ fontWeight: 600 }}>$184</b> of the $200 limit is spent with three days left. At this
+              pace the workspace reaches the limit around <b style={{ fontWeight: 600 }}>October 8</b>.
+            </p>
+            <div className="pub-cost-bar" role="img" aria-label="$184 of $200 spent">
+              <div className="pub-cost-bar-fill" />
+            </div>
+            <span className="pub-cost-note">
+              About <span className="mono">$0.012</span> for this reply. <span className="mono">$0.030</span>{" "}
+              left of this thread’s <span className="mono">$0.08</span> limit.
+            </span>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* Trust */}
-      <section className="site-wrap marketing-section" style={{ paddingBottom: 96 }}>
-        <div className="stack-6" style={{ gap: 32 }}>
-          <div className="stack-4">
-            <span className="section-number">For the people who review it</span>
-            <h2
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: 40,
-                lineHeight: 1.1,
-                fontWeight: 600,
-                letterSpacing: "-0.02em",
-                color: "var(--ink)",
-                maxWidth: "22ch",
-              }}
-            >
-              What security and legal will ask, answered up front.
-            </h2>
-          </div>
-          <dl
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-              gap: "28px 40px",
-              fontSize: 15,
-              lineHeight: 1.55,
-            }}
-          >
-            {trustPoints.map((point) => (
-              <div key={point.term}>
-                <dt style={{ fontWeight: 600, color: "var(--ink)" }}>{point.term}</dt>
-                <dd style={{ marginTop: 6, color: "var(--ink-2)" }}>{point.definition}</dd>
-              </div>
-            ))}
-          </dl>
+      <section className="wrap pub-trust">
+        <div className="pub-trust-head">
+          <span className="sn">For the people who review it</span>
+          <h2 className="h2">What security and legal will ask, answered up front.</h2>
         </div>
+        <dl className="pub-trust-grid">
+          {trustPoints.map((point) => (
+            <div key={point.term} className="pub-tc">
+              <span className="ib">{point.icon}</span>
+              <dt>{point.term}</dt>
+              <dd>{point.definition}</dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
       {/* CTA band */}
-      <section className="cta-band">
-        <div
-          className="site-wrap"
-          style={{
-            paddingTop: 88,
-            paddingBottom: 88,
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "flex-end",
-            justifyContent: "space-between",
-            gap: 32,
-          }}
-        >
-          <h2
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: 52,
-              lineHeight: 1.05,
-              fontWeight: 600,
-              letterSpacing: "-0.03em",
-              maxWidth: "14ch",
-              color: "var(--on-ink)",
-            }}
-          >
-            Bring one question and the documents behind it.
-          </h2>
-          <div className="stack-3" style={{ alignItems: "flex-start" }}>
-            <ButtonLink
-              href="/app/new"
-              variant="primary"
-              size="lg"
-              style={{ background: "var(--on-ink)", borderColor: "var(--on-ink)", color: "var(--ink)" }}
-            >
-              Start free for 14 days
-            </ButtonLink>
-            <span style={{ fontSize: 13, color: "#C9C9C3" }}>
-              $30 per seat after the trial ·{" "}
-              <Link href="/pricing" style={{ color: "var(--on-ink)" }}>
-                pricing
-              </Link>
+      <section className="wrap" style={{ paddingBottom: 0 }}>
+        <div className="pub-cta">
+          <h2>Bring one question and the documents behind it.</h2>
+          <div className="pub-cta-side">
+            <Link href="/app/new" className="btn lg" style={{ borderColor: "var(--on-ink)" }}>
+              Start free for 14 days{" "}
+              <IconArrowRight style={{ width: 15, height: 15, color: "var(--ink)" }} />
+            </Link>
+            <span className="pub-cta-note">
+              $30 per seat after the trial · <Link href="/pricing">pricing</Link>
             </span>
           </div>
         </div>
