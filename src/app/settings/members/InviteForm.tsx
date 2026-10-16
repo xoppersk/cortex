@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "../../../components/Button";
 import type { Role } from "../../../lib/types";
 
 const ROLES: Role[] = ["Editor", "Viewer", "Admin"];
@@ -34,15 +33,15 @@ export function InviteForm({
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: "var(--space-3)", flexWrap: "wrap" }}>
-        <div className="field" style={{ flex: "1 1 260px" }}>
-          <label className="field-label" htmlFor="invite-email" style={{ fontSize: 12, color: "var(--ink-3)" }}>
+      <div className="card ad-invite-card">
+        <div className="field" style={{ flex: "1 1 300px" }}>
+          <label className="ad-field-label" htmlFor="invite-email">
             Invite by email
           </label>
           <input
             id="invite-email"
-            className="field-control field-control-32"
-            style={{ height: 34 }}
+            className="inp"
+            style={{ width: "100%" }}
             type="email"
             autoComplete="email"
             placeholder="name@company.com, separate several with commas"
@@ -56,13 +55,13 @@ export function InviteForm({
           />
         </div>
         <div className="field">
-          <label className="field-label" htmlFor="invite-role" style={{ fontSize: 12, color: "var(--ink-3)" }}>
+          <label className="ad-field-label" htmlFor="invite-role">
             Role
           </label>
           <select
             id="invite-role"
-            className="field-control field-control-32"
-            style={{ height: 34, width: "auto" }}
+            className="sel ad-sel"
+            style={{ width: 120 }}
             value={role}
             onChange={(event) => setRole(event.target.value as Role)}
           >
@@ -73,9 +72,21 @@ export function InviteForm({
             ))}
           </select>
         </div>
-        <Button variant="primary" type="submit" style={{ minHeight: 34 }}>
+        <button type="submit" className="btn dk" style={{ height: 34, padding: "0 16px" }}>
+          <svg
+            viewBox="0 0 16 16"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            aria-hidden="true"
+          >
+            <path d="M2.5 4.5h11v7h-11z" />
+            <path d="m2.5 4.5 5.5 4 5.5-4" />
+          </svg>
           Send invite
-        </Button>
+        </button>
       </div>
       {error ? (
         <p className="field-error" id="invite-email-error" role="alert" style={{ marginTop: "var(--space-2)" }}>
