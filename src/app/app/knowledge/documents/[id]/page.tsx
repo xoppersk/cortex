@@ -2,10 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
-
-export const metadata: Metadata = { title: { absolute: "Cortex — Passage inspector" } };
 import { Button } from "../../../../../components/Button";
 import { getKnowledge } from "../../../../../lib/api";
+function KnowledgeSubnav() {
+  return (
+    <nav className="subnav" aria-label="Knowledge">
+      <Link href="/app/knowledge">Knowledge bases</Link>
+      <Link href="/app/knowledge/documents" aria-current="page">
+        Documents
+      </Link>
+      <Link href="/app/knowledge/ask">Ask</Link>
+    </nav>
+  );
+}
+
+export const metadata: Metadata = { title: { absolute: "Cortex — Passage inspector" } };
 
 type Passage = {
   number: number;
@@ -36,7 +47,7 @@ function PassageText({ passage }: { passage: Passage }) {
 
   if (overlapPrefix && rest.startsWith(overlapPrefix)) {
     nodes.push(
-      <span key={key++} className="overlap-shade">
+      <span key={key++} className="kb-ov">
         {overlapPrefix}
       </span>,
     );
@@ -61,12 +72,58 @@ function PassageText({ passage }: { passage: Passage }) {
   }
   if (tail) {
     nodes.push(
-      <span key={key++} className="overlap-shade">
+      <span key={key++} className="kb-ov">
         {tail}
       </span>,
     );
   }
   return <>{nodes}</>;
+}
+
+function IconSplit() {
+  return (
+    <svg
+      className="ic"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
+      <path d="M2.5 8h11M5.5 5 2.5 8l3 3M10.5 5l3 3-3 3" />
+    </svg>
+  );
+}
+
+function IconMerge() {
+  return (
+    <svg
+      className="ic"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
+      <path d="M3 4.5h10M3 11.5h10M8 6v4" />
+    </svg>
+  );
+}
+
+function IconKeepOut() {
+  return (
+    <svg
+      className="ic"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden="true"
+    >
+      <circle cx="8" cy="8" r="5.5" />
+      <path d="m4.2 11.8 7.6-7.6" />
+    </svg>
+  );
 }
 
 export default async function PassageInspectorPage(props: {
@@ -85,200 +142,155 @@ export default async function PassageInspectorPage(props: {
 
   const passages = inspector.passages as Passage[];
   const selected = inspector.selectedPassage as SelectedPassage;
+  const selectedIndex = passages.findIndex((passage) => passage.selected);
 
   return (
     <>
-      <header
-        className="bleed-head"
-        style={{
-          paddingTop: 18,
-          paddingBottom: 16,
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          gap: 14,
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <p style={{ fontSize: 12, color: "var(--ink-3)" }}>
-            <Link href="/app/knowledge/documents" style={{ color: "var(--ink-3)" }}>
+      <KnowledgeSubnav />
+      <header className="ph" style={{ alignItems: "flex-end" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
+          <span className="sub">
+            <Link href="/app/knowledge/documents" style={{ color: "var(--ink-4)" }}>
               Documents
             </Link>{" "}
-            / {inspector.collectionName}
-          </p>
-          <h1
+            <span className="sep">/</span> {inspector.collectionName}
+          </span>
+          <h1>{inspector.documentTitle}</h1>
+          <span
             style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: 24,
-              lineHeight: 1.15,
-              fontWeight: 600,
-              letterSpacing: "-0.015em",
-              color: "var(--ink)",
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: 8,
+              marginTop: 4,
+              fontSize: 12.5,
+              color: "var(--ink-3)",
             }}
           >
-            {inspector.documentTitle}
-          </h1>
-          <p className="meta">
-            {inspector.totalPassages} passages · {inspector.splitting} · {inspector.indexedLabel}
-          </p>
+            <span className="chip" style={{ height: 24 }}>
+              {inspector.totalPassages} passages
+            </span>
+            {inspector.splitting} · {inspector.indexedLabel}
+          </span>
         </div>
-        <div className="row" style={{ gap: 6, alignItems: "center", flexWrap: "nowrap" }}>
-          <label htmlFor="go-to-passage" style={{ fontSize: 12, color: "var(--ink-3)" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+          <label htmlFor="jump" style={{ fontSize: 12, color: "var(--ink-3)" }}>
             Go to passage
           </label>
           <input
-            id="go-to-passage"
-            className="field-control"
-            style={{ width: 56, height: 30, minHeight: 30, padding: "0 8px", textAlign: "right" }}
+            id="jump"
+            type="text"
             defaultValue={selected.number}
+            className="inp mono"
+            style={{ width: 64, height: 32, textAlign: "right" }}
           />
-          <Button variant="secondary" size="sm">
-            Change splitting
-          </Button>
+          <Button>Change splitting</Button>
         </div>
       </header>
 
-      <div className="doc-margin" style={{ marginTop: 24 }}>
-        <div style={{ flex: "1 1 480px", maxWidth: 660, minWidth: 0 }}>
-          <h2
-            className="section-label"
-            style={{ fontSize: 13, marginLeft: 60, marginBottom: 4 }}
-          >
-            {inspector.sectionHeading}
-          </h2>
-          <div className="passage-list">
-            {passages.map((passage) =>
-              passage.selected ? (
-                <div
-                  key={passage.number}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "44px minmax(0, 1fr)",
-                    gap: "var(--space-4)",
-                    margin: "0 -16px",
-                    padding: 16,
-                    border: "1px solid var(--ink)",
-                    borderRadius: "var(--radius-m)",
-                    background: "var(--paper)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 12,
-                      color: "var(--ink)",
-                      fontWeight: 600,
-                      paddingTop: 3,
-                    }}
-                  >
-                    {passage.number}
+      <div className="kb-split">
+        <section aria-label="Document passages" className="kb-main-inspector">
+          <h2 className="kb-inspector-h2">{inspector.sectionHeading}</h2>
+          {passages.map((passage, index) => {
+            if (passage.selected) {
+              return (
+                <div key={passage.number} className="kb-ps kb-ps-selected" aria-current="true">
+                  <span className="kb-ps-n">
+                    <span className="kb-ps-n-chip">{passage.number}</span>
                   </span>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-serif)",
-                      fontSize: 16,
-                      lineHeight: 1.65,
-                      color: "var(--ink)",
-                    }}
-                  >
+                  <p>
                     <PassageText passage={passage} />
                   </p>
                 </div>
-              ) : (
-                <div key={passage.number} className="passage-row">
-                  <span className="passage-number" style={{ textAlign: "left" }}>
-                    {passage.number}
-                  </span>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-serif)",
-                      fontSize: 16,
-                      lineHeight: 1.65,
-                      color: "var(--ink-2)",
-                    }}
-                  >
-                    <PassageText passage={passage} />
-                  </p>
-                </div>
-              ),
-            )}
-          </div>
-          <p
-            className="caption"
-            style={{ marginLeft: 60, marginTop: 12, color: "var(--ink-4)" }}
-          >
+              );
+            }
+            return (
+              <div
+                key={passage.number}
+                className={[
+                  "kb-ps",
+                  index === passages.length - 1 ? "kb-ps-last" : "",
+                  index === selectedIndex + 1 ? "kb-ps-after-selected" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                <span className="kb-ps-n">{passage.number}</span>
+                <p>
+                  <PassageText passage={passage} />
+                </p>
+              </div>
+            );
+          })}
+          <p className="kb-overlap-note">
+            <span className="kb-overlap-swatch" aria-hidden="true" />
             Grey shading marks text shared with the neighbouring passage.
           </p>
-        </div>
+        </section>
 
-        <div className="margin-column">
-          <div>
-            <h2 style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)", marginBottom: 8 }}>
-              Passage {selected.number}
-            </h2>
-            <dl
-              style={{
-                display: "grid",
-                gridTemplateColumns: "auto minmax(0, 1fr)",
-                gap: "6px 14px",
-                fontSize: 12,
-                lineHeight: 1.5,
-              }}
-            >
-              <dt style={{ color: "var(--ink-4)" }}>Length</dt>
-              <dd style={{ color: "var(--ink-2)" }}>{selected.tokens} tokens</dd>
-              <dt style={{ color: "var(--ink-4)" }}>Pages</dt>
-              <dd style={{ color: "var(--ink-2)" }}>{selected.page}</dd>
-              <dt style={{ color: "var(--ink-4)" }}>Heading</dt>
-              <dd style={{ color: "var(--ink-2)" }}>{selected.heading}</dd>
+        <aside className="kb-side" aria-label={`Passage ${selected.number}`} style={{ paddingTop: 30, gap: 14 }}>
+          <section className="card kb-side-card card-lift" style={{ gap: 12 }}>
+            <h2 className="kb-passage-card-title">Passage {selected.number}</h2>
+            <dl className="kb-dl">
+              <dt>Length</dt>
+              <dd className="mono">{selected.tokens} tokens</dd>
+              <dt>Pages</dt>
+              <dd className="mono">{selected.page}</dd>
+              <dt>Heading</dt>
+              <dd>{selected.heading}</dd>
             </dl>
-          </div>
-
-          <div className="margin-box">
-            <h2 className="margin-box-title">Last 30 days</h2>
-            <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>
-              Retrieved for{" "}
-              <b style={{ color: "var(--ink)" }}>{selected.retrieved}</b> questions and cited in{" "}
-              <b style={{ color: "var(--ink)" }}>{selected.cited}</b> answers. Median match{" "}
-              {selected.medianMatch}.
-            </p>
-            {selected.recent ? (
-              <p style={{ fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>
-                Most recent:{" "}
-                {selected.recent.map((item, index) => (
-                  <span key={item.label}>
-                    {index > 0 ? ", " : null}
-                    <Link href={item.href}>{item.label}</Link>
+          </section>
+          <section className="card kb-side-card">
+            <h2 className="lbl" style={{ fontSize: 11 }}>
+              Last 30 days
+            </h2>
+            {selected.retrieved != null && selected.cited != null ? (
+              <>
+                <span>
+                  Retrieved for <b>{selected.retrieved}</b> questions and cited in{" "}
+                  <b>{selected.cited}</b> answers. Median match{" "}
+                  <span className="mono" style={{ color: "var(--ink)" }}>
+                    {selected.medianMatch}
                   </span>
-                ))}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="margin-box">
-            <h2 className="margin-box-title">Adjust</h2>
-            <div className="stack-2">
-              <div>
-                <Button variant="secondary" size="sm">
-                  Split after &ldquo;deciding criterion&rdquo;
-                </Button>
-              </div>
-              <div>
-                <Button variant="secondary" size="sm">
-                  Merge with 119
-                </Button>
-              </div>
-              <div>
-                <Button variant="secondary" size="sm">
-                  Keep out of answers
-                </Button>
-              </div>
-            </div>
-            <p className="caption" style={{ color: "var(--ink-4)" }}>
+                  .
+                </span>
+                {selected.recent ? (
+                  <span>
+                    Most recent:{" "}
+                    {selected.recent.map((item, index) => (
+                      <span key={item.label}>
+                        {index > 0 ? ", " : null}
+                        <Link href={item.href}>{item.label}</Link>
+                      </span>
+                    ))}
+                  </span>
+                ) : null}
+              </>
+            ) : (
+              <span>{selected.usage}</span>
+            )}
+          </section>
+          <section className="card kb-side-card">
+            <h2 className="lbl" style={{ fontSize: 11, marginBottom: 2 }}>
+              Adjust
+            </h2>
+            <Button className="kb-side-btn">
+              <IconSplit />
+              Split after &ldquo;deciding criterion&rdquo;
+            </Button>
+            <Button className="kb-side-btn">
+              <IconMerge />
+              Merge with 119
+            </Button>
+            <Button className="kb-side-btn">
+              <IconKeepOut />
+              Keep out of answers
+            </Button>
+            <span style={{ color: "var(--ink-4)", paddingTop: 2 }}>
               Changes re-index this document only and take about 20 seconds.
-            </p>
-          </div>
-        </div>
+            </span>
+          </section>
+        </aside>
       </div>
     </>
   );
