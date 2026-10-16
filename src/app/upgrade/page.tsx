@@ -7,54 +7,41 @@ import { UpgradeForm } from "./UpgradeForm";
 export const metadata: Metadata = { title: { absolute: "Cortex — Choose a plan" } };
 
 /*
- * S-08 Upgrade, per screens/Upgrade.html: full-width header bar (wordmark
- * is a plain span in the design, not a link; workspace name beside it;
- * "Back to workspace" right) → centred flex row (form + summary aside)
- * → LegalFooter.
+ * S-08 Upgrade, per screens/Upgrade.html (v2): header (brand left;
+ * "Back to workspace" ghost button right, no bottom border) → centred
+ * flex row (form .sheet + summary .sheet.lift) → LegalFooter.
  */
 export default function UpgradePage() {
   const { upgrade } = getStates();
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "var(--paper)",
-        color: "var(--ink)",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <header
-        style={{
-          padding: "20px 48px",
-          borderBottom: "1px solid var(--rule)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-          <span className="wordmark" style={{ fontSize: 22 }}>
-            Cortex
-          </span>
-          <span style={{ fontSize: 14, color: "var(--ink-3)" }}>{upgrade.workspace}</span>
-        </div>
-        <Link href="/app/history?state=empty" style={{ fontSize: 14, color: "var(--ink-2)" }}>
+    <div className="sys-page">
+      <header className="sys-topbar">
+        <Link href="/" className="brand" aria-label="Cortex home">
+          <i aria-hidden="true">C</i>
+          <b>Cortex</b>
+        </Link>
+        <Link href="/app/history?state=empty" className="btn gh sys-back-link">
+          <svg
+            className="ic"
+            viewBox="0 0 16 16"
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            style={{ width: 15, height: 15 }}
+          >
+            <path d="M13 8H3M7 4 3 8l4 4" />
+          </svg>
           Back to workspace
         </Link>
       </header>
 
-      <div
-        style={{
-          flex: 1,
-          padding: "56px 48px 64px",
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          gap: 72,
-        }}
-      >
+      <div className="sys-main sys-main-upgrade">
         <UpgradeForm upgrade={upgrade} />
       </div>
 

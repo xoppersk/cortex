@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { CSSProperties, FormEvent } from "react";
+import type { FormEvent } from "react";
 import { Button } from "../../components/Button";
 import { Field, fieldDescribedBy } from "../../components/Field";
 import type { StatesData } from "../../lib/types";
@@ -10,38 +10,19 @@ import type { StatesData } from "../../lib/types";
 type Upgrade = StatesData["upgrade"];
 
 /*
- * S-08 Upgrade, per screens/Upgrade.html: a <form> (flex 1 1 460px,
- * max-width 560px) beside a tint summary <aside>. Sections open with a
- * --rule hairline and keep label/helper left, control right. "Add a card"
- * (1px ink border) opens the card step (number / expiry / CVC); "Start
- * Team" is gated on a card on file and a valid limit. The summary's
- * model-use line is derived from the limit so the two never desync.
- * On completion the flow returns to the workspace (the empty-history
- * trial home, the same target as "Back to workspace"); the design ships
- * no post-submit state.
+ * S-08 Upgrade, per screens/Upgrade.html (v2): a .sheet <form> (flex
+ * 1 1 460px, max-width 620px, padding 40px 44px) beside a .sheet.lift
+ * summary <aside> (max-width 380px). Setting rows open with a #F0F0EC
+ * hairline and keep label/helper left, control right; the seats stepper
+ * sits in a rail pill and the summary updates live from it. "Add a card"
+ * opens the card step (number / expiry / CVC — no designed UI ships for
+ * it, so it follows the Field pattern); "Start Team on October 13" is
+ * gated on a card on file and a valid limit, and lives in the summary,
+ * bound to the form by form="upgrade-form". The summary's model-use line
+ * is derived from the limit so the two never desync. On completion the
+ * flow returns to the workspace (the empty-history trial home, the same
+ * target as "Back to workspace"); the design ships no post-submit state.
  */
-
-const sectionRow: CSSProperties = {
-  display: "flex",
-  flexWrap: "wrap",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: 12,
-  paddingTop: 22,
-  borderTop: "1px solid var(--rule)",
-};
-
-const sectionLabel: CSSProperties = { fontSize: 14, fontWeight: 600, color: "var(--ink)" };
-const sectionHelper: CSSProperties = { fontSize: 13, color: "var(--ink-3)" };
-
-const summaryRow: CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "minmax(0, 1fr) 110px",
-  gap: 16,
-  padding: "11px 0",
-  fontSize: 14,
-};
-
 function parseLimit(raw: string): number | null {
   const value = Number.parseFloat(raw.replace(/[^0-9.]/g, ""));
   return Number.isFinite(value) && value > 0 ? value : null;
@@ -110,131 +91,83 @@ export function UpgradeForm({ upgrade }: { upgrade: Upgrade }) {
     router.push("/app/history?state=empty");
   }
 
-  const stepperButton: CSSProperties = {
-    width: 36,
-    height: 36,
-    border: "1px solid var(--rule-strong)",
-    background: "var(--paper)",
-    fontSize: 18,
-    fontWeight: 500,
-    color: "var(--ink)",
-    cursor: "pointer",
-  };
-
   return (
     <>
-      <form
-        id="upgrade-form"
-        onSubmit={onSubmit}
-        noValidate
-        style={{
-          flex: "1 1 460px",
-          maxWidth: 560,
-          display: "flex",
-          flexDirection: "column",
-          gap: 26,
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <span style={{ fontSize: 13, color: "var(--warn)", fontWeight: 500 }}>
-            {upgrade.trialEnds}
+      <form id="upgrade-form" onSubmit={onSubmit} noValidate className="sheet sys-upgrade-form">
+        <div className="sys-upgrade-head">
+          <span className="sys-upgrade-meta">
+            <span className="tag ln sys-upgrade-tag">{upgrade.workspace}</span>
+            <span className="sys-trial-ends">
+              <svg
+                className="ic"
+                viewBox="0 0 16 16"
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="8" cy="8" r="5.5" />
+                <path d="M8 5v3l2 1.5" />
+              </svg>
+              {upgrade.trialEnds}
+            </span>
           </span>
-          <h1
-            style={{
-              margin: 0,
-              fontFamily: "var(--font-serif)",
-              fontSize: 40,
-              lineHeight: 1.1,
-              fontWeight: 600,
-              letterSpacing: "-0.025em",
-              color: "var(--ink)",
-            }}
-          >
-            {upgrade.heading}
-          </h1>
-          <p
-            style={{
-              margin: 0,
-              fontFamily: "var(--font-serif)",
-              fontSize: 18,
-              lineHeight: 1.55,
-              fontWeight: 400,
-              color: "var(--ink-body)",
-            }}
-          >
-            {upgrade.body}
-          </p>
+          <h1 className="sys-upgrade-title">{upgrade.heading}</h1>
+          <p className="sys-upgrade-body">{upgrade.body}</p>
         </div>
 
-        <div style={sectionRow}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <span id="seats-label" style={sectionLabel}>
+        <div className="sys-set">
+          <div className="sys-set-text">
+            <span id="seats-label" className="sys-set-label">
               Seats
             </span>
-            <span style={sectionHelper}>
+            <span className="sys-set-helper">
               {upgrade.seatsInTrial} people are in the trial. Viewers are free.
             </span>
           </div>
-          <div role="group" aria-labelledby="seats-label" style={{ display: "flex", alignItems: "center" }}>
+          <div role="group" aria-labelledby="seats-label" className="sys-stepper">
             <button
               type="button"
+              className="sys-stepper-btn"
               aria-label="Remove a seat"
               onClick={() => setSeats((value) => Math.max(1, value - 1))}
               disabled={seats <= 1}
-              style={{ ...stepperButton, borderRadius: "6px 0 0 6px" }}
             >
               −
             </button>
-            <span
-              aria-live="polite"
-              style={{
-                width: 52,
-                height: 36,
-                display: "grid",
-                placeItems: "center",
-                borderTop: "1px solid var(--rule-strong)",
-                borderBottom: "1px solid var(--rule-strong)",
-                fontSize: 15,
-                fontWeight: 600,
-                boxSizing: "border-box",
-              }}
-            >
+            <span aria-live="polite" className="sys-stepper-value">
               {seats}
             </span>
             <button
               type="button"
+              className="sys-stepper-btn"
               aria-label="Add a seat"
               onClick={() => setSeats((value) => value + 1)}
-              style={{ ...stepperButton, borderRadius: "0 6px 6px 0" }}
             >
               +
             </button>
           </div>
         </div>
 
-        <div style={sectionRow}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <label htmlFor="upgrade-limit" style={sectionLabel}>
+        <div className="sys-set">
+          <div className="sys-set-text sys-set-text-wide">
+            <label htmlFor="upgrade-limit" className="sys-set-label">
               Monthly spending limit
             </label>
-            <span style={sectionHelper}>{upgrade.usageNote}</span>
+            <span className="sys-set-helper">{upgrade.usageNote}</span>
             {limitError ? (
-              <span role="alert" style={{ fontSize: 13, color: "var(--danger)" }}>
+              <span role="alert" className="sys-set-error">
                 {limitError}
               </span>
             ) : null}
           </div>
           <input
             id="upgrade-limit"
-            className="field-control"
-            style={{
-              width: 96,
-              height: 36,
-              minHeight: 36,
-              padding: "0 10px",
-              textAlign: "right",
-              fontSize: 14,
-            }}
+            className="inp mono sys-limit-input"
             value={limit}
             onChange={(event) => setLimit(event.target.value)}
             onBlur={() => {
@@ -245,18 +178,10 @@ export function UpgradeForm({ upgrade }: { upgrade: Upgrade }) {
           />
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 10,
-            paddingTop: 22,
-            borderTop: "1px solid var(--rule)",
-          }}
-        >
-          <span style={sectionLabel}>Payment</span>
+        <div className="sys-set sys-set-stack">
+          <span className="sys-set-label">Payment</span>
           {cardAdded && !showCard ? (
-            <p style={{ margin: 0, fontSize: 14, color: "var(--ink-2)" }}>
+            <p className="sys-card-added">
               Card ending in {cardLast4}.{" "}
               <button
                 type="button"
@@ -270,7 +195,7 @@ export function UpgradeForm({ upgrade }: { upgrade: Upgrade }) {
               </button>
             </p>
           ) : showCard ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 420 }}>
+            <div className="sys-card-fields">
               <Field label="Card number" htmlFor="card-number" error={cardNumberError}>
                 <input
                   id="card-number"
@@ -278,15 +203,15 @@ export function UpgradeForm({ upgrade }: { upgrade: Upgrade }) {
                   type="text"
                   inputMode="numeric"
                   autoComplete="cc-number"
-                  className="field-control"
+                  className="inp"
                   value={cardNumber}
                   onChange={(event) => setCardNumber(event.target.value)}
                   aria-invalid={cardNumberError ? true : undefined}
                   aria-describedby={fieldDescribedBy("card-number", { error: cardNumberError })}
                 />
               </Field>
-              <div style={{ display: "flex", gap: 12 }}>
-                <div style={{ flex: "1 1 120px" }}>
+              <div className="sys-card-row">
+                <div>
                   <Field label="Expiry" htmlFor="card-expiry" error={cardExpiryError}>
                     <input
                       id="card-expiry"
@@ -295,7 +220,7 @@ export function UpgradeForm({ upgrade }: { upgrade: Upgrade }) {
                       inputMode="numeric"
                       autoComplete="cc-exp"
                       placeholder="MM/YY"
-                      className="field-control"
+                      className="inp"
                       value={cardExpiry}
                       onChange={(event) => setCardExpiry(event.target.value)}
                       aria-invalid={cardExpiryError ? true : undefined}
@@ -303,7 +228,7 @@ export function UpgradeForm({ upgrade }: { upgrade: Upgrade }) {
                     />
                   </Field>
                 </div>
-                <div style={{ flex: "1 1 120px" }}>
+                <div>
                   <Field label="CVC" htmlFor="card-cvc" error={cardCvcError}>
                     <input
                       id="card-cvc"
@@ -311,7 +236,7 @@ export function UpgradeForm({ upgrade }: { upgrade: Upgrade }) {
                       type="text"
                       inputMode="numeric"
                       autoComplete="cc-csc"
-                      className="field-control"
+                      className="inp"
                       value={cardCvc}
                       onChange={(event) => setCardCvc(event.target.value)}
                       aria-invalid={cardCvcError ? true : undefined}
@@ -324,45 +249,39 @@ export function UpgradeForm({ upgrade }: { upgrade: Upgrade }) {
                 <Button type="button" variant="primary" size="md" onClick={onSaveCard}>
                   Save card
                 </Button>
-                <Button
-                  type="button"
-                  variant="quiet"
-                  size="md"
-                  onClick={() => setShowCard(false)}
-                >
+                <Button type="button" variant="quiet" size="md" onClick={() => setShowCard(false)}>
                   Cancel
                 </Button>
               </div>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={() => setShowCard(true)}
-              style={{
-                alignSelf: "flex-start",
-                height: 40,
-                padding: "0 16px",
-                border: "1px solid var(--ink)",
-                borderRadius: "var(--radius-m)",
-                background: "var(--paper)",
-                color: "var(--ink)",
-                fontSize: 14,
-                fontWeight: 500,
-                lineHeight: 1,
-                cursor: "pointer",
-              }}
-            >
+            <button type="button" className="btn sys-add-card" onClick={() => setShowCard(true)}>
+              <svg
+                className="ic"
+                viewBox="0 0 16 16"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="2" y="4" width="12" height="8.5" rx="1.5" />
+                <path d="M2 7h12" />
+              </svg>
               Add a card
             </button>
           )}
           {paymentError ? (
-            <span role="alert" style={{ fontSize: 13, color: "var(--danger)" }}>
+            <span role="alert" className="sys-set-error">
               {paymentError}
             </span>
           ) : null}
-          <span style={{ fontSize: 13, color: "var(--ink-3)" }}>
+          <span className="sys-set-helper">
             Or{" "}
-            <a href="#" style={{ color: "var(--ink-2)" }}>
+            <a href="#" style={{ color: "var(--ink)" }}>
               pay annually by invoice
             </a>
             .
@@ -370,68 +289,33 @@ export function UpgradeForm({ upgrade }: { upgrade: Upgrade }) {
         </div>
       </form>
 
-      <aside
-        aria-label="Summary"
-        style={{
-          flex: "1 1 300px",
-          maxWidth: 360,
-          alignSelf: "flex-start",
-          padding: 24,
-          background: "var(--tint)",
-          borderRadius: "var(--radius-l)",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <h2
-          style={{
-            margin: "0 0 10px",
-            fontFamily: "var(--font-serif)",
-            fontSize: 20,
-            lineHeight: 1.2,
-            fontWeight: 600,
-            color: "var(--ink)",
-          }}
-        >
-          Team plan
-        </h2>
-        <div style={summaryRow} className="upgrade-summary-row">
+      <aside aria-label="Summary" className="sheet lift sys-summary">
+        <h2 className="sys-summary-title">Team plan</h2>
+        <div className="sys-li">
           <span>
             {seats} seats × ${upgrade.perSeat}
           </span>
-          <span style={{ textAlign: "right" }}>{money(seatsTotal)}</span>
+          <span>{money(seatsTotal)}</span>
         </div>
-        <div style={{ ...summaryRow, borderTop: "1px solid var(--rule)" }} className="upgrade-summary-row">
+        <div className="sys-li">
           <span>
             Model use at cost
             <br />
-            <span style={{ fontSize: 12, color: "var(--ink-3)" }}>
-              Billed after each month, never over {limitLabel}
-            </span>
+            <span className="sys-li-sub">Billed after each month, never over {limitLabel}</span>
           </span>
-          <span style={{ textAlign: "right", color: "var(--ink-3)" }}>up to {limitLabel}</span>
+          <span className="sys-li-muted">up to {limitLabel}</span>
         </div>
-        <div
-          className="upgrade-summary-row"
-          style={{
-            ...summaryRow,
-            borderTop: "1px solid var(--ink)",
-            fontWeight: 600,
-          }}
-        >
+        <div className="sys-li sys-li-total">
           <span>Charged {upgrade.chargedDate}</span>
-          <span style={{ textAlign: "right" }}>{money(seatsTotal)}</span>
+          <span>{money(seatsTotal)}</span>
         </div>
-        <p style={{ margin: "14px 0 0", fontSize: 12, lineHeight: 1.5, color: "var(--ink-2)" }}>
-          {upgrade.footerNote}
-        </p>
+        <p className="sys-summary-note">{upgrade.footerNote}</p>
         <Button
           type="submit"
           form="upgrade-form"
           variant="primary"
           size="lg"
-          className="btn-block"
-          style={{ marginTop: 18 }}
+          className="sys-btn-block sys-summary-cta"
         >
           Start Team on {upgrade.chargedDate}
         </Button>
