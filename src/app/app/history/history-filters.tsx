@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
-import { Button } from "../../../components/Button";
+import { IconSearch } from "../../../components/icons";
 import { getConversations } from "../../../lib/api";
 import type { Conversation } from "../../../lib/types";
 import { formatCost } from "../../../lib/utils";
@@ -19,6 +19,22 @@ type FilterId = (typeof FILTERS)[number]["id"];
 
 const GROUPS: Conversation["group"][] = ["Today", "This week", "Earlier"];
 const DEFAULT_TERM = "interview";
+
+const AVATAR_CLASS: Record<string, string> = {
+  "Sheku Koroma": "av-ink",
+  "Maya Jordan": "ws-av-mj",
+  "Owen Clarke": "ws-av-oc",
+  "Priya Shah": "ws-av-ps",
+  "Lena Brooks": "ws-av-lb",
+};
+
+function initialsOf(name: string): string {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("");
+}
 
 function peopleLabel(people: string[]): string {
   return people.map((person) => (person === "Sheku Koroma" ? "You" : person.split(" ")[0])).join(", ");
@@ -99,14 +115,21 @@ export function HistoryFilters() {
   });
 
   return (
-    <div className="stack-5">
-      <div className="row-between" style={{ alignItems: "center" }}>
-        <div className="filter-row" role="group" aria-label="Filter conversations">
+    <>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+        }}
+      >
+        <div className="seg" role="group" aria-label="Filter conversations">
           {FILTERS.map((item) => (
             <button
               key={item.id}
               type="button"
-              className="filter-button"
               aria-pressed={filter === item.id}
               onClick={() => updateParams({ filter: item.id })}
             >
@@ -114,35 +137,43 @@ export function HistoryFilters() {
             </button>
           ))}
         </div>
-        <div className="history-search-group" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ minWidth: 220, flex: "0 1 260px" }}>
-            <label className="sr-only" htmlFor="history-search">
-              Search titles, people, sources and message text
-            </label>
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+          <label className="ws-searchbox">
+            <IconSearch />
+            <span className="sr-only">Search titles, people, sources and message text</span>
             <input
               id="history-search"
-              className="field-control field-control-32"
               type="search"
-              placeholder="Search"
               value={searchValue}
               onChange={(event) => onSearchChange(event.target.value)}
             />
-          </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            aria-label="Sort conversations by last edited"
+          </label>
+          <button
+            type="button"
+            className="btn"
             aria-pressed={sortAsc}
             onClick={() => updateParams({ sort: sortAsc ? "desc" : "asc" })}
           >
+            <svg
+              className="ic"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              aria-hidden="true"
+            >
+              <path d="M5 3v10M2.5 10.5 5 13l2.5-2.5M11 13V3M8.5 5.5 11 3l2.5 2.5" />
+            </svg>
             Last edited
-          </Button>
+          </button>
         </div>
       </div>
 
       {term.trim() ? (
-        <p className="caption" style={{ margin: 0 }}>
-          {visible.length} conversations mention “{term.trim()}” in a title, message or cited source.
+        <p className="ws-match-line">
+          <span className="tag ws-match-tag">{term.trim()}</span>
+          {visible.length} conversations mention “{term.trim()}” in a title, message or cited
+          source.
         </p>
       ) : null}
 
@@ -150,77 +181,74 @@ export function HistoryFilters() {
         <p className="summary-sentence">No conversations match this search.</p>
       ) : (
         <div className="table-scroll">
-          <table className="data-table history-table">
-            <thead>
-              <tr>
-                <th scope="col">Conversation</th>
-                <th scope="col">Sources</th>
-                <th scope="col">People</th>
-                <th scope="col" className="numeric">
-                  Cost
-                </th>
-                <th scope="col" className="numeric">
-                  Edited
-                </th>
-              </tr>
-            </thead>
+          <div role="table" aria-label="Conversations" className="card" style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <div role="row" className="ws-hrow ws-hrow-head th">
+              <span role="columnheader">Conversation</span>
+              <span role="columnheader">Sources</span>
+              <span role="columnheader">People</span>
+              <span role="columnheader" style={{ textAlign: "right" }}>
+                Cost
+              </span>
+              <span role="columnheader" style={{ textAlign: "right" }}>
+                Edited
+              </span>
+            </div>
             {GROUPS.map((group) => {
               const groupRows = visible.filter((conversation) => conversation.group === group);
               const rows = sortAsc ? [...groupRows].reverse() : groupRows;
               if (rows.length === 0) return null;
               return (
-                <tbody key={group}>
-                  <tr>
-                    <td colSpan={5} style={{ borderBottom: 0, padding: "18px 0 6px" }}>
-                      <h2 style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", margin: 0 }}>
-                        {group === "Earlier" ? "Earlier in October" : group}
-                      </h2>
-                    </td>
-                  </tr>
+                <div key={group} style={{ display: "contents" }}>
+                  <h2 className="ws-ghead">{group === "Earlier" ? "Earlier in October" : group}</h2>
                   {rows.map((conversation) => (
-                    <tr key={conversation.id}>
-                      <td>
-                        <Link
-                          href={`/app/c/${conversation.id}`}
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 4,
-                            textDecoration: "none",
-                          }}
-                        >
-                          <span style={{ fontSize: 14, fontWeight: 500, color: "var(--ink)" }}>
-                            <Highlighted text={conversation.title} term={term.trim()} />
-                          </span>
-                          <span
-                            style={{
-                              fontFamily: "var(--font-serif)",
-                              fontSize: 14,
-                              lineHeight: 1.45,
-                              color: "var(--ink-3)",
-                            }}
-                          >
-                            <Highlighted text={conversation.snippet} term={term.trim()} />
-                          </span>
-                        </Link>
-                      </td>
-                      <td style={{ color: "var(--ink-2)" }}>{conversation.sources}</td>
-                      <td style={{ color: "var(--ink-2)" }}>{peopleLabel(conversation.people)}</td>
-                      <td className="numeric">{formatCost(conversation.cost)}</td>
-                      <td className="numeric" style={{ color: "var(--ink-3)" }}>
+                    <Link
+                      key={conversation.id}
+                      role="row"
+                      href={`/app/c/${conversation.id}`}
+                      className="ws-hrow"
+                    >
+                      <span role="cell" className="ws-h-title">
+                        <b>
+                          <Highlighted text={conversation.title} term={term.trim()} />
+                        </b>
+                        <span className="ws-snip">
+                          <Highlighted text={conversation.snippet} term={term.trim()} />
+                        </span>
+                      </span>
+                      <span role="cell">
+                        <span className="tag">{conversation.sources}</span>
+                      </span>
+                      <span role="cell" className="ws-ppl">
+                        <span className="av-stack" aria-hidden="true">
+                          {conversation.people.map((person, index) => (
+                            <span
+                              key={person}
+                              className={`av ws-av-sm ${AVATAR_CLASS[person] ?? ""}`}
+                              style={index > 0 ? { marginLeft: -7 } : undefined}
+                            >
+                              {initialsOf(person)}
+                            </span>
+                          ))}
+                        </span>
+                        {peopleLabel(conversation.people)}
+                      </span>
+                      <span role="cell" className="ws-num">
+                        {formatCost(conversation.cost)}
+                      </span>
+                      <span role="cell" className="ws-num ws-num-dim">
                         {conversation.edited}
-                      </td>
-                    </tr>
+                      </span>
+                    </Link>
                   ))}
-                </tbody>
+                </div>
               );
             })}
-          </table>
+          </div>
         </div>
       )}
 
       {term.trim() ? (
-        <p style={{ fontSize: 12, lineHeight: 1.45, color: "var(--ink-4)", margin: 0 }}>
+        <p style={{ margin: 0, fontSize: 12, color: "var(--ink-4)" }}>
           Showing {visible.length} of {visible.length} matches.{" "}
           {includeArchived ? (
             <>Archived conversations are included in this search.</>
@@ -230,7 +258,7 @@ export function HistoryFilters() {
               <button
                 type="button"
                 className="text-button"
-                style={{ fontSize: 12 }}
+                style={{ fontSize: 12, color: "var(--ink-2)" }}
                 onClick={() => updateParams({ archived: "1" })}
               >
                 include archived
@@ -240,6 +268,6 @@ export function HistoryFilters() {
           )}
         </p>
       ) : null}
-    </div>
+    </>
   );
 }
