@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { Button, ButtonLink } from "../../../../components/Button";
+import { useEffect, useState, type ReactNode } from "react";
+import { ButtonLink } from "../../../../components/Button";
 import { Composer } from "../../../../components/Composer";
 import { CopyButton } from "../../../../components/CopyButton";
-import { Footnote, MarginNote, RichSegments } from "../../../../components/Footnote";
-import { Notice } from "../../../../components/Notice";
+import { MarginNote, RichSegments } from "../../../../components/Footnote";
+import { IconArrowRight, IconCheck, IconDatabase } from "../../../../components/icons";
 import type {
-  Conversation,
   MarginNoteData,
   Segment,
   ThreadBlock,
@@ -19,59 +18,81 @@ import { formatCost } from "../../../../lib/utils";
 
 export type ThreadState = "normal" | "sources-down" | "limit" | "viewer";
 
-/** Notes in the design align to the top of the paragraph they cite; the
- *  heading above the first paragraph pushes its note group down by 62px. */
-const HEADING_NOTE_OFFSET = 62;
+/* The fixture calls passage 118 "chunk 118"; the design system names it a
+ * passage (screens: "Catalog 02 · Oct 2 · passage 118"). Display-only fix. */
+function displayNote(note: MarginNoteData): MarginNoteData {
+  return { ...note, meta: note.meta.replace("· chunk ", "· passage ") };
+}
+
+/* Screen copy is final (Main.html): the pull quote reads "playbooks, with
+ * citations" — the fixture's em dash is overridden at display time only. */
+function displayQuote(text: string): string {
+  return text.replace("playbooks — with citations", "playbooks, with citations");
+}
 
 function blockText(block: ThreadBlock): string {
-  if (block.type === "pullQuote") return block.text ?? "";
+  if (block.type === "pullQuote") return displayQuote(block.text ?? "");
   if (block.type === "list") return (block.items ?? []).map((item) => item.map((s) => s.text).join("")).join("\n");
   return (block.segments ?? []).map((segment) => segment.text).join("");
 }
 
-function answerPlainText(turn: ThreadTurn, extra = ""): string {
+function answerPlainText(turn: ThreadTurn): string {
   const body = turn.answer.blocks.map(blockText).join("\n\n");
-  return `${turn.answer.heading}\n\n${body}${extra}`;
+  return `${turn.answer.heading}\n\n${body}`;
 }
 
-function Segments({ segments, broken }: { segments: Segment[]; broken?: boolean }) {
-  if (!broken) return <RichSegments segments={segments} />;
+function initialsOf(name: string): string {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("");
+}
+
+const AVATAR_BG: Record<string, string> = {
+  "Maya Jordan": "#E9E3C7",
+  "Owen Clarke": "#DDE3E9",
+  "Priya Shah": "#E3E9DD",
+  "Lena Brooks": "#DDE3E9",
+};
+
+function Segments({ segments, broken = false }: { segments: Segment[]; broken?: boolean }) {
+  if (!broken) return <RichSegments segments={segments} selectedN={3} />;
   return (
     <>
       {segments.map((segment, index) => (
         <span key={index}>
           {segment.mark ? <mark>{segment.text}</mark> : segment.text}
-          {segment.footnote ? (
-            <Footnote n={segment.footnote} noteId={`note-${segment.footnote}`} broken />
-          ) : null}
+          {segment.footnote ? <span className="ws-fn">{segment.footnote}</span> : null}
         </span>
       ))}
     </>
   );
 }
 
-export function Block({
-  block,
-  broken,
-  style,
-}: {
-  block: ThreadBlock;
-  broken?: boolean;
-  style?: CSSProperties;
-}) {
+function Block({ block, broken = false }: { block: ThreadBlock; broken?: boolean }) {
   if (block.type === "pullQuote") {
-    // The attribution is rendered in the margin column by the caller (M-2).
+    const attribution = (block.attribution ?? "")
+      .replace("Not sourced; it ", "")
+      .replace(". ", " · ")
+      .replace(/\.$/, "");
     return (
-      <figure style={{ margin: 0 }}>
-        <blockquote className="pull-quote">{block.text}</blockquote>
+      <figure className="ws-pullquote">
+        <blockquote>{displayQuote(block.text ?? "")}</blockquote>
+        {attribution ? (
+          <figcaption>
+            <span className="ws-not-sourced">Not sourced</span>
+            {attribution}
+          </figcaption>
+        ) : null}
       </figure>
     );
   }
   if (block.type === "list") {
     return (
-      <ol className="answer-list">
+      <ol style={{ margin: 0, paddingLeft: 22, display: "flex", flexDirection: "column", gap: 6 }}>
         {(block.items ?? []).map((item, index) => (
-          <li key={index}>
+          <li key={index} className="prose">
             <Segments segments={item} broken={broken} />
           </li>
         ))}
@@ -79,53 +100,68 @@ export function Block({
     );
   }
   return (
-    <p className="answer-text" style={style}>
+    <p className="prose">
       <Segments segments={block.segments ?? []} broken={broken} />
     </p>
   );
 }
 
-function AnswerFooter({
-  tokens,
-  duration,
-  cost,
-  citedLabel,
-  copyText,
-}: {
-  tokens: string;
-  duration: string;
-  cost: number;
-  citedLabel: string;
-  copyText: string;
-}) {
-  const smallButton: CSSProperties = { minHeight: 26, fontSize: 12, padding: "0 8px" };
+function UserTurn({ speaker, time, question, namedTime = false }: { speaker: string; time: string; question: string; namedTime?: boolean }) {
   return (
-    <div className="answer-footer">
-      <span>
-        {tokens} · {duration} · {formatCost(cost)} · {citedLabel}
+    <div className="ws-turn-user">
+      <span className="av av-ink" aria-hidden="true">
+        {initialsOf(speaker)}
       </span>
-      <span style={{ display: "flex", gap: 2 }}>
-        <CopyButton text={copyText} style={smallButton} />
-        <Button variant="quiet" size="sm" style={smallButton}>
-          Retry
-        </Button>
-        <Button variant="quiet" size="sm" style={smallButton}>
-          Flag for eval
-        </Button>
-      </span>
+      <div className="ws-bubble">
+        {question}
+        <span className="ws-bubble-time">{namedTime ? `${speaker}, ${time}` : time}</span>
+      </div>
     </div>
   );
 }
 
+function Provenance({ turn }: { turn: ThreadTurn }) {
+  const footer = turn.answer.footer!;
+  const cited = new Set<number>();
+  for (const block of turn.answer.blocks) {
+    for (const segment of block.segments ?? []) if (segment.footnote) cited.add(segment.footnote);
+    for (const item of block.items ?? []) for (const segment of item) if (segment.footnote) cited.add(segment.footnote);
+  }
+  const copyText = answerPlainText(turn);
+  return (
+    <footer className="provenance">
+      <span className="provenance-main">
+        <IconCheck style={{ width: 15, height: 15, color: "var(--ink)" }} />
+        <b>
+          {cited.size} of {cited.size} claims cited
+        </b>
+        <span className="provenance-sep">·</span>
+        <span className="provenance-meta">
+          {footer.tokens} · {footer.duration} · {formatCost(footer.cost)}
+        </span>
+      </span>
+      <span style={{ display: "flex", gap: 6 }}>
+        <CopyButton text={copyText} variant="secondary" size="sm" />
+        <button type="button" className="btn sm">
+          Retry
+        </button>
+        <ButtonLink href="/app/evaluations" variant="secondary" size="sm">
+          Flag for eval
+        </ButtonLink>
+      </span>
+    </footer>
+  );
+}
+
 /**
- * The streaming turn rests in its "Writing" state (M-17): the design shows no
- * completion footer for turn 2, so Stop only freezes the cost ticker.
+ * The streaming turn: the paragraph is shown as far as it has streamed
+ * (to cite 7) with a live cost ticker. Stop ends the stream (HANDOVER §10):
+ * the Writing line and caret go away and the answer rests as written.
  */
-function StreamingLine({ turn }: { turn: ThreadTurn }) {
+function StreamingLine({ turn, stopped, onStop }: { turn: ThreadTurn; stopped: boolean; onStop: () => void }) {
   const costSoFar = turn.answer.streaming?.costSoFar ?? 0.019;
   const targetCost = 0.031;
   const [elapsed, setElapsed] = useState(0);
-  const [stopped, setStopped] = useState(false);
 
   useEffect(() => {
     if (stopped) return;
@@ -137,192 +173,125 @@ function StreamingLine({ turn }: { turn: ThreadTurn }) {
   const cost = costSoFar + progress * (targetCost - costSoFar);
 
   return (
-    <div className="streaming-line">
-      <span>
-        {turn.answer.streaming?.label ?? "Writing"} · {formatCost(cost)} so far
-      </span>
-      <Button
-        variant="secondary"
-        size="sm"
-        style={{ minHeight: 24, padding: "0 8px", fontSize: 12 }}
-        onClick={() => setStopped(true)}
-      >
+    <div className="ws-streamline">
+      <span className="dot" aria-hidden="true" />
+      {turn.answer.streaming?.label ?? "Writing"} ·{" "}
+      <span className="mono">{formatCost(cost)}</span> so far
+      <button type="button" className="btn" onClick={onStop}>
         Stop
-      </Button>
+      </button>
     </div>
   );
 }
 
-/** One doc + margin row: notes sit beside the block they cite (M-1) and drop
- *  below it when the layout stacks on narrow screens. */
-function DocMarginRow({
-  doc,
-  margin,
-  marginOffset = 0,
-  marginLabel,
-}: {
-  doc: ReactNode;
-  margin?: ReactNode;
-  marginOffset?: number;
-  marginLabel?: string;
-}) {
-  return (
-    <div className="doc-margin">
-      <div className="doc-column">{doc}</div>
-      {margin ? (
-        <aside
-          className="margin-column"
-          aria-label={marginLabel ?? "Sources"}
-          style={marginOffset ? { paddingTop: marginOffset } : undefined}
-        >
-          {margin}
-        </aside>
-      ) : (
-        <div className="margin-column" aria-hidden="true" />
-      )}
-    </div>
-  );
-}
-
-function NotesStack({ notes }: { notes: MarginNoteData[] }) {
-  if (notes.length === 0) return null;
-  return (
-    <div className="margin-stack">
-      {notes.map((note) => (
-        <MarginNote key={note.id} note={note} />
-      ))}
-    </div>
-  );
-}
-
-function TurnArticle({ turn, notes }: { turn: ThreadTurn; notes: MarginNoteData[] }) {
-  // Assign each paragraph block the fixture paragraphId used by the notes.
-  let paragraphCount = 0;
-  const blocks = turn.answer.blocks.map((block) => {
-    const paragraphId = block.type === "paragraph" ? `${turn.id}-p${++paragraphCount}` : null;
-    return { block, paragraphId };
-  });
-  const notesFor = (paragraphId: string | null) =>
-    paragraphId ? notes.filter((note) => note.paragraphId === paragraphId) : [];
+function TurnArticle({ turn }: { turn: ThreadTurn }) {
+  const [stopped, setStopped] = useState(false);
   const streaming = Boolean(turn.answer.streaming);
 
-  const questionRow = (
-    <DocMarginRow
-      doc={
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <p className="caption" style={{ color: "var(--ink-4)" }}>
-            {turn.speaker}, {turn.time}
-          </p>
-          <p className="ui-strong" style={{ margin: 0 }}>
-            {turn.question}
-          </p>
-        </div>
-      }
-    />
-  );
-
   if (streaming) {
-    const firstParagraphId = blocks.find((entry) => entry.paragraphId)?.paragraphId ?? null;
+    const firstParagraph = turn.answer.blocks.find((block) => block.type === "paragraph");
+    const segments = firstParagraph?.segments ?? [];
+    const cut = segments.findIndex((segment) => segment.footnote === 7);
+    const shown = cut >= 0 ? segments.slice(0, cut + 1) : segments;
     return (
-      <article className="turn">
-        {questionRow}
-        <DocMarginRow
-          marginOffset={HEADING_NOTE_OFFSET}
-          margin={<NotesStack notes={notesFor(firstParagraphId)} />}
-          doc={
-            <div className="stack-4">
-              <h2 className="answer-heading">{turn.answer.heading}</h2>
-              {blocks.map(({ block }, index) => (
-                <Block key={index} block={block} />
-              ))}
-              <StreamingLine turn={turn} />
-            </div>
-          }
-        />
-      </article>
+      <>
+        <UserTurn speaker={turn.speaker} time={turn.time} question={turn.question} />
+        <article aria-labelledby={`h-${turn.id}`} aria-busy={!stopped} className="ws-answer" style={{ gap: 14 }}>
+          <h2 id={`h-${turn.id}`} className="ws-answer-h">
+            {turn.answer.heading}
+          </h2>
+          <p className="prose">
+            <Segments segments={shown} />
+            {stopped ? null : <span className="ws-caret" aria-hidden="true" />}
+          </p>
+          {stopped ? null : <StreamingLine turn={turn} stopped={stopped} onStop={() => setStopped(true)} />}
+        </article>
+      </>
     );
   }
 
-  const [first, ...rest] = blocks;
   return (
-    <article className="turn">
-      {questionRow}
-      {first ? (
-        <DocMarginRow
-          marginOffset={HEADING_NOTE_OFFSET}
-          margin={<NotesStack notes={notesFor(first.paragraphId)} />}
-          doc={
-            <div className="stack-4">
-              <h2 className="answer-heading">{turn.answer.heading}</h2>
-              <Block block={first.block} />
+    <>
+      <UserTurn speaker={turn.speaker} time={turn.time} question={turn.question} />
+      <article aria-labelledby={`h-${turn.id}`} className="ws-answer">
+        <h2 id={`h-${turn.id}`} className="ws-answer-h">
+          {turn.answer.heading}
+        </h2>
+        {turn.answer.blocks.map((block, index) => (
+          <Block key={index} block={block} />
+        ))}
+        {turn.answer.footer ? <Provenance turn={turn} /> : null}
+      </article>
+    </>
+  );
+}
+
+function SourcesAside({ notes, children }: { notes: MarginNoteData[]; children?: ReactNode }) {
+  return (
+    <aside className="ws-aside" aria-label="Sources">
+      {children ?? (
+        <>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <h2 className="lbl">Sources</h2>
+            <Link href="/app/knowledge" style={{ fontSize: 12, color: "var(--ink-2)" }}>
+              Open catalog
+            </Link>
+          </div>
+          {notes.map((note, index) => (
+            <div key={note.id} style={{ display: "contents" }}>
+              {index === 5 ? (
+                <div style={{ height: 1, background: "var(--rule)", margin: "6px 0" }} aria-hidden="true" />
+              ) : null}
+              <MarginNote note={displayNote(note)} featured={note.expanded} match={note.expanded ? 0.91 : undefined} />
             </div>
-          }
-        />
-      ) : null}
-      {rest.map(({ block, paragraphId }, index) =>
-        block.type === "pullQuote" ? (
-          <DocMarginRow
-            key={index}
-            doc={<Block block={block} />}
-            margin={
-              block.attribution ? (
-                <p
-                  className="caption"
-                  style={{ color: "var(--ink-4)", paddingTop: 8, margin: 0 }}
-                >
-                  {block.attribution}
-                </p>
-              ) : null
-            }
-          />
-        ) : (
-          <DocMarginRow
-            key={index}
-            doc={<Block block={block} />}
-            margin={<NotesStack notes={notesFor(paragraphId)} />}
-          />
-        ),
+          ))}
+        </>
       )}
-      {turn.answer.footer ? (
-        <DocMarginRow
-          doc={
-            <AnswerFooter
-              tokens={turn.answer.footer.tokens}
-              duration={turn.answer.footer.duration}
-              cost={turn.answer.footer.cost}
-              citedLabel={turn.answer.footer.citedLabel}
-              copyText={answerPlainText(turn)}
-            />
-          }
-        />
-      ) : null}
-    </article>
+    </aside>
   );
 }
 
-function PausedComposer({ note }: { note: string }) {
+function PausedStrip({ note }: { note: string }) {
   return (
-    <DocMarginRow
-      doc={
-        <div
-          className="tint-box"
-          role="status"
-          style={{ border: "1px solid var(--rule)", fontSize: 14, color: "var(--ink-4)" }}
+    <div className="ws-paused" role="status">
+      <svg
+        className="ic"
+        viewBox="0 0 16 16"
+        width="16"
+        height="16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        aria-hidden="true"
+        style={{ color: "var(--ink)" }}
+      >
+        <path d="M6 4v8M10 4v8" />
+      </svg>
+      <span>{note}</span>
+      <span className="snd" aria-hidden="true">
+        <svg
+          viewBox="0 0 16 16"
+          width="15"
+          height="15"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+          style={{ color: "#FFFFFF", transform: "rotate(-90deg)" }}
         >
-          {note}
-        </div>
-      }
-    />
+          <path d="M3 8h10M9 4l4 4-4 4" />
+        </svg>
+      </span>
+    </div>
   );
 }
 
-function SourcesDownView({
-  thread,
-  conversation,
-}: {
-  thread: ThreadData;
-  conversation?: Conversation;
-}) {
+/* ------------------------------------------------------- S-05 sources down */
+
+function SourcesDownView({ thread }: { thread: ThreadData }) {
   const sd = thread.sourcesDown as ThreadData["sourcesDown"] & {
     bannerHeadline?: string;
     bannerBody?: string;
@@ -331,364 +300,350 @@ function SourcesDownView({
   const body = sd.bannerBody ?? sd.banner.replace(`${headline} `, "");
   const turn = thread.turns[0]!;
   const firstParagraph = turn.answer.blocks[0]!;
+
   return (
-    <div>
-      {/* Designed header (M-3): full-width hairline bar, title + meta
-          stacked (SourcesUnavailable.html). */}
-      <header
-        className="bleed-head"
-        style={{
-          paddingTop: 18,
-          paddingBottom: 16,
-          display: "flex",
-          flexDirection: "column",
-          gap: 6,
-        }}
-      >
-        <h1 className="conversation-title">{conversation?.title ?? thread.header.title}</h1>
-        <p className="meta">{conversation ? `${conversation.sources} sources · Cortex 4` : sd.meta}</p>
+    <>
+      <header className="ph">
+        <h1>{thread.header.title}</h1>
+        <span className="ws-ph-actions">
+          <span className="chip">
+            <IconDatabase style={{ width: 13, height: 13 }} />
+            {sd.meta}
+          </span>
+        </span>
       </header>
 
-      <section
-        className="notice"
-        role="alert"
-        style={{
-          flexDirection: "row",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "var(--space-4)",
-          marginTop: 24,
-          marginBottom: "var(--space-6)",
-          maxWidth: 980,
-        }}
-      >
-        <div className="stack-2" style={{ maxWidth: 600 }}>
-          <h2 className="notice-headline">{headline}</h2>
-          <p className="notice-body" style={{ margin: 0 }}>
-            {body}
-          </p>
-        </div>
-        <div className="row">
-          <Button
-            variant="primary"
-            size="md"
-            style={{ minHeight: 34 }}
-            onClick={() => window.location.reload()}
+      <div className="ws-alert" role="alert">
+        <span className="ws-alert-icon">
+          <svg
+            viewBox="0 0 16 16"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
           >
+            <path d="M7 4.5l1.2-1.2a2.6 2.6 0 0 1 3.7 3.7L10.7 8.2M9 11.5l-1.2 1.2a2.6 2.6 0 0 1-3.7-3.7L5.3 7.8" />
+            <path d="M2.5 2.5l2 2M13.5 13.5l-2-2" />
+          </svg>
+        </span>
+        <div className="ws-alert-text">
+          <b>{headline}</b>
+          <span>{body}</span>
+        </div>
+        <div className="ws-alert-actions">
+          <button type="button" className="btn dk" onClick={() => window.location.reload()}>
             Try again
-          </Button>
-          <ButtonLink href="/app/knowledge" variant="quiet" size="md" style={{ minHeight: 34 }}>
+          </button>
+          <ButtonLink href="/app/knowledge" variant="secondary">
             Check the catalog
           </ButtonLink>
         </div>
-      </section>
-
-      <DocMarginRow
-        doc={
-          <article className="turn">
-            <p className="caption" style={{ color: "var(--ink-4)" }}>
-              {turn.speaker}, {turn.time}
-            </p>
-            <p className="ui-strong" style={{ margin: 0 }}>
-              {sd.question}
-            </p>
-            <div className="stack-4">
-              <h2 className="answer-heading">{turn.answer.heading}</h2>
-              <Block block={firstParagraph} broken style={{ color: "var(--ink-3)" }} />
-              <p
-                style={{
-                  fontSize: 12,
-                  lineHeight: 1.45,
-                  color: "var(--ink-4)",
-                  borderTop: "1px solid var(--rule)",
-                  paddingTop: 10,
-                  margin: 0,
-                }}
-              >
-                {sd.footerLine}
-              </p>
-            </div>
-          </article>
-        }
-        margin={
-          <div style={{ display: "flex", flexDirection: "column", gap: 14, fontSize: 12, lineHeight: 1.45 }}>
-            <dl
-              style={{
-                margin: 0,
-                display: "grid",
-                gridTemplateColumns: "auto minmax(0, 1fr)",
-                gap: "8px 14px",
-              }}
-            >
-              <dt style={{ color: "var(--ink-4)" }}>Thread</dt>
-              <dd style={{ margin: 0 }}>Preserved</dd>
-              <dt style={{ color: "var(--ink-4)" }}>Sources</dt>
-              <dd style={{ margin: 0, color: "var(--danger)" }}>Unavailable</dd>
-              <dt style={{ color: "var(--ink-4)" }}>{sd.marginNoteTitle}</dt>
-              <dd style={{ margin: 0 }}>{sd.marginNoteStatus}</dd>
-            </dl>
-            <p
-              style={{
-                margin: 0,
-                paddingTop: 14,
-                borderTop: "1px solid var(--rule)",
-                color: "var(--ink-2)",
-              }}
-            >
-              {sd.marginNoteText}
-            </p>
-          </div>
-        }
-        marginOffset={110}
-      />
-
-      <div style={{ marginTop: "var(--space-6)" }}>
-        <PausedComposer note={sd.composerNote} />
       </div>
-    </div>
+
+      <div className="ws-split">
+        <div className="ws-doc" style={{ gap: 22 }}>
+          <UserTurn speaker={turn.speaker} time={turn.time} question={sd.question} namedTime />
+          <article className="ws-answer" style={{ gap: 16 }}>
+            <h2 className="ws-answer-h">{turn.answer.heading}</h2>
+            <p className="prose" style={{ color: "var(--ink-3)" }}>
+              <Segments segments={firstParagraph.segments ?? []} broken />
+            </p>
+            <p className="ws-not-verified">
+              <svg
+                className="ic"
+                viewBox="0 0 16 16"
+                width="15"
+                height="15"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M8 2.5 14 13H2z" />
+                <path d="M8 6.5v3M8 11.2v.3" />
+              </svg>
+              {sd.footerLine}
+            </p>
+          </article>
+          <PausedStrip note={sd.composerNote} />
+        </div>
+
+        <aside className="ws-aside" aria-label="Status">
+          <dl className="ws-st card">
+            <dt>Thread</dt>
+            <dd>
+              <i aria-hidden="true" />
+              Preserved
+            </dd>
+            <dt>Sources</dt>
+            <dd className="danger">
+              <i aria-hidden="true" />
+              Unavailable
+            </dd>
+            <dt>{sd.marginNoteTitle}</dt>
+            <dd className="warn">
+              <i aria-hidden="true" />
+              {sd.marginNoteStatus}
+            </dd>
+          </dl>
+          <span>{sd.marginNoteText}</span>
+        </aside>
+      </div>
+    </>
   );
 }
+
+/* ------------------------------------------------------------- S-06 limit */
 
 function LimitView({ thread }: { thread: ThreadData }) {
   const limit = thread.limitState;
-  const citationNotes = thread.notes.filter((note) => note.n === 1 || note.n === 2);
+  const actionIcons = [
+    <IconArrowRight key="go" style={{ width: 15, height: 15, color: "var(--ink)" }} />,
+    <svg
+      key="wait"
+      className="ic"
+      viewBox="0 0 16 16"
+      width="15"
+      height="15"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="8" cy="8" r="5.5" />
+      <path d="M8 5v3l2 1.5" />
+    </svg>,
+  ];
   return (
-    <div>
-      {/* Designed header (M-3): full-width hairline bar, title only
-          (BudgetExceeded.html). */}
-      <header className="bleed-head" style={{ paddingTop: 18, paddingBottom: 16 }}>
-        <h1 className="conversation-title">{limit.title}</h1>
+    <>
+      <header className="ph">
+        <h1>{limit.title}</h1>
       </header>
 
-      <div style={{ marginTop: 32 }}>
-      <DocMarginRow
-        doc={
-          <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
-            <p className="caption" style={{ color: "var(--ink-4)", margin: 0 }}>
-              {limit.speaker}, {limit.time}
-            </p>
-            <p className="ui-strong" style={{ margin: 0 }}>
-              {limit.question}
-            </p>
-            <p className="answer-text" style={{ margin: 0 }}>
-              <RichSegments segments={limit.partialSegments} />
-            </p>
-            <div
-              role="status"
-              className="stack-3"
-              style={{ borderTop: "1px solid var(--ink)", paddingTop: 22, marginTop: 10 }}
-            >
-              <h2 className="answer-heading" style={{ margin: 0 }}>
-                {limit.headline}
-              </h2>
-              <p className="answer-text" style={{ fontSize: 17, margin: 0 }}>
-                {limit.body}
-              </p>
-            </div>
+      <div className="ws-split">
+        <div className="ws-doc" style={{ gap: 22 }}>
+          <UserTurn speaker={limit.speaker} time={limit.time} question={limit.question} namedTime />
+          <p className="prose">
+            <RichSegments segments={limit.partialSegments} />
+            <span className="ws-caret ws-caret-danger" aria-hidden="true" />
+          </p>
+          <div className="ws-limit-card" role="status">
+            <span className="ws-limit-head">
+              <span className="ws-limit-icon">
+                <svg
+                  viewBox="0 0 16 16"
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="4" y="4" width="8" height="8" rx="1.5" />
+                </svg>
+              </span>
+              <b>{limit.headline}</b>
+            </span>
+            <p>{limit.body}</p>
           </div>
-        }
-        margin={
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <h2 style={{ margin: "0 0 4px", fontSize: 12, fontWeight: 400, color: "var(--ink-4)" }}>
-              {limit.adminHeading}
-            </h2>
-            {limit.actions.map((action) => (
-              <button key={action.label} type="button" className="act-card">
-                <span className="act-label">{action.label}</span>
-                <span className="act-detail">{action.detail}</span>
-              </button>
-            ))}
-            <Link
-              href="/app/usage"
-              style={{ fontSize: 12, color: "var(--ink-2)", paddingTop: 6 }}
-            >
-              {limit.usageLinkLabel}
-            </Link>
-            <p
-              style={{
-                margin: 0,
-                fontSize: 12,
-                lineHeight: 1.5,
-                color: "var(--ink-3)",
-                borderTop: "1px solid var(--rule)",
-                paddingTop: 10,
-              }}
-            >
-              {limit.editorsNote}
-            </p>
-            {/* Citations 1–2 keep working in this state (L-5): their notes
-                live at the foot of the margin column. */}
-            <div style={{ marginTop: "var(--space-5)" }}>
-              <NotesStack notes={citationNotes} />
-            </div>
-          </div>
-        }
-      />
-      </div>
+          <PausedStrip note={limit.composerNote} />
+        </div>
 
-      <div style={{ marginTop: "var(--space-6)" }}>
-        <PausedComposer note={limit.composerNote} />
+        <aside className="ws-aside" aria-label="Admin actions" style={{ gap: 12 }}>
+          <h2 className="lbl" style={{ marginBottom: 4 }}>
+            {limit.adminHeading}
+          </h2>
+          {limit.actions.map((action, index) => (
+            <button key={action.label} type="button" className="ws-act ws-act-arrow">
+              <span>
+                {action.label}
+                <small>{action.detail}</small>
+              </span>
+              {actionIcons[index] ?? actionIcons[0]}
+            </button>
+          ))}
+          <Link href="/app/usage" style={{ fontSize: 12.5, fontWeight: 500, paddingTop: 6 }}>
+            {limit.usageLinkLabel}
+          </Link>
+          <span style={{ fontSize: 12, paddingTop: 12, borderTop: "1px solid var(--rule)", color: "var(--ink-3)" }}>
+            {limit.editorsNote}
+          </span>
+        </aside>
       </div>
-    </div>
+    </>
   );
 }
 
-export function BlockedView({
-  thread,
-  conversation,
-}: {
-  thread: ThreadData;
-  conversation?: Conversation;
-}) {
+/* ------------------------------------------------------------ S-07 viewer */
+
+export function BlockedView({ thread }: { thread: ThreadData }) {
   const blocked = thread.blocked;
   const notes = thread.notes.filter((note) => note.n === 6 || note.n === 7);
   return (
-    <div>
-      {/* Designed header (M-3): full-width hairline bar, title + meta
-          column only (Blocked.html). */}
-      <header
-        className="bleed-head"
-        style={{
-          paddingTop: 18,
-          paddingBottom: 16,
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          gap: 12,
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <h1 className="conversation-title">{conversation?.title ?? thread.header.title}</h1>
-          <p className="meta">{blocked.meta}</p>
+    <>
+      <header className="ph">
+        <div className="ws-ph-stack">
+          <h1>{thread.header.title}</h1>
+          <p className="sub" style={{ fontSize: 12.5 }}>
+            {blocked.meta}
+          </p>
         </div>
+        <span className="chip">
+          <svg
+            className="ic"
+            viewBox="0 0 16 16"
+            width="13"
+            height="13"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z" />
+            <circle cx="8" cy="8" r="2" />
+          </svg>
+          Viewer
+        </span>
       </header>
-      <div style={{ marginTop: 32 }}>
-      <DocMarginRow
-        marginOffset={50}
-        margin={<NotesStack notes={notes} />}
-        doc={
-          <div className="stack-4">
-            <h2 className="answer-heading">{blocked.heading}</h2>
-            <p className="answer-text">
+
+      <div className="ws-split">
+        <div className="ws-doc" style={{ gap: 26 }}>
+          <article className="ws-answer" style={{ gap: 16 }}>
+            <h2 className="ws-answer-h">{blocked.heading}</h2>
+            <p className="prose">
               <RichSegments segments={blocked.segments} />
             </p>
-          </div>
-        }
-      />
-      </div>
-      <div style={{ maxWidth: "var(--column-doc)", marginTop: "var(--space-6)" }}>
-        <Notice
-          headline={blocked.noticeHeading}
-          actions={
-            <>
-              <Button variant="primary" size="md" style={{ minHeight: 34 }}>
+          </article>
+          <section className="ws-viewer-card" aria-labelledby="ro">
+            <span className="ws-viewer-icon">
+              <svg
+                viewBox="0 0 16 16"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="3.5" y="7" width="9" height="6.5" rx="1.5" />
+                <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
+              </svg>
+            </span>
+            <h2 id="ro">{blocked.noticeHeading}</h2>
+            <p>{blocked.noticeBody}</p>
+            <div className="ws-viewer-actions">
+              <button type="button" className="btn dk">
                 Request Editor access
-              </Button>
-              <Button variant="secondary" size="md" style={{ minHeight: 34 }}>
+              </button>
+              <button type="button" className="btn">
                 Leave a comment instead
-              </Button>
-            </>
-          }
-        >
-          <p style={{ margin: 0 }}>{blocked.noticeBody}</p>
-        </Notice>
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <aside className="ws-aside" aria-label="Sources">
+          <h2 className="lbl">Sources</h2>
+          <ol style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 14 }}>
+            {notes.map((note) => (
+              <li key={note.id}>
+                <MarginNote note={displayNote(note)} />
+              </li>
+            ))}
+          </ol>
+        </aside>
       </div>
-    </div>
+    </>
   );
 }
 
-function sharedWithLabel(conversation: Conversation): string | null {
-  const others = conversation.people.filter((person) => person !== "Sheku Koroma");
-  if (others.length === 0) return null;
-  if (others.length === 1) return `shared with ${others[0]}`;
-  return `shared with ${others.slice(0, -1).join(", ")} and ${others[others.length - 1]}`;
-}
+/* ------------------------------------------------------------- W-02 main */
 
-export function ThreadView({
-  thread,
-  state,
-  conversation,
-}: {
-  thread: ThreadData;
-  state: ThreadState;
-  conversation?: Conversation;
-}) {
-  if (state === "sources-down") return <SourcesDownView thread={thread} conversation={conversation} />;
+export function ThreadView({ thread, state }: { thread: ThreadData; state: ThreadState }) {
+  if (state === "sources-down") return <SourcesDownView thread={thread} />;
   if (state === "limit") return <LimitView thread={thread} />;
-  if (state === "viewer") return <BlockedView thread={thread} conversation={conversation} />;
+  if (state === "viewer") return <BlockedView thread={thread} />;
 
-  // M-16: the header reflects the conversation named by the route.
-  const title = conversation?.title ?? thread.header.title;
-  const shared = conversation ? sharedWithLabel(conversation) : null;
-  const meta = conversation
-    ? `${conversation.sources} sources · Cortex 4${shared ? ` · ${shared}` : ""}`
-    : thread.header.meta;
+  /* This screen always renders the designed thread (Main.html), so its
+   * header comes from the thread fixture itself — title, 32 sources, and
+   * the MJ/OC share avatars — never from the URL's conversation record. */
+  const title = thread.header.title;
+  const sources = 32;
+  const sharedNames = ["Maya Jordan", "Owen Clarke"];
 
   return (
-    <div>
-      {/* Designed header (M-3): a full-width hairline bar bleeding to the
-          edges of the main column — title + meta stacked left, actions
-          bottom-aligned right (Main.html). */}
-      <header
-        className="bleed-head"
-        style={{
-          paddingTop: 18,
-          paddingBottom: 16,
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "flex-end",
-          justifyContent: "space-between",
-          gap: 14,
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 0 }}>
-          <h1 className="conversation-title">{title}</h1>
-          <p className="meta">{meta}</p>
+    <>
+      <header className="ph">
+        <div className="ws-ph-stack">
+          <span className="sub">
+            Conversations <span className="sep">/</span> Go-to-market
+          </span>
+          <h1>{title}</h1>
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, alignItems: "center" }}>
-          <Button variant="quiet" size="sm">
+        <div className="ws-ph-actions">
+          <span className="chip">
+            <IconDatabase style={{ width: 13, height: 13 }} />
+            {sources} sources · this month
+          </span>
+          <span className="chip">Cortex 4</span>
+          {sharedNames.length > 0 ? (
+            <span className="av-stack" style={{ marginLeft: 4 }} aria-label={`Shared with ${sharedNames.join(" and ")}`}>
+              {sharedNames.map((name) => (
+                <span key={name} className="av" style={{ background: AVATAR_BG[name] }} aria-hidden="true">
+                  {initialsOf(name)}
+                </span>
+              ))}
+            </span>
+          ) : null}
+          <button type="button" className="btn">
             Fork
-          </Button>
-          <Button variant="quiet" size="sm">
+          </button>
+          <ButtonLink href={`/app/playbooks/${"launch-brief"}/edit`} variant="secondary">
             Save as playbook
-          </Button>
-          <Button variant="primary" size="sm">
+          </ButtonLink>
+          <button type="button" className="btn dk">
             Share
-          </Button>
+          </button>
         </div>
       </header>
 
-      <div className="column-heads" style={{ marginTop: 36 }}>
-        <span className="doc-head">Thread</span>
-        <span className="margin-head" style={{ display: "flex", justifyContent: "space-between" }}>
-          <span>Sources</span>
-          <Link href="/app/knowledge" style={{ color: "var(--ink-2)" }}>
-            Open catalog
-          </Link>
-        </span>
+      <div className="ws-split">
+        <div className="ws-doc">
+          {thread.turns.map((turn) => (
+            <TurnArticle key={turn.id} turn={turn} />
+          ))}
+          <Composer
+            sourcesLabel={thread.composer.sources}
+            playbookLabel={thread.composer.playbook}
+            model={thread.composer.model}
+            costSentence={
+              <>
+                ≈ <span className="mono">$0.012</span> · <span className="mono">$0.030</span> left
+                of $0.08
+              </>
+            }
+            placeholder="Ask a follow-up…"
+            label="Ask a follow-up"
+            singleLine
+            showModel={false}
+          />
+        </div>
+        <SourcesAside notes={thread.notes} />
       </div>
-
-      {thread.turns.map((turn) => (
-        <TurnArticle key={turn.id} turn={turn} notes={thread.notes} />
-      ))}
-
-      <div style={{ marginTop: "var(--space-6)" }}>
-        <DocMarginRow
-          doc={
-            <Composer
-              sourcesLabel={thread.composer.sources}
-              playbookLabel={thread.composer.playbook}
-              model={thread.composer.model}
-              costSentence={thread.composer.costSentence}
-              placeholder={thread.composer.placeholder}
-              label="Ask a follow-up"
-              usingSentence
-            />
-          }
-        />
-      </div>
-    </div>
+    </>
   );
 }
