@@ -1,8 +1,13 @@
 "use client";
 
-import { Fragment, useId, useState } from "react";
-import { Button } from "./Button";
+import { Fragment, useId, useState, type ReactNode } from "react";
+import { IconArrowUp } from "./icons";
 
+/*
+ * Composer (v2): a floating white card (radius-xl, ring + soft lift) with a
+ * serif input, a row of source chips, the cost estimate at the right and a
+ * round ink send button — per the approved thread screen.
+ */
 export function Composer({
   sourcesLabel = "3 collections",
   playbookLabel = "No playbook",
@@ -16,11 +21,13 @@ export function Composer({
   sendLabel = "Send",
   attachLabel,
   label = "Ask a question",
+  singleLine = false,
+  showModel = true,
 }: {
   sourcesLabel?: string;
   playbookLabel?: string;
   model?: string;
-  costSentence?: string;
+  costSentence?: ReactNode;
   placeholder?: string;
   disabled?: boolean;
   pausedMessage?: string;
@@ -29,6 +36,10 @@ export function Composer({
   sendLabel?: string;
   attachLabel?: string;
   label?: string;
+  /** Render a one-line input (thread composer) instead of a textarea. */
+  singleLine?: boolean;
+  /** Show the quiet model button at the right of the chips row. */
+  showModel?: boolean;
 }) {
   const [value, setValue] = useState("");
   const textareaId = useId();
@@ -45,6 +56,7 @@ export function Composer({
     <div>
       <form
         className="composer"
+        aria-label={label}
         onSubmit={(event) => {
           event.preventDefault();
           submit();
@@ -53,17 +65,28 @@ export function Composer({
         <label className="sr-only" htmlFor={textareaId}>
           {label}
         </label>
-        <textarea
-          id={textareaId}
-          value={value}
-          onChange={(event) => setValue(event.target.value)}
-          placeholder={placeholder}
-          disabled={disabled}
-          rows={3}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) submit();
-          }}
-        />
+        {singleLine ? (
+          <input
+            id={textareaId}
+            className="ws-composer-input"
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+            placeholder={placeholder}
+            disabled={disabled}
+          />
+        ) : (
+          <textarea
+            id={textareaId}
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+            placeholder={placeholder}
+            disabled={disabled}
+            rows={2}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) submit();
+            }}
+          />
+        )}
         <div className="composer-row">
           {usingSentence ? (
             <span className="composer-links" style={{ fontSize: 12, color: "var(--ink-3)" }}>
@@ -83,37 +106,47 @@ export function Composer({
                 </a>
               </span>
             </span>
+          ) : attachLabel ? (
+            <span className="composer-chips">
+              <button type="button" className="chip composer-chip" disabled={disabled}>
+                {attachLabel}
+              </button>
+            </span>
           ) : (
-            <span className="composer-links">
-              {attachLabel ? (
-                <button type="button" className="composer-link" disabled={disabled}>
-                  {attachLabel}
-                </button>
-              ) : (
-                <>
-                  <button type="button" className="composer-link" disabled={disabled}>
-                    Sources · {sourcesLabel}
-                  </button>
-                  <button type="button" className="composer-link" disabled={disabled}>
-                    Playbook · {playbookLabel}
-                  </button>
-                </>
-              )}
+            <span className="composer-chips">
+              {sourceNames.map((name) => (
+                <span key={name} className="chip composer-chip">
+                  {name} <span aria-hidden="true">×</span>
+                </span>
+              ))}
+              <span className="chip composer-chip composer-chip-dashed">Playbook: {playbookLabel}</span>
             </span>
           )}
-          <Button variant="quiet" size="sm" type="button" disabled={disabled} aria-label={`Model: ${model}`}>
-            {model}
-          </Button>
-          <Button variant="primary" size="md" type="submit" disabled={disabled}>
-            {sendLabel}
-          </Button>
+          <span style={{ marginLeft: "auto" }} className="row">
+            {pausedMessage ? (
+              <span className="composer-paused" role="status">
+                {pausedMessage}
+              </span>
+            ) : costSentence ? (
+              <span className="composer-cost">{costSentence}</span>
+            ) : null}
+            {showModel ? (
+              <button
+                type="button"
+                className="composer-link"
+                disabled={disabled}
+                aria-label={`Model: ${model}`}
+                style={{ marginRight: 2 }}
+              >
+                {model}
+              </button>
+            ) : null}
+            <button type="submit" className="composer-send" disabled={disabled} aria-label={sendLabel}>
+              <IconArrowUp style={{ width: 15, height: 15, color: "var(--on-ink)" }} />
+            </button>
+          </span>
         </div>
       </form>
-      {pausedMessage ? (
-        <p className="composer-cost" role="status">{pausedMessage}</p>
-      ) : costSentence ? (
-        <p className="composer-cost">{costSentence}</p>
-      ) : null}
     </div>
   );
 }
