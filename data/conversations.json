@@ -155,11 +155,11 @@
    "pinned": true,
    "project": "Launch narrative",
    "shared": false,
-   "snippet": "The interview synthesis supports the forwarding claim, but the retention claim needs a narrower source.",
+   "snippet": "The synthesis supports the forwarding claim, but the retention claim needs a narrower source.",
    "sources": 4,
    "startedBy": "me",
    "title": "Which launch claims can we make without qualification?",
-   "searchText": "Which launch claims can we make without qualification? The interview synthesis supports the forwarding claim, but the retention claim needs a narrower source. Sheku Koroma Lena Brooks"
+   "searchText": "Which launch claims can we make without qualification? The synthesis supports the forwarding claim, but the retention claim needs a narrower source. Sheku Koroma Lena Brooks"
   },
   {
    "cost": 0.031,
@@ -173,11 +173,11 @@
    "pinned": false,
    "project": "Launch narrative",
    "shared": true,
-   "snippet": "Interviewees returned to version history, source age and reviewer access in eleven passages.",
+   "snippet": "Buyers returned to version history, source age and reviewer access in eleven passages.",
    "sources": 2,
    "startedBy": "maya-jordan",
-   "title": "Which objections appear in the October interviews?",
-   "searchText": "Which objections appear in the October interviews? Interviewees returned to version history, source age and reviewer access in eleven passages. Maya Jordan Owen Clarke"
+   "title": "Which objections came up in October?",
+   "searchText": "Which objections came up in October? Buyers returned to version history, source age and reviewer access in eleven passages. Maya Jordan Owen Clarke"
   },
   {
    "cost": 0.027,
@@ -208,11 +208,11 @@
    "pinned": false,
    "project": "Launch narrative",
    "shared": false,
-   "snippet": "The strongest proof comes from customer interviews, the product council synthesis and procurement notes.",
+   "snippet": "The strongest proof comes from customer sessions, the product council synthesis and procurement notes.",
    "sources": 3,
    "startedBy": "maya-jordan",
    "title": "Draft the proof section for the launch brief",
-   "searchText": "Draft the proof section for the launch brief The strongest proof comes from customer interviews, the product council synthesis and procurement notes. Maya Jordan"
+   "searchText": "Draft the proof section for the launch brief The strongest proof comes from customer sessions, the product council synthesis and procurement notes. Maya Jordan"
   },
   {
    "cost": 0.019,
@@ -244,11 +244,11 @@
    "pinned": false,
    "project": "Launch narrative",
    "shared": true,
-   "snippet": "Customers rarely say citation. In interviews they say show me, open it and prove it.",
+   "snippet": "Customers rarely say citation. In sessions they say show me, open it and prove it.",
    "sources": 2,
    "startedBy": "owen-clarke",
    "title": "What do customers call the evidence problem?",
-   "searchText": "What do customers call the evidence problem? Customers rarely say citation. In interviews they say show me, open it and prove it. Owen Clarke Maya Jordan"
+   "searchText": "What do customers call the evidence problem? Customers rarely say citation. In sessions they say show me, open it and prove it. Owen Clarke Maya Jordan"
   },
   {
    "cost": 0.016,
@@ -280,11 +280,11 @@
    "pinned": false,
    "project": "Launch narrative",
    "shared": true,
-   "snippet": "Three evaluation failures came from an old interview passage and two claims with no direct source.",
+   "snippet": "Three evaluation failures came from an old research passage and two claims with no direct source.",
    "sources": 2,
    "startedBy": "maya-jordan",
    "title": "Which claims failed the last evaluation?",
-   "searchText": "Which claims failed the last evaluation? Three evaluation failures came from an old interview passage and two claims with no direct source. Maya Jordan Priya Shah"
+   "searchText": "Which claims failed the last evaluation? Three evaluation failures came from an old research passage and two claims with no direct source. Maya Jordan Priya Shah"
   },
   {
    "cost": 0.047,
@@ -298,11 +298,11 @@
    "pinned": true,
    "project": "Research synthesis",
    "shared": true,
-   "snippet": "Across the interview set, trust is described as a chain: source, passage, version and reviewer.",
+   "snippet": "Across the session set, trust is described as a chain: source, passage, version and reviewer.",
    "sources": 1,
    "startedBy": "owen-clarke",
-   "title": "Themes across the October customer interviews",
-   "searchText": "Themes across the October customer interviews Across the interview set, trust is described as a chain: source, passage, version and reviewer. Owen Clarke Sheku Koroma"
+   "title": "Themes across the October customer sessions",
+   "searchText": "Themes across the October customer sessions Across the session set, trust is described as a chain: source, passage, version and reviewer. Owen Clarke Sheku Koroma"
   },
   {
    "cost": 0.029,
@@ -333,11 +333,11 @@
    "pinned": false,
    "project": "Research synthesis",
    "shared": false,
-   "snippet": "Round two interviewees asked more often whether the source was current on the day of the answer.",
+   "snippet": "Round two participants asked more often whether the source was current on the day of the answer.",
    "sources": 1,
    "startedBy": "owen-clarke",
-   "title": "Compare interview rounds one and two",
-   "searchText": "Compare interview rounds one and two Round two interviewees asked more often whether the source was current on the day of the answer. Owen Clarke"
+   "title": "Compare research rounds one and two",
+   "searchText": "Compare research rounds one and two Round two participants asked more often whether the source was current on the day of the answer. Owen Clarke"
   },
   {
    "cost": 0.026,
