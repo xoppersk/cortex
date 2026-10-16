@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalFooter } from "../../../components/SiteHeader";
+import { IconBook, IconChat, IconDatabase } from "../../../components/icons";
 import { getStates } from "../../../lib/api";
 import { InviteForm } from "./InviteForm";
 
@@ -9,9 +10,18 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: { absolute: `Cortex — Join ${invite.workspace}` } };
 }
 
+/* Waiting-row icons from screens/Invite.html, in the fixture's row order:
+   conversation (chat), two playbooks (book), knowledge bases (database). */
+const waitingIcons = [IconChat, IconBook, IconBook, IconDatabase];
+
 /*
- * S-03 Invite, per screens/Invite.html: header (wordmark only) → centred
- * content row (form column beside a "Waiting for you" aside) → LegalFooter.
+ * S-03 Invite, per screens/Invite.html (v2): header (brand only) → centred
+ * row: the .sheet.lift form card (flex 1 1 400px, max 480px; inviter
+ * avatar + expiry tag, heading, role sentence with the role word on
+ * --highlight, prefilled email, name, Join / Decline) beside the
+ * "Waiting for you" .sheet aside (flex 1 1 320px, max 400px, margin-top
+ * 24px) with icon rows and the inviter's quote on --paper-sunk →
+ * LegalFooter.
  */
 export default async function InvitePage({
   params,
@@ -21,125 +31,74 @@ export default async function InvitePage({
   // The token only gates the page's presence in this fixture-driven phase.
   await params;
   const { invite } = getStates();
+  const initials = invite.inviter
+    .split(" ")
+    .map((part) => part[0])
+    .join("");
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "var(--paper)",
-        color: "var(--ink)",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <header style={{ padding: "28px 48px" }}>
-        <Link href="/" className="wordmark" style={{ fontSize: 22 }}>
-          Cortex
+    <div className="sys-page">
+      <header className="sys-topbar">
+        <Link href="/" className="brand" aria-label="Cortex home">
+          <i aria-hidden="true">C</i>
+          <b>Cortex</b>
         </Link>
       </header>
 
-      <div
-        style={{
-          flex: 1,
-          padding: "40px 48px 64px",
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          gap: 72,
-        }}
-      >
-        <div
-          style={{
-            flex: "1 1 380px",
-            maxWidth: 420,
-            display: "flex",
-            flexDirection: "column",
-            gap: 16,
-          }}
-        >
-          <span style={{ fontSize: 13, color: "var(--ink-3)" }}>
-            Invitation · expires {invite.expires}
+      <div className="sys-main">
+        <InviteForm email={invite.email} name={invite.name} workspace={invite.workspace}>
+          <span className="sys-invite-top">
+            <span style={{ display: "flex" }}>
+              <span className="av av-ink sys-invite-av">{initials}</span>
+            </span>
+            <span className="tag ln">
+              <svg
+                className="ic"
+                viewBox="0 0 16 16"
+                width="13"
+                height="13"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                style={{ width: 13, height: 13 }}
+              >
+                <circle cx="8" cy="8" r="5.5" />
+                <path d="M8 5v3l2 1.5" />
+              </svg>
+              Invitation · expires {invite.expires}
+            </span>
           </span>
-          <h1
-            style={{
-              margin: 0,
-              fontFamily: "var(--font-serif)",
-              fontSize: 36,
-              lineHeight: 1.12,
-              fontWeight: 600,
-              letterSpacing: "-0.02em",
-              color: "var(--ink)",
-            }}
-          >
+          <h1 className="sys-invite-title">
             {invite.inviter} invited you to {invite.workspace}.
           </h1>
-          <p
-            style={{
-              margin: "0 0 6px",
-              fontFamily: "var(--font-serif)",
-              fontSize: 18,
-              lineHeight: 1.55,
-              fontWeight: 400,
-              color: "var(--ink-body)",
-            }}
-          >
-            You&rsquo;ll join as an <b style={{ fontWeight: 600 }}>{invite.role}</b>:{" "}
+          <p className="sys-invite-role">
+            You&rsquo;ll join as an <b className="sys-role-mark">{invite.role}</b>:{" "}
             {invite.roleDescription}.
           </p>
-          <InviteForm email={invite.email} name={invite.name} workspace={invite.workspace} />
-        </div>
+        </InviteForm>
 
-        <aside
-          style={{
-            flex: "1 1 320px",
-            maxWidth: 380,
-            paddingTop: 34,
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-          }}
-        >
-          <h2
-            style={{
-              margin: "0 0 8px",
-              fontSize: 13,
-              fontWeight: 400,
-              color: "var(--ink-4)",
-            }}
-          >
-            Waiting for you
-          </h2>
+        <aside className="sheet sys-waiting-aside">
+          <h2 className="lbl sys-waiting-title">Waiting for you</h2>
           <div>
-            {invite.waiting.map((item, index) => (
-              <div
-                key={item.label}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "minmax(0, 1fr) auto",
-                  gap: 12,
-                  padding: "10px 0",
-                  borderTop: "1px solid var(--rule)",
-                  borderBottom:
-                    index === invite.waiting.length - 1 ? "1px solid var(--rule)" : undefined,
-                  fontSize: 14,
-                }}
-              >
-                <span style={{ color: "var(--ink)" }}>{item.label}</span>
-                <span style={{ color: "var(--ink-3)", textAlign: "right" }}>{item.detail}</span>
-              </div>
-            ))}
+            {invite.waiting.map((item, index) => {
+              const Icon = waitingIcons[index] ?? IconBook;
+              return (
+                <div key={item.label} className="sys-ir">
+                  <span className="ib">
+                    <Icon style={{ width: 15, height: 15 }} />
+                  </span>
+                  <span className="sys-ir-label">{item.label}</span>
+                  <span className="sys-ir-detail">{item.detail}</span>
+                </div>
+              );
+            })}
           </div>
-          <p
-            style={{
-              margin: "12px 0 0",
-              fontFamily: "var(--font-serif)",
-              fontSize: 16,
-              lineHeight: 1.55,
-              fontWeight: 400,
-              color: "var(--ink-2)",
-            }}
-          >
-            {invite.quote.text} — {invite.quote.author}
+          <p className="sys-invite-quote">
+            {invite.quote.text}{" "}
+            <span className="sys-invite-quote-author">— {invite.quote.author}</span>
           </p>
         </aside>
       </div>
