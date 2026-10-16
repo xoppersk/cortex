@@ -3,9 +3,21 @@
 import Link from "next/link";
 import { useMemo, useRef, useState, type FormEvent } from "react";
 import { Button } from "../../../../components/Button";
-import { RichSegments } from "../../../../components/Footnote";
+import { Footnote } from "../../../../components/Footnote";
+import { IconCheck, IconSearch } from "../../../../components/icons";
 import { PassageTrace } from "../../../../components/PassageTrace";
 import type { KnowledgeData, PassageTraceRow, Segment } from "../../../../lib/types";
+function KnowledgeSubnav({ current }: { current: "ask" }) {
+  return (
+    <nav className="subnav" aria-label="Knowledge">
+      <Link href="/app/knowledge">Knowledge bases</Link>
+      <Link href="/app/knowledge/documents">Documents</Link>
+      <Link href="/app/knowledge/ask" aria-current={current === "ask" ? "page" : undefined}>
+        Ask
+      </Link>
+    </nav>
+  );
+}
 
 type AskData = KnowledgeData["ask"];
 
@@ -29,12 +41,13 @@ function withMark(excerpt: string, phrase: string | undefined): string | Segment
 }
 
 /**
- * Give every trace row the design's anchor id (t1…t8), restore the <mark>s in
- * cited rows (A-4), and fix the stale row's outcome wording/tone (A-5).
+ * Give every cited trace row the design's anchor id (t1, t2, t4, t5 — the
+ * row's position in the table), restore the <mark>s in cited rows, and fix
+ * the stale row's outcome wording/tone. Set-aside rows carry no anchor.
  */
 function prepareTrace(rows: PassageTraceRow[]): PassageTraceRow[] {
   return rows.map((row, index) => {
-    const prepared: PassageTraceRow = { ...row, id: `t${index + 1}` };
+    const prepared: PassageTraceRow = { ...row, id: row.cite ? `t${index + 1}` : undefined };
     if (typeof row.excerpt === "string") {
       prepared.excerpt = withMark(row.excerpt, row.cite ? CITED_MARKS[row.cite] : undefined);
     }
@@ -58,7 +71,7 @@ export function AskForm({
   const { search } = ask;
   const [question, setQuestion] = useState(ask.question);
   const [asked, setAsked] = useState(ask.question);
-  const answerRef = useRef<HTMLDivElement>(null);
+  const answerRef = useRef<HTMLElement>(null);
 
   const traceRows = useMemo(() => prepareTrace(ask.trace), [ask.trace]);
   const noteTarget = (n: number) =>
@@ -66,6 +79,10 @@ export function AskForm({
   const collectionSuffix = ask.collectionLabel.startsWith(`${collectionName} · `)
     ? ask.collectionLabel.slice(collectionName.length + 3)
     : ask.collectionLabel;
+
+  // Provenance line: "4 citations from 3 documents · 1,206 tokens · $0.014"
+  const [metaCitations, ...metaRest] = ask.answerMeta.split(" · ");
+  const metaTokens = metaRest.join(" · ");
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -76,114 +93,118 @@ export function AskForm({
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 30 }}>
-      <form
-        onSubmit={submit}
-        style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: "var(--column-doc)" }}
-      >
-        <label htmlFor="ask-question" style={{ fontSize: 12, color: "var(--ink-3)" }}>
-          Ask{" "}
-          <Link href="/app/knowledge" style={{ color: "var(--ink)", fontWeight: 500 }}>
-            {collectionName}
-          </Link>{" "}
-          · {collectionSuffix}
-        </label>
-        <div style={{ display: "flex", gap: 8 }}>
-          <input
-            id="ask-question"
-            className="field-control"
-            type="text"
-            value={question}
-            onChange={(event) => setQuestion(event.target.value)}
-            style={{ flex: 1, minWidth: 0, minHeight: 40, borderColor: "var(--ink)", fontSize: 15 }}
-          />
-          <Button variant="primary" size="md" type="submit" disabled={!question.trim()} style={{ minHeight: 40 }}>
-            Ask
-          </Button>
-        </div>
-      </form>
+    <>
+      <KnowledgeSubnav current="ask" />
+      <div className="kb-split">
+        <div className="kb-main-ask">
+          <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <label htmlFor="ask-question" style={{ fontSize: 12, color: "var(--ink-4)" }}>
+              Ask{" "}
+              <Link href="/app/knowledge" style={{ color: "var(--ink)", fontWeight: 500 }}>
+                {collectionName}
+              </Link>{" "}
+              · {collectionSuffix}
+            </label>
+            <div className="kb-ask-pill">
+              <IconSearch />
+              <input
+                id="ask-question"
+                className="kb-ask-input"
+                type="text"
+                value={question}
+                onChange={(event) => setQuestion(event.target.value)}
+              />
+              <Button
+                variant="primary"
+                type="submit"
+                disabled={!question.trim()}
+                style={{ height: 36, padding: "0 16px" }}
+              >
+                Ask
+              </Button>
+            </div>
+          </form>
 
-      <div className="doc-margin">
-        <div className="doc-column stack-4" ref={answerRef} key={asked}>
-          <h1 className="answer-heading">{ask.answerHeading}</h1>
-          {ask.answerBlocks.map((block, index) => (
-            <p key={index} className="answer-text">
-              <RichSegments segments={block.segments ?? []} noteTarget={noteTarget} />
-            </p>
-          ))}
-          <p
-            className="ask-answer-meta"
-            style={{
-              fontSize: 12,
-              lineHeight: 1.45,
-              color: "var(--ink-4)",
-              borderTop: "1px solid var(--rule)",
-              paddingTop: 8,
-              margin: 0,
-            }}
+          <article
+            aria-labelledby="ans"
+            ref={answerRef}
+            key={asked}
+            style={{ display: "flex", flexDirection: "column", gap: 18 }}
           >
-            {ask.answerMeta} ·{" "}
-            <Link href="/app/c/launch-narrative" style={{ color: "var(--ink-2)" }}>
-              Continue as a conversation
-            </Link>
-          </p>
+            <h1 id="ans" className="kb-answer-title">
+              {ask.answerHeading}
+            </h1>
+            {ask.answerBlocks.map((block, index) => (
+              <p key={index} className="prose">
+                {(block.segments ?? []).map((segment, segmentIndex) => (
+                  <span key={segmentIndex}>
+                    {segment.text}
+                    {segment.footnote ? (
+                      <Footnote
+                        n={segment.footnote}
+                        noteId={noteTarget(segment.footnote)}
+                        selected={segment.footnote === 1}
+                      />
+                    ) : null}
+                  </span>
+                ))}
+              </p>
+            ))}
+            <footer className="provenance">
+              <span className="provenance-main">
+                <IconCheck style={{ width: 15, height: 15, strokeWidth: 1.8, color: "var(--ink)" }} />
+                <b>{metaCitations}</b>
+                <span className="provenance-sep">·</span>
+                <span className="provenance-meta">{metaTokens}</span>
+              </span>
+              <Link href="/app/c/launch-narrative" className="btn sm">
+                Continue as a conversation
+              </Link>
+            </footer>
+          </article>
+
+          <section aria-labelledby="tr" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <h2 id="tr" className="kb-trace-title">
+                What was read, and what was used
+              </h2>
+              <p style={{ margin: 0, fontSize: 13, lineHeight: 1.5, color: "var(--ink-3)" }}>
+                {ask.traceIntro}
+              </p>
+            </div>
+            <PassageTrace rows={traceRows} caption="Retrieved passages" />
+          </section>
         </div>
 
-        <aside className="margin-column">
-          <div className="margin-box">
-            <h2 className="margin-box-title">How Cortex searched</h2>
-            <dl className="definition-grid">
+        <aside className="kb-side" aria-label="Retrieval settings" style={{ paddingTop: 30, gap: 16 }}>
+          <h2 className="lbl">How Cortex searched</h2>
+          <section className="card kb-side-card card-lift">
+            <dl className="kb-dl">
               <dt>Read</dt>
               <dd>Top {search.top} passages</dd>
               <dt>Minimum match</dt>
-              <dd>{search.minimumMatch.toFixed(2)}</dd>
+              <dd className="mono">{search.minimumMatch.toFixed(2)}</dd>
               <dt>Freshness</dt>
               <dd>Updated in last {search.freshnessDays} days</dd>
               <dt>Re-ranking</dt>
               <dd>{search.reranking ? "On" : "Off"}</dd>
             </dl>
-            <p style={{ margin: 0 }}>
-              <a href="#" onClick={(event) => event.preventDefault()}>
-                Change for this question
-              </a>
-            </p>
-          </div>
+            <a href="#" onClick={(event) => event.preventDefault()} style={{ paddingTop: 4 }}>
+              Change for this question
+            </a>
+          </section>
+          <div className="kb-side-divider" aria-hidden="true" />
+          <h2 className="lbl">Something off?</h2>
+          <section className="card kb-side-card">
+            <span>
+              If a passage should have been used, open it in the chunk inspector to see how it
+              was split and scored.
+            </span>
+            <Link href={`/app/knowledge/documents/${inspectorDocumentId}`}>Open passage 118 →</Link>
+            <Link href="/app/evaluations">Add this question to an evaluation →</Link>
+          </section>
         </aside>
       </div>
-
-      <section className="hairline-top" style={{ paddingTop: 26 }}>
-        <div className="doc-margin">
-          <div className="doc-column stack-3">
-            <h2 style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>What was read, and what was used</h2>
-            <p className="ui-text muted-3" style={{ margin: 0 }}>
-              {ask.traceIntro}
-            </p>
-            <PassageTrace rows={traceRows} caption="Retrieved passages" />
-          </div>
-          <aside className="margin-column" aria-label="Something off?">
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-                fontSize: 12,
-                lineHeight: 1.5,
-                color: "var(--ink-2)",
-              }}
-            >
-              <h2 className="margin-box-title" style={{ margin: 0 }}>
-                Something off?
-              </h2>
-              <p style={{ margin: 0 }}>
-                If a passage should have been used, open it in the chunk inspector to see how it
-                was split and scored.
-              </p>
-              <Link href={`/app/knowledge/documents/${inspectorDocumentId}`}>Open passage 118</Link>
-              <Link href="/app/evaluations">Add this question to an evaluation</Link>
-            </div>
-          </aside>
-        </div>
-      </section>
-    </div>
+    </>
   );
 }
