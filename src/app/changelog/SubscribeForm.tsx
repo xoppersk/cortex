@@ -4,56 +4,98 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 
 /*
- * P-05 subscribe form, built to the canvas control pairing: a plain 14px
- * input and a bespoke submit button with a 1px ink border (neither the DS
- * primary nor secondary button). On submit the form stays in place and a
- * status line appears under it (brief §10 form behaviour).
+ * P-05 subscribe form — Premium v2 (screens/Changelog.html): a white card
+ * holding a mail icon, a borderless email input and a Subscribe (ink)
+ * button. Validation follows the Field spec (brief §10): validate on
+ * submit, then on change; the error sits under the form in --danger, and
+ * while it is present the card's ring turns --danger — the Field-spec
+ * border, applied to the ring because the input itself is borderless.
+ * On success the form stays in place and a status line appears under it.
  */
+function IconMail() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="ic"
+    >
+      <rect x="2" y="3.5" width="12" height="9" rx="1.5" />
+      <path d="m2.5 4.5 5.5 4 5.5-4" />
+    </svg>
+  );
+}
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export function SubscribeForm() {
-  const [subscribed, setSubscribed] = useState(false);
   const [email, setEmail] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [subscribed, setSubscribed] = useState(false);
+  const [touched, setTouched] = useState(false);
+
+  function validate(value: string): string | null {
+    if (value.trim().length === 0) return "Enter your email address.";
+    if (!EMAIL_PATTERN.test(value.trim())) return "Enter a valid email address.";
+    return null;
+  }
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (email.trim().length > 0) setSubscribed(true);
+    setTouched(true);
+    const problem = validate(email);
+    setError(problem);
+    if (!problem) setSubscribed(true);
+  }
+
+  function onChange(value: string) {
+    setEmail(value);
+    setSubscribed(false);
+    if (touched) setError(validate(value));
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      <form onSubmit={onSubmit} style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-        <label htmlFor="changelog-email" className="sr-only">
+    <div className="pub-subscribe">
+      <form
+        className="pub-subscribe-form"
+        onSubmit={onSubmit}
+        noValidate
+        style={
+          error
+            ? { boxShadow: "0 0 0 1px var(--danger), 0 1px 2px rgba(27, 27, 26, 0.04)" }
+            : undefined
+        }
+      >
+        <label htmlFor="em" className="sr-only">
           Email address
         </label>
+        <IconMail />
         <input
-          id="changelog-email"
+          id="em"
           type="email"
-          required
           placeholder="Email for monthly updates"
-          className="field-control"
-          style={{ width: 240, minHeight: 36, fontSize: 14, padding: "0 10px" }}
+          className="pub-subscribe-input"
           value={email}
-          onChange={(event) => setEmail(event.target.value)}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? "em-error" : subscribed ? "em-status" : undefined}
+          onChange={(event) => onChange(event.target.value)}
         />
-        <button
-          type="submit"
-          style={{
-            height: 36,
-            padding: "0 14px",
-            border: "1px solid var(--ink)",
-            borderRadius: "var(--radius-m)",
-            background: "var(--paper)",
-            color: "var(--ink)",
-            fontSize: 14,
-            fontWeight: 500,
-            lineHeight: 1,
-            cursor: "pointer",
-          }}
-        >
+        <button type="submit" className="btn dk">
           Subscribe
         </button>
       </form>
-      {subscribed ? (
-        <p className="ui-text" role="status" style={{ fontSize: 14 }}>
+      {error ? (
+        <p id="em-error" className="pub-subscribe-error" role="alert">
+          {error}
+        </p>
+      ) : subscribed ? (
+        <p id="em-status" className="pub-subscribe-status" role="status">
           You’re on the list.
         </p>
       ) : null}

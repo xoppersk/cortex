@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { IconArrowRight, IconCheck } from "../../components/icons";
 import { SiteFooter, SiteHeader } from "../../components/SiteHeader";
 import { SubscribeForm } from "./SubscribeForm";
 
 export const metadata: Metadata = { title: { absolute: "Cortex — Changelog" } };
 
-/* P-05 Changelog. All five entries copy the canvas reference exactly. */
+/* P-05 Changelog — Premium v2 (screens/Changelog.html): subscribe card,
+   timeline of five dated entries, "Older entries". Copy verbatim. */
 
 interface Entry {
   date: string;
@@ -14,6 +16,19 @@ interface Entry {
   title: string;
   body: string;
   extra?: ReactNode;
+}
+
+function CheckList({ items }: { items: string[] }) {
+  return (
+    <ul>
+      {items.map((item) => (
+        <li key={item}>
+          <IconCheck />
+          {item}
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 const entries: Entry[] = [
@@ -24,33 +39,16 @@ const entries: Entry[] = [
     body: "You can now open any document and see exactly how Cortex split it into passages, where neighbouring passages overlap, and how often each one has been cited. When a citation is wrong, you can split, merge or exclude the passage and re-index that document in about twenty seconds.",
     extra: (
       <>
-        <div
-          className="fragment"
-          style={{
-            padding: "16px 18px",
-            display: "grid",
-            gridTemplateColumns: "40px minmax(0, 1fr)",
-            gap: 14,
-          }}
-        >
-          <span style={{ fontSize: 12, color: "var(--ink)", fontWeight: 600, paddingTop: 4 }}>118</span>
-          <span
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontSize: 16,
-              lineHeight: 1.6,
-              color: "var(--ink)",
-            }}
-          >
+        <div className="pub-passage-card">
+          <span className="nb">118</span>
+          <span className="pub-passage-text">
             Buyers repeatedly asked to <mark>see the document behind an answer</mark> before forwarding it
             to legal.
           </span>
         </div>
-        <p>
-          <Link href="/app/knowledge/documents/customer-interview-synthesis" style={{ fontSize: 14 }}>
-            Open the inspector
-          </Link>
-        </p>
+        <Link href="/app/knowledge/documents/customer-interview-synthesis" className="pub-en-link">
+          Open the inspector <IconArrowRight />
+        </Link>
       </>
     ),
   },
@@ -60,10 +58,12 @@ const entries: Entry[] = [
     title: "Re-ranking on by default",
     body: "Cortex now reorders retrieved passages by how directly they answer the question before writing. In our own evaluation set, correct answers rose from 41 to 47 of 50 within a week.",
     extra: (
-      <ul style={{ paddingLeft: 20, fontSize: 15, lineHeight: 1.6, color: "var(--ink-2)" }}>
-        <li>Applies to new conversations; existing threads keep their setting.</li>
-        <li>Adds about 0.3 seconds per answer and no cost.</li>
-      </ul>
+      <CheckList
+        items={[
+          "Applies to new conversations; existing threads keep their setting.",
+          "Adds about 0.3 seconds per answer and no cost.",
+        ]}
+      />
     ),
   },
   {
@@ -84,10 +84,9 @@ const entries: Entry[] = [
     title: "Evidence kept for seven years",
     body: "Cited passages are now stored as they were when the answer was written. If the document changes or is deleted, the old answer still shows what it relied on.",
     extra: (
-      <ul style={{ paddingLeft: 20, fontSize: 15, lineHeight: 1.6, color: "var(--ink-2)" }}>
-        <li>Team plan: up to 7 years. Enterprise: up to 10.</li>
-        <li>Set it in Workspace settings › Retention.</li>
-      </ul>
+      <CheckList
+        items={["Team plan: up to 7 years. Enterprise: up to 10.", "Set it in Workspace settings › Retention."]}
+      />
     ),
   },
 ];
@@ -97,100 +96,36 @@ export default function ChangelogPage() {
     <div>
       <SiteHeader current="/changelog" />
 
-      <section
-        className="site-wrap"
-        style={{
-          paddingTop: 72,
-          paddingBottom: 40,
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          gap: 20,
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <h1 className="display-l" style={{ fontSize: 56 }}>
-            Changelog
-          </h1>
-          <p className="serif-lead" style={{ maxWidth: "30em" }}>
-            What changed in Cortex, and why. New entries most weeks.
-          </p>
+      <section className="wrap pub-changelog-hero">
+        <div className="pub-changelog-head">
+          <h1 className="pub-page-h1">Changelog</h1>
+          <p className="lead pub-changelog-lead">What changed in Cortex, and why. New entries most weeks.</p>
         </div>
         <SubscribeForm />
       </section>
 
-      <section className="site-wrap" style={{ paddingBottom: 96 }}>
-        {entries.map((entry, index) => (
-          <article
-            key={entry.title}
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 48,
-              padding: "40px 0",
-              borderTop: "1px solid var(--rule)",
-              borderBottom: index === entries.length - 1 ? "1px solid var(--rule)" : undefined,
-            }}
-          >
-            <div
-              style={{
-                flex: "0 0 180px",
-                display: "flex",
-                flexDirection: "column",
-                gap: 6,
-                fontSize: 14,
-                color: "var(--ink-3)",
-              }}
-            >
-              <time>{entry.date}</time>
-              <span>{entry.category}</span>
-            </div>
-            <div
-              style={{
-                flex: "1 1 520px",
-                maxWidth: 680,
-                display: "flex",
-                flexDirection: "column",
-                gap: 14,
-              }}
-            >
-              <h2
-                style={{
-                  fontFamily: "var(--font-serif)",
-                  fontSize: 30,
-                  lineHeight: 1.15,
-                  fontWeight: 600,
-                  letterSpacing: "-0.02em",
-                  color: "var(--ink)",
-                }}
-              >
-                {entry.title}
-              </h2>
-              <p
-                style={{
-                  fontFamily: "var(--font-serif)",
-                  fontSize: 18,
-                  lineHeight: 1.6,
-                  color: "var(--ink-body)",
-                }}
-              >
-                {entry.body}
-              </p>
-              {entry.extra}
-            </div>
-          </article>
-        ))}
-        <p style={{ marginTop: 24 }}>
-          <a href="#" style={{ fontSize: 14, color: "var(--ink-2)" }}>
-            Older entries
-          </a>
-        </p>
+      <section className="wrap pub-changelog-body">
+        <div className="pub-tlx">
+          {entries.map((entry) => (
+            <article key={entry.title} className="pub-en">
+              <div className="pub-en-d">
+                <time>{entry.date}</time>
+                <span className="tag ln">{entry.category}</span>
+              </div>
+              <div className="sheet pub-en-b">
+                <h2>{entry.title}</h2>
+                <p>{entry.body}</p>
+                {entry.extra}
+              </div>
+            </article>
+          ))}
+        </div>
+        <a href="#" className="btn pub-older">
+          Older entries
+        </a>
       </section>
 
-      <div className="hairline-top">
-        <SiteFooter />
-      </div>
+      <SiteFooter />
     </div>
   );
 }
