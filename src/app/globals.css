@@ -472,7 +472,7 @@ code,
 }
 
 .btn:disabled {
-  opacity: 0.55;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
@@ -1387,6 +1387,10 @@ a.ledger-row:hover {
   background: var(--paper-sunk);
 }
 
+.ledger-row:active {
+  background: var(--selected);
+}
+
 .ledger-row-featured {
   border-top: 1px solid var(--ink);
 }
@@ -1435,9 +1439,9 @@ a.ledger-row:hover {
    Notice
    ========================================================================== */
 .notice {
-  border: 1px solid var(--ink);
+  border: 1px solid var(--rule-strong);
   border-radius: var(--radius-l);
-  padding: 20px 22px;
+  padding: 24px;
   background: var(--paper);
   display: flex;
   flex-direction: column;
@@ -1446,16 +1450,17 @@ a.ledger-row:hover {
 
 .notice-headline {
   font-family: var(--font-serif);
-  font-size: 20px;
+  font-size: 30px;
   line-height: 1.25;
   font-weight: 600;
   color: var(--ink);
 }
 
 .notice-body {
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: var(--ink-2);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--ink-body);
 }
 
 .notice-lead {
@@ -1464,7 +1469,7 @@ a.ledger-row:hover {
 }
 
 .notice-warning {
-  border: 1px solid var(--rule-strong);
+  border: 1px solid var(--warn);
   background: var(--warn-tint);
   border-radius: var(--radius-l);
 }
