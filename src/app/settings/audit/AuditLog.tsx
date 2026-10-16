@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 
 export interface AuditSegment {
   text: string;
@@ -38,6 +38,68 @@ const WHAT_TO_CATEGORY: Record<string, string> = {
   Exports: "Exports",
 };
 
+/* Avatar tints, copied from the screen, keyed by actor. */
+const AVATAR_BG: Record<string, CSSProperties> = {
+  "Sheku Koroma": { background: "var(--ink)", color: "var(--on-ink)" },
+  "Maya Jordan": { background: "#E9E3C7" },
+  "Priya Shah": { background: "#E6E6E2" },
+  "Owen Clarke": { background: "#DDE3E9" },
+  "Lena Brooks": { background: "#E3E7DF" },
+};
+
+function initials(name: string): string {
+  return name
+    .replace(/ \(API key\)$/, "")
+    .split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("");
+}
+
+function EntryAvatar({ entry }: { entry: AuditEntryView }) {
+  if (entry.actor === "Cortex") {
+    return (
+      <span
+        className="av"
+        aria-hidden="true"
+        style={{
+          background: "var(--paper)",
+          boxShadow: "inset 0 0 0 1px var(--control)",
+          fontFamily: "var(--font-serif)",
+          fontSize: 11,
+          fontWeight: 600,
+        }}
+      >
+        C
+      </span>
+    );
+  }
+  if (entry.actor.includes("API key")) {
+    return (
+      <span className="av" aria-hidden="true" style={{ background: "var(--rail)" }}>
+        <svg
+          viewBox="0 0 16 16"
+          width="12"
+          height="12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          aria-hidden="true"
+          style={{ color: "var(--ink)" }}
+        >
+          <circle cx="5.5" cy="10.5" r="3" />
+          <path d="m7.6 8.4 5.9-5.9M11 5l1.5 1.5" />
+        </svg>
+      </span>
+    );
+  }
+  return (
+    <span className="av" aria-hidden="true" style={AVATAR_BG[entry.actor]}>
+      {initials(entry.actor)}
+    </span>
+  );
+}
+
 function renderSegments(segments: AuditSegment[]): ReactNode {
   return segments.map((segment, index) =>
     segment.href ? (
@@ -55,22 +117,13 @@ function renderActor(actor: string): ReactNode {
   if (actor.endsWith(suffix)) {
     return (
       <>
-        <span style={{ fontWeight: 500, color: "var(--ink)" }}>{actor.slice(0, -suffix.length)}</span>
+        <b style={{ fontWeight: 600, color: "var(--ink)" }}>{actor.slice(0, -suffix.length)}</b>
         {suffix}
       </>
     );
   }
-  return <span style={{ fontWeight: 500, color: "var(--ink)" }}>{actor}</span>;
+  return <b style={{ fontWeight: 600, color: "var(--ink)" }}>{actor}</b>;
 }
-
-const filterSelectStyle = {
-  height: 30,
-  minHeight: 30,
-  padding: "0 8px",
-  width: "auto",
-} as const;
-
-const filterLabelStyle = { fontSize: 12, color: "var(--ink-3)" } as const;
 
 export function AuditLog({
   groups,
@@ -132,156 +185,143 @@ export function AuditLog({
     .filter((group) => group.entries.length > 0);
 
   return (
-    <div className="stack-6">
-      <div
-        style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", flexWrap: "wrap" }}
-        role="group"
-        aria-label="Audit log filters"
-      >
-        <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)" }}>
-          <label htmlFor="audit-who" style={filterLabelStyle}>
-            Who
-          </label>
-          <select
-            id="audit-who"
-            className="field-control"
-            style={filterSelectStyle}
-            value={who}
-            onChange={(event) => updateFilter("who", event.target.value, filters.who[0]!)}
-          >
-            {filters.who.map((option) => (
-              <option key={option}>{option}</option>
-            ))}
-          </select>
-        </span>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)" }}>
-          <label htmlFor="audit-what" style={filterLabelStyle}>
-            What
-          </label>
-          <select
-            id="audit-what"
-            className="field-control"
-            style={filterSelectStyle}
-            value={what}
-            onChange={(event) => updateFilter("what", event.target.value, filters.what[0]!)}
-          >
-            {filters.what.map((option) => (
-              <option key={option}>{option}</option>
-            ))}
-          </select>
-        </span>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)" }}>
-          <label htmlFor="audit-when" style={filterLabelStyle}>
-            When
-          </label>
-          <select
-            id="audit-when"
-            className="field-control"
-            style={filterSelectStyle}
-            value={when}
-            onChange={(event) => updateFilter("when", event.target.value, filters.when[0]!)}
-          >
-            {filters.when.map((option) => (
-              <option key={option}>{option}</option>
-            ))}
-          </select>
-        </span>
+    <>
+      <div className="ad-audit-filters" role="group" aria-label="Audit log filters">
+        <label className="ad-filter-label" htmlFor="audit-who">
+          Who
+        </label>
+        <select
+          id="audit-who"
+          className="sel ad-sel ad-sel-sm"
+          value={who}
+          onChange={(event) => updateFilter("who", event.target.value, filters.who[0]!)}
+        >
+          {filters.who.map((option) => (
+            <option key={option}>{option}</option>
+          ))}
+        </select>
+        <label className="ad-filter-label ad-filter-gap" htmlFor="audit-what">
+          What
+        </label>
+        <select
+          id="audit-what"
+          className="sel ad-sel ad-sel-sm"
+          value={what}
+          onChange={(event) => updateFilter("what", event.target.value, filters.what[0]!)}
+        >
+          {filters.what.map((option) => (
+            <option key={option}>{option}</option>
+          ))}
+        </select>
+        <label className="ad-filter-label ad-filter-gap" htmlFor="audit-when">
+          When
+        </label>
+        <select
+          id="audit-when"
+          className="sel ad-sel ad-sel-sm"
+          value={when}
+          onChange={(event) => updateFilter("when", event.target.value, filters.when[0]!)}
+        >
+          {filters.when.map((option) => (
+            <option key={option}>{option}</option>
+          ))}
+        </select>
         {when === "Custom range" ? (
-          <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)" }}>
-            <label htmlFor="audit-from" style={filterLabelStyle}>
+          <>
+            <label className="ad-filter-label ad-filter-gap" htmlFor="audit-from">
               From
             </label>
             <input
               id="audit-from"
               type="date"
-              className="field-control"
-              style={filterSelectStyle}
+              className="inp ad-sel-sm"
+              style={{ height: 30 }}
               value={rangeFrom}
               onChange={(event) => setRangeFrom(event.target.value)}
             />
-            <label htmlFor="audit-to" style={filterLabelStyle}>
+            <label className="ad-filter-label" htmlFor="audit-to">
               To
             </label>
             <input
               id="audit-to"
               type="date"
-              className="field-control"
-              style={filterSelectStyle}
+              className="inp ad-sel-sm"
+              style={{ height: 30 }}
               value={rangeTo}
               onChange={(event) => setRangeTo(event.target.value)}
             />
-          </span>
+          </>
         ) : null}
-        <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--ink-3)" }}>{totalEntries} entries</span>
+        <span className="chip" style={{ marginLeft: "auto" }}>
+          <span className="mono">{totalEntries}</span> entries
+        </span>
       </div>
 
       {filteredGroups.length === 0 ? (
         <p className="ui-text">No audit entries match these filters.</p>
       ) : (
-        filteredGroups.map((group) => (
-          <section key={group.day} aria-label={group.day}>
-            <h2 style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", marginBottom: 4 }}>{group.day}</h2>
-            <div>
-              {group.entries.map((entry, index) => (
-                <div key={`${entry.time}-${index}`}>
+        <div role="list" aria-label="Audit entries" className="card" style={{ overflow: "hidden" }}>
+          {filteredGroups.map((group, groupIndex) => (
+            <section key={group.day} aria-label={group.day}>
+              <h2 className={groupIndex === 0 ? "ad-day ad-day-first" : "ad-day"}>{group.day}</h2>
+              {group.entries.map((entry, index) => {
+                const hasDetail = Boolean(entry.changes);
+                // "Admin · can now manage members, keys and billing" → tag + remainder.
+                const afterParts = entry.changes ? entry.changes.after.split(" · ") : [];
+                return (
                   <div
-                    className="audit-entry"
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "80px minmax(0, 1fr) 120px",
-                      gap: 18,
-                      alignItems: "baseline",
-                      padding: "12px 0",
-                      borderTop: "1px solid var(--rule)",
-                      fontSize: 14,
-                      lineHeight: 1.45,
-                    }}
+                    key={`${entry.time}-${index}`}
+                    role="listitem"
+                    className={hasDetail ? "ad-ev ad-ev-expanded" : "ad-ev"}
                   >
-                    <span style={{ fontSize: 12, color: "var(--ink-3)" }}>{entry.time}</span>
-                    <span style={{ color: "var(--ink-body)" }}>
-                      {renderActor(entry.actor)}{" "}
-                      {entry.segments ? renderSegments(entry.segments) : entry.sentence}
+                    <EntryAvatar entry={entry} />
+                    <time>{entry.time}</time>
+                    <span className="ad-ev-text">
+                      {hasDetail ? (
+                        <span className="ad-ev-stack">
+                          <span>
+                            {renderActor(entry.actor)}{" "}
+                            {entry.segments ? renderSegments(entry.segments) : entry.sentence}
+                          </span>
+                          <dl className="ad-ev-detail">
+                              <dt>Before</dt>
+                              <dd>
+                                <span className="tag ln">{entry.changes!.before}</span>
+                              </dd>
+                              <dt>After</dt>
+                              <dd>
+                                <span className="tag dk">{afterParts[0]}</span>
+                                {afterParts.length > 1 ? (
+                                  <span style={{ color: "var(--ink-2)" }}> · {afterParts.slice(1).join(" · ")}</span>
+                                ) : null}
+                              </dd>
+                              {entry.context ? (
+                                <>
+                                  <dt>From</dt>
+                                  <dd style={{ color: "var(--ink-2)" }}>
+                                    {entry.context.replace(/^From /, "")}
+                                  </dd>
+                                </>
+                              ) : null}
+                          </dl>
+                        </span>
+                      ) : (
+                        <>
+                          {renderActor(entry.actor)}{" "}
+                          {entry.segments ? renderSegments(entry.segments) : entry.sentence}
+                        </>
+                      )}
                     </span>
-                    <span style={{ fontSize: 12, color: "var(--ink-4)", textAlign: "right" }}>{entry.category}</span>
+                    <span className="ad-ev-cat">
+                      <span className={entry.category === "Spending" ? "tag warn" : "tag"}>{entry.category}</span>
+                    </span>
                   </div>
-                  {entry.changes ? (
-                    <div
-                      style={{
-                        background: "#FAFAF8",
-                        borderRadius: "var(--radius-m)",
-                        padding: 12,
-                        margin: "0 -12px 12px",
-                      }}
-                    >
-                      <dl
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "70px minmax(0, 1fr)",
-                          gap: "6px 14px",
-                          fontSize: 12,
-                          lineHeight: 1.5,
-                          margin: 0,
-                        }}
-                      >
-                        <dt style={{ color: "var(--ink-4)" }}>Before</dt>
-                        <dd style={{ color: "var(--ink-body)" }}>{entry.changes.before}</dd>
-                        <dt style={{ color: "var(--ink-4)" }}>After</dt>
-                        <dd style={{ color: "var(--ink-body)" }}>{entry.changes.after}</dd>
-                        {entry.context ? (
-                          <>
-                            <dt style={{ color: "var(--ink-4)" }}>From</dt>
-                            <dd style={{ color: "var(--ink-body)" }}>{entry.context.replace(/^From /, "")}</dd>
-                          </>
-                        ) : null}
-                      </dl>
-                    </div>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </section>
-        ))
+                );
+              })}
+            </section>
+          ))}
+        </div>
       )}
-    </div>
+    </>
   );
 }
