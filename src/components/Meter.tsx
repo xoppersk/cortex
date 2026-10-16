@@ -5,7 +5,6 @@ export function Meter({
   value,
   max,
   caption,
-  label,
 }: {
   sentence: ReactNode;
   value: number;
@@ -17,11 +16,7 @@ export function Meter({
   return (
     <div className="meter">
       <p className="meter-sentence">{sentence}</p>
-      <div
-        className="meter-track"
-        role="img"
-        aria-label={label ?? `${value} of ${max}`}
-      >
+      <div className="meter-track" aria-hidden="true">
         <div className="meter-fill" style={{ width: `${percent}%` }} />
       </div>
       {caption ? <p className="meter-caption">{caption}</p> : null}
