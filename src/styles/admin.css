@@ -1,0 +1,833 @@
+/* Administration screens (A-01..A-06) — page-level v2 styles.
+   Foundation (tokens, shell, components) lives in src/app/globals.css.
+   Prefix page classes with ad- to avoid collisions. */
+
+/* Mobile overflow containment: flex/grid children and wrappers on the path
+   from the panel to the .table-scroll scrollers must be allowed to shrink
+   below their content's min-content, so the wide designed grids stay inside
+   the scroller instead of inflating the page. */
+.ad-cols,
+.ad-main,
+.ad-side,
+.ad-formwrap,
+.ad-keys-wrap,
+.ad-main > *,
+.ad-keys-wrap > *,
+.ad-formwrap > * {
+  min-width: 0;
+}
+
+/* The .sr-only span inside a wide grid head is position:absolute; with no
+   positioned ancestor its containing block is the viewport and its static
+   position inside the min-width grid leaks into the root's scrollable
+   overflow, defeating the scroller. Making the head row its containing
+   block keeps it inside the scroller's clip. */
+.ad-mr-head,
+.ad-kr-head,
+.ad-ir-head {
+  position: relative;
+}
+
+/* Tag state variants from the screens' core CSS (not in the foundation) */
+.tag.warn {
+  background: #f7eedd;
+  color: var(--warn);
+}
+.tag.bad {
+  background: #f8ebe8;
+  color: var(--danger);
+}
+
+/* Panel header variant used by every settings screen (screens: 22px 28px,
+   flex-end alignment) + its left stack and serif lede. */
+.ad-ph {
+  padding: 22px 28px;
+  align-items: flex-end;
+}
+.ad-ph-center {
+  align-items: center;
+}
+.ad-ph-left {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 680px;
+  min-width: 0;
+}
+.ad-ph-left-tight {
+  gap: 8px;
+}
+.ad-lede {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.55;
+  font-weight: 400;
+  color: var(--ink-body);
+}
+
+/* Main column + 300px margin rail (Team / Billing / Audit screens) */
+.ad-cols {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  min-width: 0;
+}
+.ad-main {
+  padding: 24px 24px 36px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+.ad-main-wide {
+  gap: 20px;
+}
+.ad-side {
+  border-left: 1px solid var(--rule);
+  padding: 24px 22px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #fcfcfb;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  min-width: 0;
+}
+.ad-side-card {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ad-side-card b,
+.ad-side-strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.ad-side a {
+  font-weight: 500;
+}
+.ad-side-divider {
+  height: 1px;
+  background: var(--rule);
+  margin: 8px 0;
+}
+.ad-side-foot {
+  margin: 6px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+}
+
+/* Full-width settings form (Workspace settings / Profile) */
+.ad-formwrap {
+  padding: 24px 28px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Settings section card: the screens lay .card-sec out as body + a 280px
+   consequence note in the margin column of the card itself. */
+.ad-sec {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+}
+.ad-sec .card-sec-body h2 {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+}
+.ad-sec .card-sec-body {
+  padding: 22px 24px;
+  /* AUD-27: the screens' section body stacks at gap 16px, not the
+     foundation card's 14px (sections compressed ~2px each, accumulating
+     down the Workspace/Profile pages). */
+  gap: 16px;
+}
+.ad-sec .fr {
+  /* AUD-27: the screens' form-row grid uses a uniform 16px gap; the
+     foundation .fr uses 8px row / 20px column. */
+  gap: 16px;
+}
+.ad-sec .card-sec-note {
+  padding: 22px;
+  border-top: 0;
+  border-left: 1px solid #f0f0ec;
+  background: #fcfcfb;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+.card-sec.ad-sec-danger {
+  box-shadow: 0 0 0 1px #e8c9c2;
+}
+.ad-sec-danger .card-sec-body h2 {
+  color: var(--danger);
+}
+.ad-sec-danger .card-sec-note {
+  background: #fdf8f7;
+  border-left-color: #f3e3df;
+}
+
+/* Selects: the screens draw a chevron and a 30px small size */
+.ad-sel {
+  padding-right: 30px;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2377776F' stroke-width='1.5'%3E%3Cpath d='m4.5 6.5 3.5 3.5 3.5-3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  background-size: 14px;
+  cursor: pointer;
+}
+.ad-sel-sm {
+  height: 30px;
+}
+
+/* The changed-but-unsaved field (Workspace settings, ceiling):
+   ink border + the screen's highlight focus ring */
+.ad-changed {
+  border-color: var(--ink) !important;
+  box-shadow: 0 0 0 3px var(--highlight);
+}
+
+/* Checkbox row (screens' .ck) */
+.ad-ck {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-body);
+}
+.ad-ck input {
+  margin: 2px 0 0;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--ink);
+  flex: none;
+}
+
+/* Presence dot */
+.ad-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink);
+  flex: none;
+  display: inline-block;
+}
+.ad-dot-open {
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1.5px var(--ink-4);
+}
+
+/* Segmented control: the screens mark the active option with aria-checked */
+.seg [aria-checked="true"] {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--shadow-ring);
+}
+
+/* Card header strip (Billing cards) */
+.ad-hd {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f0f0ec;
+  background: var(--paper-sunk);
+}
+.ad-hd h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+}
+
+/* ---- Team (A-01) ---- */
+.ad-invite-card {
+  padding: 16px 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+}
+.ad-field-label {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ink-2);
+}
+.ad-mr {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px 110px 150px;
+  gap: 18px;
+  align-items: center;
+  padding: 14px 20px;
+  border-top: 1px solid #f0f0ec;
+  min-width: 620px;
+}
+.ad-mr-head {
+  border-top: 0;
+  padding: 12px 20px;
+  background: var(--paper-sunk);
+}
+.ad-who {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.ad-who .av {
+  width: 34px;
+  height: 34px;
+  font-size: 12px;
+  border: 0;
+  flex: none;
+}
+.ad-who-name {
+  font-family: var(--font-serif);
+  font-size: 15.5px;
+  line-height: 1.25;
+  font-weight: 600;
+  color: var(--ink);
+}
+.ad-who-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.ad-who-detail {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.ad-role-card b {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.ad-ph-avatars {
+  display: flex;
+}
+.ad-ph-avatars .av + .av {
+  margin-left: -5px;
+}
+
+/* ---- API keys (A-03) ---- */
+.ad-keys-wrap {
+  padding: 24px 28px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  /* AUD-15: the screen's content column is 1120px with the 28px side
+     padding outside it (wrapper 1176px); cap the CONTENT box at 1120px,
+     not the padding box (which left only 1064px of content). */
+  box-sizing: content-box;
+  max-width: 1120px;
+}
+.ad-reveal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 0;
+  border-radius: var(--radius-xl);
+  background: var(--ink);
+  color: var(--on-ink);
+  overflow: hidden;
+  box-shadow: 0 18px 40px -22px rgba(27, 27, 26, 0.55);
+}
+.ad-reveal-main {
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+/* AUD-16: copy glyph inside the reveal panel's Copy key button — the
+   screen's icon metrics (16px, flex-none, ink on the white button). */
+.ad-copy-ic {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  color: var(--ink);
+}
+/* The reveal panel's buttons sit on the ink panel; the base .btn hover
+   colour (ink) would turn the label/glyph invisible against it. */
+.ad-reveal-row .btn:hover {
+  color: var(--ink);
+}
+.ad-reveal-title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.ad-reveal-badge {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-m);
+  background: var(--highlight);
+  color: var(--ink);
+  flex: none;
+}
+.ad-reveal-body {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #cfcfc9;
+}
+.ad-reveal-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding-top: 4px;
+}
+.ad-reveal-input {
+  flex: 1 1 320px;
+  min-width: 0;
+  height: 38px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid var(--ink-2);
+  border-radius: var(--radius-m);
+  background: #2a2a28;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1;
+  color: #ffffff;
+}
+.ad-reveal-dl {
+  margin: 0;
+  padding: 22px;
+  border-left: 1px solid #333331;
+  background: #222220;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px 14px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #ffffff;
+  align-content: start;
+}
+.ad-reveal-dl dt {
+  color: #a6a6a0;
+}
+.ad-reveal-dl dd {
+  margin: 0;
+}
+.ad-kr {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px 160px 90px;
+  gap: 18px;
+  align-items: center;
+  padding: 15px 20px;
+  border-top: 1px solid #f0f0ec;
+  min-width: 680px;
+}
+.ad-kr-head {
+  border-top: 0;
+  padding: 12px 20px;
+  background: var(--paper-sunk);
+}
+.ad-ki {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+}
+.ad-ki-name {
+  font-family: var(--font-serif);
+  font-size: 15.5px;
+  line-height: 1.25;
+  font-weight: 600;
+  color: var(--ink);
+}
+.ad-ki-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.ad-ki-code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+.ad-key-tile {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-m);
+  flex: none;
+}
+.ad-keys-foot {
+  margin: 0;
+  padding: 12px 20px;
+  border-top: 1px solid #f0f0ec;
+  background: var(--paper-sunk);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+.ad-keys-foot a {
+  color: var(--ink);
+}
+
+/* ---- Billing (A-04) ---- */
+.ad-warn-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px 14px 18px;
+  border-radius: var(--radius-l);
+  background: var(--warn-tint);
+  box-shadow: 0 0 0 1px #e8d9a8;
+}
+.ad-warn-text {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex: 1 1 420px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-body);
+  min-width: 0;
+}
+.ad-li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px;
+  gap: 16px;
+  align-items: baseline;
+  padding: 14px 22px;
+  border-top: 1px solid #f0f0ec;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink-body);
+}
+.ad-li .ad-li-meta {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.ad-li > span:last-child {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+}
+.ad-li-total {
+  padding: 18px 22px;
+  border-top: 1px solid var(--ink);
+  background: var(--paper-sunk);
+  align-items: center;
+}
+.ad-li-total > span:first-child {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--ink);
+}
+.ad-li-total > span:last-child {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-align: right;
+}
+.ad-ir {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) 100px 80px 60px;
+  gap: 16px;
+  align-items: center;
+  padding: 13px 20px;
+  border-top: 1px solid #f0f0ec;
+  font-size: 13px;
+  min-width: 560px;
+}
+.ad-ir-head {
+  border-top: 0;
+  padding: 12px 20px;
+}
+.ad-card-visual {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 92px;
+  padding: 14px 16px;
+  border-radius: var(--radius-l);
+  background: var(--ink);
+  color: var(--on-ink);
+  box-sizing: border-box;
+  margin-bottom: 4px;
+}
+.ad-card-visual-text {
+  font-size: 12.5px;
+  line-height: 1.3;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.ad-plan-part {
+  display: block;
+}
+.ad-plan-part + .ad-plan-part {
+  padding-top: 10px;
+  border-top: 1px solid #f0f0ec;
+}
+
+/* ---- Audit log (A-05) ---- */
+.ad-audit-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.ad-audit-filters .ad-filter-label {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.ad-audit-filters .ad-filter-gap {
+  margin-left: 8px;
+}
+.ad-day {
+  margin: 0;
+  padding: 12px 20px;
+  border-top: 1px solid #f0f0ec;
+  background: var(--paper-sunk);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+.ad-day-first {
+  border-top: 0;
+}
+.ad-ev {
+  display: grid;
+  grid-template-columns: 28px 76px minmax(0, 1fr) 110px;
+  gap: 14px;
+  align-items: baseline;
+  padding: 14px 20px;
+  border-top: 1px solid #f0f0ec;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-body);
+}
+.ad-ev .av {
+  width: 24px;
+  height: 24px;
+  font-size: 9.5px;
+  border: 0;
+  align-self: start;
+  margin-top: -1px;
+}
+.ad-ev time {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--ink-3);
+}
+.ad-ev .ad-ev-cat {
+  text-align: right;
+}
+.ad-ev-expanded {
+  background: #fcfcfb;
+  box-shadow: inset 3px 0 0 var(--ink);
+}
+.ad-ev-detail {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
+  gap: 8px 14px;
+  padding: 12px 14px;
+  border-radius: var(--radius-l);
+  background: var(--paper);
+  box-shadow: var(--shadow-ring);
+  font-size: 12.5px;
+  line-height: 1.45;
+  margin: 0;
+}
+.ad-ev-detail dt {
+  color: var(--ink-4);
+}
+.ad-ev-detail dd {
+  margin: 0;
+  color: var(--ink-body);
+}
+.ad-ev-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* ---- Profile (A-06) ---- */
+.ad-ph-avatar {
+  width: 48px;
+  height: 48px;
+  border: 0;
+  background: var(--ink);
+  color: var(--on-ink);
+  font-size: 16px;
+}
+.ad-addr {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.ad-addr-prefix {
+  height: 34px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--control);
+  border-right: 0;
+  border-radius: var(--radius-m) 0 0 var(--radius-m);
+  background: var(--tint);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.ad-addr-input {
+  flex: 1;
+  min-width: 0;
+  border-radius: 0 var(--radius-m) var(--radius-m) 0;
+  font-size: 12.5px;
+}
+.ad-preview {
+  margin: 4px 0 0;
+  padding: 16px 18px;
+  border-radius: var(--radius-l);
+  background: var(--paper-sunk);
+  box-shadow: 0 0 0 1px var(--rule);
+  font-family: var(--font-serif);
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--ink-body);
+}
+.ad-preview-label {
+  margin-right: 6px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ink-4);
+  vertical-align: 2px;
+}
+.ad-sr2 {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 140px 70px;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid #f0f0ec;
+  font-size: 13px;
+}
+.ad-sessions {
+  border-radius: var(--radius-l);
+  box-shadow: 0 0 0 1px var(--rule);
+  overflow: hidden;
+}
+
+/* ---- Responsive: stack the margin rail and section notes, shrink pads ---- */
+@media (max-width: 1080px) {
+  .ad-reveal {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ad-reveal-dl {
+    border-left: 0;
+    border-top: 1px solid #333331;
+  }
+}
+
+@media (max-width: 900px) {
+  .ad-cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ad-side {
+    border-left: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .ad-sec {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ad-sec .card-sec-note {
+    border-left: 0;
+    border-top: 1px solid #f0f0ec;
+  }
+}
+
+@media (max-width: 640px) {
+  .ad-ph {
+    padding: 18px 16px;
+  }
+  .ad-main,
+  .ad-formwrap,
+  .ad-keys-wrap {
+    padding: 18px 16px 28px;
+  }
+  .ad-side {
+    padding: 20px 16px 26px;
+  }
+  .ad-sec .card-sec-body {
+    padding: 18px 16px;
+  }
+  .ad-sec .card-sec-note {
+    padding: 18px 16px;
+  }
+  .ad-ev {
+    grid-template-columns: 28px minmax(0, 1fr);
+  }
+  .ad-ev time {
+    grid-column: 2;
+  }
+  .ad-ev .ad-ev-text {
+    grid-column: 2;
+  }
+  .ad-ev .ad-ev-cat {
+    grid-column: 2;
+    text-align: left;
+  }
+  .ad-sr2 {
+    grid-template-columns: 28px minmax(0, 1fr) 70px;
+  }
+  .ad-sr2 .ad-sr2-place {
+    display: none;
+  }
+  .ad-li {
+    padding: 14px 16px;
+  }
+  .ad-li-total {
+    padding: 16px;
+  }
+}

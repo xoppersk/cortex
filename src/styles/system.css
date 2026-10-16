@@ -1,0 +1,939 @@
+/* System state screens (S-01..S-09) — page-level v2 styles.
+   Foundation (tokens, shell, components) lives in src/app/globals.css.
+   Prefix page classes with sys- to avoid collisions.
+   Values are copied from the approved v2 screens (screens/*.html):
+   rail ground, sheet/lift cards, dark ink panel on Login, and the
+   screens' own paddings, gaps and type sizes. */
+
+/* ---------- Shared standalone-page chrome ---------- */
+
+.sys-page {
+  min-height: 100vh;
+  background: var(--rail);
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+}
+
+.sys-topbar {
+  padding: 22px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sys-topbar-note {
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+.sys-topbar-note a {
+  font-weight: 500;
+}
+
+/* Centred form + aside row used by Signup / Invite / Upgrade */
+.sys-main {
+  flex: 1;
+  padding: 40px 48px 64px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.sys-main-upgrade {
+  padding-top: 32px;
+}
+
+.sys-btn-block {
+  width: 100%;
+  justify-content: center;
+}
+
+.sys-form-title {
+  margin: 0 0 6px;
+  font-family: var(--font-serif);
+  font-size: 38px;
+  line-height: 1.08;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+}
+
+/* ---------- S-01 Login ---------- */
+
+.sys-login-wrap {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.sys-login-left {
+  flex: 1 1 520px;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 22px 48px 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sys-brand-start {
+  align-self: flex-start;
+}
+
+.sys-login-mid {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.sys-login-form {
+  width: 100%;
+  max-width: 420px;
+  box-sizing: border-box;
+  margin: 48px auto;
+  padding: 36px 36px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sys-login-title {
+  margin: 0 0 8px;
+  font-family: var(--font-serif);
+  font-size: 38px;
+  line-height: 1.08;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+}
+
+.sys-login-or {
+  margin: 6px 0;
+}
+
+.sys-login-submit {
+  margin-top: 4px;
+}
+
+.sys-login-new {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.sys-login-new a {
+  font-weight: 500;
+}
+
+.sys-login-twostep {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 16px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-4);
+}
+
+.sys-login-aside {
+  flex: 1 1 420px;
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 10px 10px 10px 0;
+  padding: 56px;
+  border-radius: var(--radius-xl);
+  background: var(--ink);
+  color: var(--on-ink);
+  display: flex;
+  align-items: center;
+}
+
+.sys-login-figure {
+  margin: 0 auto;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sys-login-quote {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 32px;
+  line-height: 1.38;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--on-ink);
+}
+
+.sys-login-cite {
+  background: var(--highlight);
+  color: var(--ink);
+  font-style: normal;
+  vertical-align: 8px;
+  margin-left: 4px;
+}
+
+.sys-login-caption {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #c9c9c3;
+  padding-top: 18px;
+  border-top: 1px solid #3a3a38;
+}
+
+.sys-login-caption-cite {
+  margin: 1px 0 0;
+  background: #3a3a38;
+  color: var(--on-ink);
+  vertical-align: 0;
+}
+
+/* ---------- S-02 Signup ---------- */
+
+.sys-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+.sys-progress-bars {
+  display: flex;
+  gap: 4px;
+}
+
+.sys-progress-bars i {
+  width: 22px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ink);
+}
+
+.sys-progress-bars i.off {
+  background: var(--ring-line);
+}
+
+.sys-signup-form {
+  flex: 1 1 380px;
+  width: 100%;
+  min-width: 0;
+  max-width: 460px;
+  box-sizing: border-box;
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sys-signup-or {
+  margin: 4px 0;
+}
+
+.sys-signup-submit {
+  margin-top: 4px;
+}
+
+.sys-inp-error {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px #f6e4e0;
+}
+
+.sys-signup-error {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--danger);
+}
+
+.sys-signup-error .ic {
+  color: var(--danger);
+  margin-top: 1px;
+}
+
+.sys-legal-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.sys-trial-aside {
+  flex: 1 1 300px;
+  width: 100%;
+  min-width: 0;
+  max-width: 360px;
+  box-sizing: border-box;
+  margin-top: 24px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sys-trial-title {
+  font-size: 11.5px;
+  padding-bottom: 2px;
+}
+
+.sys-perk {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.sys-perk .ib {
+  width: 28px;
+  height: 28px;
+}
+
+.sys-perk b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.sys-trial-note {
+  padding: 14px;
+  border-radius: var(--radius-l);
+  background: var(--paper-sunk);
+  box-shadow: 0 0 0 1px var(--rule);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+/* ---------- S-03 Invite ---------- */
+
+.sys-invite-card {
+  flex: 1 1 400px;
+  width: 100%;
+  min-width: 0;
+  max-width: 480px;
+  box-sizing: border-box;
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sys-invite-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sys-invite-av {
+  width: 34px;
+  height: 34px;
+  font-size: 12px;
+  border: 0;
+}
+
+.sys-invite-title {
+  margin: 4px 0 0;
+  font-family: var(--font-serif);
+  font-size: 36px;
+  line-height: 1.12;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+}
+
+.sys-invite-role {
+  margin: 0 0 6px;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--ink-body);
+}
+
+.sys-role-mark {
+  font-weight: 600;
+  background: var(--highlight);
+  padding: 0 3px;
+  border-radius: 3px;
+}
+
+.sys-inp-readonly {
+  background: var(--tint);
+  color: var(--ink-2);
+}
+
+.sys-invite-submit {
+  margin-top: 4px;
+}
+
+.sys-waiting-aside {
+  flex: 1 1 320px;
+  width: 100%;
+  min-width: 0;
+  max-width: 400px;
+  box-sizing: border-box;
+  margin-top: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sys-waiting-title {
+  font-size: 11.5px;
+  padding: 22px 16px 14px;
+}
+
+.sys-ir {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid #f0f0ec;
+  font-size: 14px;
+}
+
+.sys-ir .ib {
+  width: 28px;
+  height: 28px;
+}
+
+.sys-ir-label {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.sys-ir-detail {
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+.sys-invite-quote {
+  margin: 0;
+  padding: 18px 18px 22px;
+  border-top: 1px solid var(--rule);
+  background: #fcfcfb;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 16.5px;
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--ink-body);
+}
+
+.sys-invite-quote-author {
+  font-style: normal;
+  color: var(--ink-3);
+}
+
+/* ---------- S-08 Upgrade ---------- */
+
+.sys-back-link {
+  font-size: 14px;
+}
+
+.sys-upgrade-form {
+  flex: 1 1 460px;
+  width: 100%;
+  min-width: 0;
+  max-width: 620px;
+  box-sizing: border-box;
+  padding: 40px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sys-upgrade-head {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sys-upgrade-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sys-upgrade-tag {
+  height: 22px;
+  font-size: 12px;
+}
+
+.sys-trial-ends {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--warn);
+  font-weight: 500;
+}
+
+.sys-trial-ends .ic {
+  color: var(--warn);
+  width: 14px;
+  height: 14px;
+}
+
+.sys-upgrade-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 42px;
+  line-height: 1.08;
+  font-weight: 600;
+  letter-spacing: -0.028em;
+  color: var(--ink);
+}
+
+.sys-upgrade-body {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--ink-body);
+}
+
+.sys-set {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0ec;
+}
+
+.sys-set-stack {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.sys-set-text {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.sys-set-text-wide {
+  max-width: 380px;
+}
+
+.sys-set-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.sys-set-helper {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
+
+.sys-set-error {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--danger);
+}
+
+.sys-stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border-radius: var(--radius-l);
+  background: var(--rail);
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+
+.sys-stepper-btn {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: var(--radius-m);
+  background: var(--paper);
+  box-shadow: var(--shadow-ring);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+}
+
+.sys-stepper-btn:hover {
+  box-shadow: 0 0 0 1px var(--ink);
+}
+
+.sys-stepper-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.sys-stepper-value {
+  width: 48px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.sys-limit-input {
+  width: 104px;
+  height: 40px;
+  text-align: right;
+  font-size: 15px;
+}
+
+.sys-add-card {
+  height: 40px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+.sys-add-card .ic {
+  color: var(--ink);
+}
+
+.sys-card-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.sys-card-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sys-card-row > div {
+  flex: 1 1 120px;
+  min-width: 0;
+}
+
+.sys-card-added {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.sys-summary {
+  flex: 1 1 300px;
+  width: 100%;
+  min-width: 0;
+  max-width: 380px;
+  box-sizing: border-box;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sys-summary-title {
+  margin: 0 0 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.sys-li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px;
+  gap: 16px;
+  padding: 13px 0;
+  border-top: 1px solid #f0f0ec;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.sys-li > span:last-child {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+}
+
+.sys-li-sub {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.sys-li-muted {
+  color: var(--ink-3);
+}
+
+.sys-li-total {
+  border-top: 1.5px solid var(--ink);
+  font-weight: 600;
+}
+
+.sys-li-total > span:last-child {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.sys-summary-note {
+  margin: 10px 0 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-l);
+  background: var(--paper-sunk);
+  box-shadow: 0 0 0 1px var(--rule);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.sys-summary-cta {
+  margin-top: 18px;
+  justify-content: center;
+}
+
+/* ---------- S-09 Not found ---------- */
+
+.sys-404-main {
+  flex: 1;
+  padding: 72px 48px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 64px;
+}
+
+.sys-404-left {
+  flex: 1 1 460px;
+  min-width: 0;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.sys-404-tag {
+  height: 24px;
+  padding: 0 9px;
+  font-size: 12.5px;
+}
+
+.sys-404-tag .mono {
+  font-weight: 500;
+}
+
+.sys-404-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 52px;
+  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -0.032em;
+  color: var(--ink);
+}
+
+.sys-404-body {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  line-height: 1.65;
+  font-weight: 400;
+  color: var(--ink-body);
+}
+
+.sys-404-url {
+  margin: 6px 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-height: 32px;
+  box-sizing: border-box;
+  padding: 6px 12px;
+  border-radius: var(--radius-m);
+  border: 1px dashed #b9b9b3;
+  background: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1;
+  color: var(--ink-3);
+  overflow-wrap: anywhere;
+}
+
+.sys-404-url-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sys-404-nav {
+  flex: 1 1 300px;
+  width: 100%;
+  min-width: 0;
+  max-width: 360px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sys-404-nav-title {
+  font-size: 11.5px;
+  padding: 20px 16px 14px;
+}
+
+.sys-lk {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 13px 16px;
+  border-top: 1px solid #f0f0ec;
+  font-size: 15px;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.sys-lk:hover {
+  background: #fafaf8;
+  color: var(--ink);
+}
+
+.sys-lk .ib {
+  width: 28px;
+  height: 28px;
+}
+
+.sys-lk-label {
+  font-weight: 500;
+}
+
+.sys-lk-detail {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.sys-404-nav-foot {
+  padding: 14px 16px 16px;
+  border-top: 1px solid var(--rule);
+  background: #fcfcfb;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.sys-404-nav-foot .mono {
+  color: var(--ink);
+}
+
+/* ---------- Mobile: split panels stack, cards full-width ---------- */
+
+@media (max-width: 860px) {
+  .sys-topbar {
+    padding: 22px 16px;
+  }
+
+  .sys-main,
+  .sys-main-upgrade {
+    padding: 32px 16px 48px;
+  }
+
+  .sys-login-left {
+    flex-basis: 100%;
+    padding: 22px 16px 24px;
+  }
+
+  .sys-login-form {
+    margin: 32px auto;
+    padding: 28px 20px 24px;
+  }
+
+  .sys-login-aside {
+    flex-basis: 100%;
+    margin: 0 10px 10px;
+    padding: 36px 24px;
+  }
+
+  .sys-login-quote {
+    font-size: 26px;
+  }
+
+  .sys-signup-form,
+  .sys-invite-card {
+    padding: 28px 20px;
+  }
+
+  .sys-upgrade-form {
+    padding: 28px 20px;
+  }
+
+  .sys-summary {
+    padding: 22px 20px;
+  }
+
+  .sys-trial-aside,
+  .sys-waiting-aside {
+    margin-top: 0;
+  }
+
+  .sys-form-title {
+    font-size: 32px;
+  }
+
+  .sys-login-title {
+    font-size: 32px;
+  }
+
+  .sys-invite-title {
+    font-size: 30px;
+  }
+
+  .sys-upgrade-title {
+    font-size: 34px;
+  }
+
+  .sys-404-main {
+    padding: 40px 16px 48px;
+    gap: 32px;
+  }
+
+  .sys-404-left {
+    flex-basis: 100%;
+  }
+
+  .sys-404-title {
+    font-size: 40px;
+  }
+
+  .sys-li {
+    grid-template-columns: minmax(0, 1fr) 96px;
+  }
+}
