@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { getAdminData, getWorkspaceData } from "../../../lib/api";
+import { changePlanAction } from "../actions";
 
 export const metadata: Metadata = { title: { absolute: "Cortex — Billing" } };
 
@@ -61,9 +62,9 @@ function CardIcon({ size = 16, color }: { size?: number; color?: string }) {
   );
 }
 
-export default function BillingPage() {
-  const { billing } = getAdminData();
-  const { workspace } = getWorkspaceData();
+export default async function BillingPage() {
+  const { billing } = await getAdminData();
+  const { workspace } = await getWorkspaceData();
 
   const warningParts = billing.card.warning.split(". ");
   const warningLead = `${warningParts[0]}.`;
@@ -185,6 +186,22 @@ export default function BillingPage() {
         </div>
 
         <aside className="ad-side">
+          <section className="card ad-side-card" style={{ gap: 10 }} aria-label="Change plan">
+            <h2 className="lbl">Change plan</h2>
+            <p style={{ margin: 0, fontSize: 13, color: "var(--ink-2)" }}>
+              Plan changes are recorded on the workspace as intent. No payment is taken — billing
+              (Stripe) is not connected in this deployment.
+            </p>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {(["starter", "pro", "team"] as const).map((planOption) => (
+                <form key={planOption} action={async () => { "use server"; await changePlanAction(planOption); }}>
+                  <button type="submit" className="btn sm">
+                    {planOption === "starter" ? "Starter" : planOption === "pro" ? "Pro" : "Team"}
+                  </button>
+                </form>
+              ))}
+            </div>
+          </section>
           <h2 className="lbl" style={{ marginBottom: 2 }}>
             Paying with
           </h2>
@@ -241,3 +258,4 @@ export default function BillingPage() {
     </>
   );
 }
+
