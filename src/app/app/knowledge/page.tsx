@@ -90,8 +90,8 @@ function CollectionStatus({ collection }: { collection: Collection }) {
   );
 }
 
-export default function KnowledgePage() {
-  const knowledge = getKnowledge();
+export default async function KnowledgePage() {
+  const knowledge = await getKnowledge();
   const { collections } = knowledge;
 
   return (
