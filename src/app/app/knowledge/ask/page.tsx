@@ -4,8 +4,8 @@ import { AskForm } from "./AskForm";
 
 export const metadata: Metadata = { title: { absolute: "Cortex — Ask a knowledge base" } };
 
-export default function AskPage() {
-  const knowledge = getKnowledge();
+export default async function AskPage() {
+  const knowledge = await getKnowledge();
   const { ask } = knowledge;
   const collection = knowledge.collections.find((entry) => entry.id === ask.collectionId);
 
