@@ -177,7 +177,7 @@ function StreamingLine({ turn, stopped, onStop }: { turn: ThreadTurn; stopped: b
   return (
     <div className="ws-streamline">
       <span className="dot" aria-hidden="true" />
-      {turn.answer.streaming?.label ?? "Writing"}{"\u00b7"}{" "}
+      {turn.answer.streaming?.label ?? "Writing"}{" "}{"\u00b7"}{" "}
       <span className="mono">{formatCost(cost)}</span> so far
       <button type="button" className="btn" onClick={onStop}>
         Stop
@@ -321,6 +321,8 @@ function SourcesDownView({ thread }: { thread: ThreadData }) {
             viewBox="0 0 16 16"
             width="18"
             height="18"
+            fill="none"
+            stroke="currentColor"
             stroke="currentColor"
             strokeWidth="1.5"
             strokeLinecap="round"
