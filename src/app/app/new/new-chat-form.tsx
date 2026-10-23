@@ -1,5 +1,7 @@
 "use client";
 
+import { createConversationAction } from "../actions";
+
 import { useState } from "react";
 
 /**
@@ -76,13 +78,14 @@ export function ConfigSentence({
 
 export function QuestionForm() {
   return (
-    <form className="ws-bigform" action="/app/c/launch-narrative" method="get">
+    <form className="ws-bigform" action={createConversationAction}>
       <label className="sr-only" htmlFor="new-question">
         Your question
       </label>
       <textarea
         id="new-question"
-        name="q"
+        name="question"
+        required
         rows={5}
         placeholder="Name the decision you are making and what a useful answer should make clearer."
       />
