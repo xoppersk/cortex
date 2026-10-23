@@ -53,8 +53,9 @@ export function UpgradeForm({ upgrade }: { upgrade: Upgrade }) {
   const limitLabel = limitValue !== null ? formatLimit(limitValue) : limit;
   const limitError =
     submitted && limitValue === null ? "Enter a limit above $0, like $75." : undefined;
-  const paymentError =
-    submitted && !cardAdded ? "Add a card before starting Team." : undefined;
+  // Billing boundary: no Stripe keys exist, so no card is required or
+  // charged — submitting records the plan intent on the workspace.
+  const paymentError = undefined;
 
   const cardDigits = cardNumber.replace(/\D/g, "");
   const cardNumberError =
@@ -80,15 +81,13 @@ export function UpgradeForm({ upgrade }: { upgrade: Upgrade }) {
     }
   }
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitted(true);
-    if (!cardAdded) {
-      setShowCard(true);
-      return;
-    }
     if (limitValue === null) return;
-    router.push("/app/history?state=empty");
+    const { changePlanAction } = await import("../settings/actions");
+    await changePlanAction("team");
+    router.push("/settings/billing");
   }
 
   return (
@@ -137,7 +136,7 @@ export function UpgradeForm({ upgrade }: { upgrade: Upgrade }) {
               onClick={() => setSeats((value) => Math.max(1, value - 1))}
               disabled={seats <= 1}
             >
-              −
+              {"\u2212"}
             </button>
             <span aria-live="polite" className="sys-stepper-value">
               {seats}
