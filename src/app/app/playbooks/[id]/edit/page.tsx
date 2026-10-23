@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getPlaybookEdit } from "../../../../../lib/api";
 import { EditPlaybookForm } from "./edit-form";
 
 export const metadata: Metadata = { title: { absolute: "Cortex — Edit playbook" } };
@@ -11,12 +12,39 @@ export default async function EditPlaybookPage({
 }) {
   const { id } = await params;
 
-  // The design defines the builder for the Launch brief playbook only; any
-  // other id is a genuine not-found rather than the Launch brief editor
-  // presented under a different playbook's name.
-  if (id !== "launch-brief") {
-    notFound();
+  if (id === "new") {
+    return (
+      <EditPlaybookForm
+        playbookId=""
+        playbookName="New playbook"
+        isNew
+        edit={{
+          instructions: "",
+          inputs: [],
+          sources: [],
+          checks: [
+            { label: "Every claim cited", checked: true },
+            { label: "Sources under 30 days old", checked: false },
+          ],
+          sharing: {
+            selected: "team",
+            options: [
+              { value: "personal", label: "Only me" },
+              { value: "team", label: "Whole team" },
+            ],
+          },
+          preview: "",
+          testRunCost: 0,
+          changesSincePrevious: [],
+          version: "v1",
+          liveVersion: "—",
+          savedNote: "Not saved yet",
+        }}
+      />
+    );
   }
 
-  return <EditPlaybookForm playbookName="Launch brief" />;
+  const found = await getPlaybookEdit(id);
+  if (!found) notFound();
+  return <EditPlaybookForm playbookId={found.id} playbookName={found.name} edit={found.edit} />;
 }
