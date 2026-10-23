@@ -4,11 +4,13 @@ import { SiteFooter, SiteHeader } from "../../components/SiteHeader";
 import { getTemplates } from "../../lib/api";
 import { TemplatesBrowser } from "./TemplatesBrowser";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: { absolute: "Cortex — Playbook templates" } };
 
 /* P-03 Templates — Premium v2 (screens/Templates.html). */
-export default function TemplatesPage() {
-  const data = getTemplates();
+export default async function TemplatesPage() {
+  const data = await getTemplates();
 
   return (
     <div>
