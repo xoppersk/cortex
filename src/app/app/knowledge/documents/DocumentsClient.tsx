@@ -4,8 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { IconCheck, IconSearch } from "../../../../components/icons";
-import { getKnowledge } from "../../../../lib/api";
-import type { KnowledgeDocument } from "../../../../lib/types";
+import type { KnowledgeData, KnowledgeDocument } from "../../../../lib/types";
 import { cx } from "../../../../lib/utils";
 function KnowledgeSubnav({ current }: { current: "documents" }) {
   return (
@@ -24,7 +23,7 @@ function KnowledgeSubnav({ current }: { current: "documents" }) {
 
 type DocumentExtra = KnowledgeDocument & { statusAction?: string; indexPercent?: number };
 
-/** File-type tile letters, per the screen (XLSX→XLS, Google Doc→DOC, …). */
+/** File-type tile letters, per the screen (XLSX->XLS, Google Doc->DOC, ...). */
 function fileTile(format: string): string {
   if (format.startsWith("XLS")) return "XLS";
   if (format.startsWith("PDF")) return "PDF";
@@ -131,12 +130,11 @@ type Filter =
   | { kind: "action" }
   | { kind: "collection"; id: string };
 
-const INITIAL_SELECTION = ["onboarding-spec-v2", "retrieval-architecture-notes"];
+const INITIAL_SELECTION: string[] = [];
 
-export function DocumentsClient() {
+export function DocumentsClient({ knowledge }: { knowledge: KnowledgeData }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const knowledge = getKnowledge();
   const { collections, documents } = knowledge;
 
   const filterParam = searchParams.get("filter");
@@ -244,19 +242,19 @@ export function DocumentsClient() {
           <p className="kb-doc-meta">
             <span>{totalDocuments} documents</span>
             <span className="sep" aria-hidden="true">
-              ·
+              {"\u00b7"}
             </span>
             <span className="item">
               <span className="kb-dot kb-dot-danger" aria-hidden="true" />1 failed
             </span>
             <span className="sep" aria-hidden="true">
-              ·
+              {"\u00b7"}
             </span>
             <span className="item">
               <span className="kb-dot kb-dot-hollow" aria-hidden="true" />1 indexing
             </span>
             <span className="sep" aria-hidden="true">
-              ·
+              {"\u00b7"}
             </span>
             <span className="item">
               <span className="kb-dot kb-dot-warn" aria-hidden="true" />2 stale
@@ -355,7 +353,7 @@ export function DocumentsClient() {
                 Re-index
               </button>
               <button type="button" className="btn sm kb-btn-on-dark">
-                Move to…
+                Move to{"\u2026"}
               </button>
               <button type="button" className="btn sm kb-btn-on-dark-solid">
                 Exclude from answers
@@ -435,7 +433,7 @@ export function DocumentsClient() {
                         color: document.passages == null ? "var(--ink-4)" : undefined,
                       }}
                     >
-                      {document.passages ?? "—"}
+                      {document.passages ?? "\u2014"}
                     </span>
                     <span
                       role="cell"
