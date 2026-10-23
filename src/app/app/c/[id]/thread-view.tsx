@@ -323,7 +323,6 @@ function SourcesDownView({ thread }: { thread: ThreadData }) {
             height="18"
             fill="none"
             stroke="currentColor"
-            stroke="currentColor"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
