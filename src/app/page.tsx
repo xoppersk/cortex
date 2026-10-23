@@ -3,6 +3,9 @@ import Link from "next/link";
 import type { SVGProps } from "react";
 import { IconArrowRight, IconBook, IconDatabase } from "../components/icons";
 import { SiteFooter, SiteHeader } from "../components/SiteHeader";
+import { getFeaturedThreadId } from "../lib/api";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: { absolute: "Cortex — Answers that can show their work" },
@@ -79,7 +82,8 @@ const trustPoints = [
   },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const threadId = await getFeaturedThreadId();
   return (
     <div>
       <SiteHeader current="/" />
@@ -96,7 +100,7 @@ export default function LandingPage() {
           <Link href="/app/new" className="btn dk lg">
             Start free for 14 days <IconArrowRight style={{ width: 15, height: 15, color: "var(--on-ink)" }} />
           </Link>
-          <Link href="/app/c/launch-evidence" className="btn lg">
+          <Link href={threadId ? `/app/c/${threadId}` : "/app"} className="btn lg">
             See a real thread
           </Link>
           <span className="pub-hero-note">No card. $20 of model use included.</span>
