@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { IconArrowRight, IconChat, IconCheck } from "../../../components/icons";
-import { getConversations, getStates } from "../../../lib/api";
+import { getConversations, getEmptyHistoryState } from "../../../lib/api";
 import { HistoryFilters } from "./history-filters";
 
 export async function generateMetadata({
@@ -26,8 +26,9 @@ export default async function HistoryPage({
 }) {
   const params = await searchParams;
 
-  if (params.state === "empty") {
-    const empty = getStates().emptyHistory;
+  const data = await getConversations();
+  if (params.state === "empty" || data.conversations.length === 0) {
+    const empty = await getEmptyHistoryState();
     return (
       <div className="ws-split">
         <div className="ws-doc-empty">
@@ -108,7 +109,6 @@ export default async function HistoryPage({
     );
   }
 
-  const data = getConversations();
   return (
     <>
       <header className="ph">
@@ -135,7 +135,7 @@ export default async function HistoryPage({
       </header>
       <div className="ws-page">
         <Suspense fallback={<p className="caption">Loading conversations…</p>}>
-          <HistoryFilters />
+          <HistoryFilters data={data} />
         </Suspense>
       </div>
     </>
