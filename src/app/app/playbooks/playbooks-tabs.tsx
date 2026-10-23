@@ -4,8 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { ButtonLink } from "../../../components/Button";
-import { getPlaybooks } from "../../../lib/api";
-import type { PlaybookRow } from "../../../lib/types";
+import type { PlaybookRow, PlaybooksData } from "../../../lib/types";
 import { formatCost } from "../../../lib/utils";
 
 type TabId = "team" | "private" | "archived";
@@ -62,7 +61,7 @@ export function withDottedInputs(instructions: string): ReactNode {
 function PlaybookRowLine({ playbook }: { playbook: PlaybookRow }) {
   const archived = Boolean(playbook.status);
   return (
-    <Link role="row" href="#" className="ws-prow" onClick={(event) => event.preventDefault()}>
+    <Link role="row" href={`/app/playbooks/${playbook.id}/edit`} className="ws-prow">
       <span role="cell" className="ws-p-title">
         <b>{playbook.name}</b>
         {playbook.description ? <span className="ws-p-desc">{playbook.description}</span> : null}
@@ -78,16 +77,15 @@ function PlaybookRowLine({ playbook }: { playbook: PlaybookRow }) {
   );
 }
 
-export function PlaybooksTabs() {
+export function PlaybooksTabs({ playbooks }: { playbooks: PlaybooksData }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const playbooks = getPlaybooks();
   const featured = playbooks.featured;
 
   const tab = (searchParams.get("tab") as TabId | null) ?? "team";
 
   const tabs: Array<{ id: TabId; label: string }> = [
-    { id: "team", label: `Team · ${playbooks.team.length + 1}` },
+    { id: "team", label: `Team · ${playbooks.team.length + (featured.id ? 1 : 0)}` },
     { id: "private", label: `Private · ${playbooks.private.length}` },
     { id: "archived", label: "Archived" },
   ];
@@ -282,3 +280,4 @@ export function PlaybooksTabs() {
     </>
   );
 }
+
