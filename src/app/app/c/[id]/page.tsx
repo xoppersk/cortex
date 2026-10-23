@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { getThread } from "../../../../lib/api";
+import { notFound } from "next/navigation";
+import { getConversation, getThread } from "../../../../lib/api";
 import { ThreadView, type ThreadState } from "./thread-view";
 
 export async function generateMetadata({
@@ -26,9 +27,11 @@ export default async function ConversationPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  await params;
+  const { id } = await params;
   const query = await searchParams;
-  const thread = getThread();
+  const conversation = await getConversation(id);
+  if (!conversation) notFound();
+  const thread = await getThread(id);
 
   const state: ThreadState =
     query.state === "sources-down"
@@ -39,5 +42,5 @@ export default async function ConversationPage({
           ? "viewer"
           : "normal";
 
-  return <ThreadView thread={thread} state={state} />;
+  return <ThreadView thread={thread} state={state} conversationId={id} />;
 }
