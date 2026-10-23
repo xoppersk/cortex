@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore, type ReactNode } from "react";
 import type { AdminData } from "../../../lib/types";
+import { updateProfileAction } from "../actions";
 
 type Profile = AdminData["profile"];
 
@@ -76,7 +77,7 @@ function MonitorIcon() {
 
 function PhoneIcon() {
   return (
-    <svg className="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+    <svg className="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" style={{ color: "var(--ink)" }}>
       <rect x="4.5" y="1.5" width="7" height="13" rx="1.5" />
       <path d="M7 12.5h2" />
     </svg>
@@ -147,7 +148,12 @@ export function ProfileForm({
 
       <form
         className="ad-formwrap"
-        onSubmit={(event) => event.preventDefault()}
+        onSubmit={(event) => {
+          event.preventDefault();
+          // Persist the profile name (profiles.display_name). Notification
+          // and reading preferences are local UI preferences in this phase.
+          void updateProfileAction({ displayName: name });
+        }}
       >
         <Section title="Profile" labelledBy="pf-profile-h" note={profile.profileNote}>
           <div className="fr">
@@ -341,3 +347,4 @@ export function ProfileForm({
     </div>
   );
 }
+
