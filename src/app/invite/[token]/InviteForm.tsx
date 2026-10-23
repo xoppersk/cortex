@@ -1,32 +1,44 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import type { ReactNode } from "react";
-import { Button } from "../../../components/Button";
+
+import { Button, ButtonLink } from "../../../components/Button";
 import { Field } from "../../../components/Field";
 import { IconArrowRight } from "../../../components/icons";
+import { acceptInviteAction, type AuthFormState } from "../../../lib/auth/actions";
+
+const initialState: AuthFormState = {};
 
 /*
- * S-03 Invite form (client part), per screens/Invite.html (v2): in the
- * design the whole left card is one <form class="sheet lift">, so this
- * component renders that form and receives the card's static head
- * (inviter row, heading, role sentence) as children from the page.
- * Join submits to /app/new carrying name/email, as before. Decline is
- * the design's ghost button — an action, not navigation: it swaps the
- * form for the same card holding a declined status line.
+ * S-03 Invite form (client part), per screens/Invite.html (v2): the whole
+ * left card is one .sheet.lift; the page passes the card's head (inviter
+ * row, heading, role sentence) as children.
+ *
+ * Production modes:
+ *  - "accept": a signed-in user whose email matches the invite. Join runs
+ *    `acceptInviteAction` (inserts team_members, marks the invite
+ *    accepted). Decline swaps the card to the design's declined state.
+ *  - "signin": signed-out visitor — Join first routes through /login with
+ *    next=/invite/<token>, returning here to accept.
  */
 export function InviteForm({
+  token,
   email,
   name,
   workspace,
+  mode,
   children,
 }: {
+  token: string;
   email: string;
   name: string;
   workspace: string;
+  mode: "accept" | "signin";
   children?: ReactNode;
 }) {
+  const [state, formAction, pending] = useActionState(acceptInviteAction, initialState);
   const [declined, setDeclined] = useState(false);
 
   if (declined) {
@@ -40,13 +52,49 @@ export function InviteForm({
     );
   }
 
+  if (mode === "signin") {
+    return (
+      <div className="sheet lift sys-invite-card">
+        {children}
+        <Field label="Joining as" htmlFor="invite-email">
+          <input
+            id="invite-email"
+            type="text"
+            className="inp lg sys-inp-readonly"
+            defaultValue={email}
+            readOnly
+          />
+        </Field>
+        <ButtonLink
+          href={`/login?next=${encodeURIComponent(`/invite/${token}`)}`}
+          variant="primary"
+          size="lg"
+          className="sys-btn-block sys-invite-submit"
+        >
+          Sign in to join {workspace}{" "}
+          <IconArrowRight style={{ width: 15, height: 15, color: "var(--on-ink)" }} />
+        </ButtonLink>
+        <p className="sys-legal-note">
+          No account yet? <Link href="/signup">Create one</Link> with this email address and the
+          invitation will be waiting. Joining adds a seat to the workspace&rsquo;s bill, not
+          yours.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <form action="/app/new" method="get" className="sheet lift sys-invite-card">
+    <form action={formAction} className="sheet lift sys-invite-card">
       {children}
+      <input type="hidden" name="token" value={token} />
+      {state.error ? (
+        <p className="sys-set-error" role="alert">
+          {state.error}
+        </p>
+      ) : null}
       <Field label="Joining as" htmlFor="invite-email">
         <input
           id="invite-email"
-          name="email"
           type="text"
           className="inp lg sys-inp-readonly"
           defaultValue={email}
@@ -63,8 +111,14 @@ export function InviteForm({
           defaultValue={name}
         />
       </Field>
-      <Button type="submit" variant="primary" size="lg" className="sys-btn-block sys-invite-submit">
-        Join {workspace}{" "}
+      <Button
+        type="submit"
+        variant="primary"
+        size="lg"
+        className="sys-btn-block sys-invite-submit"
+        disabled={pending}
+      >
+        {pending ? "Joining…" : `Join ${workspace}`}{" "}
         <IconArrowRight style={{ width: 15, height: 15, color: "var(--on-ink)" }} />
       </Button>
       <Button
@@ -77,8 +131,8 @@ export function InviteForm({
         Decline
       </Button>
       <p className="sys-legal-note">
-        Not you? <Link href="/login">Sign in with another account</Link>. Joining adds a seat to the
-        workspace&rsquo;s bill, not yours.
+        Not you? <Link href="/login">Sign in with another account</Link>. Joining adds a seat to
+        the workspace&rsquo;s bill, not yours.
       </p>
     </form>
   );
