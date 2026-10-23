@@ -6,9 +6,9 @@ import { AuditLog, type AuditGroupView } from "./AuditLog";
 
 export const metadata: Metadata = { title: { absolute: "Cortex — Audit log" } };
 
-export default function AuditPage() {
-  const { audit } = getAdminData();
-  const { workspace } = getWorkspaceData();
+export default async function AuditPage() {
+  const { audit } = await getAdminData();
+  const { workspace } = await getWorkspaceData();
 
   const groups: AuditGroupView[] = audit.groups.map((group) => ({
     day: group.day,
@@ -24,7 +24,7 @@ export default function AuditPage() {
     })),
   }));
 
-  // The fixture's single "not shown" text covers two margin cards on the screen;
+  // The aside's second card shows the tail of `notShown`, verbatim, after we
   // split it where the second card's sentence begins.
   const notShownParts = audit.notShown.split(" Streaming this log");
   const notShownFirst = notShownParts[0]!;
