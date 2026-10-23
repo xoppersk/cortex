@@ -166,7 +166,7 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
                * id by design), so the copied template opens there; building
                * the href from the template's own id dead-ended on a 404.
                */}
-              <Link href="/app/playbooks/launch-brief/edit" className="btn dk">
+              <Link href="/app/playbooks" className="btn dk">
                 Copy to my workspace <IconArrowRight />
               </Link>
             </div>
@@ -214,3 +214,4 @@ export function TemplatesBrowser({ data }: { data: TemplatesData }) {
     </>
   );
 }
+
