@@ -46,9 +46,9 @@ function initialsOf(name: string): string {
     .join("");
 }
 
-export default function UsagePage() {
-  const usage = getUsage();
-  const { workspace } = getWorkspaceData();
+export default async function UsagePage() {
+  const usage = await getUsage();
+  const { workspace } = await getWorkspaceData();
   const limit = workspace.monthlyLimit;
 
   const series = usage.series;
@@ -370,3 +370,4 @@ export default function UsagePage() {
     </>
   );
 }
+
