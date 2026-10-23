@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalFooter } from "../../components/SiteHeader";
-import { getStates } from "../../lib/api";
+import { getUpgradeState } from "../../lib/api";
 import { UpgradeForm } from "./UpgradeForm";
 
 export const metadata: Metadata = { title: { absolute: "Cortex — Choose a plan" } };
@@ -11,8 +11,8 @@ export const metadata: Metadata = { title: { absolute: "Cortex — Choose a plan
  * "Back to workspace" ghost button right, no bottom border) → centred
  * flex row (form .sheet + summary .sheet.lift) → LegalFooter.
  */
-export default function UpgradePage() {
-  const { upgrade } = getStates();
+export default async function UpgradePage() {
+  const upgrade = await getUpgradeState();
 
   return (
     <div className="sys-page">
@@ -21,7 +21,7 @@ export default function UpgradePage() {
           <i aria-hidden="true">C</i>
           <b>Cortex</b>
         </Link>
-        <Link href="/app/history?state=empty" className="btn gh sys-back-link">
+        <Link href="/app/history" className="btn gh sys-back-link">
           <svg
             className="ic"
             viewBox="0 0 16 16"
