@@ -337,3 +337,21 @@ export interface StatesData {
 }
 
 export type AdminData = typeof import("../../data/admin.json");
+
+/** DTO passed from the async layouts into the client shells (Shells.tsx). */
+export interface ShellData {
+  workspaceName: string;
+  plan: string;
+  userName: string;
+  userEmail: string;
+  conversationCount: number;
+  playbookCount: number;
+  documentCount: number;
+  memberCount: number;
+  apiKeyCount: number;
+  recent: Array<{ id: string; title: string }>;
+  spend: number;
+  monthlyLimit: number;
+  spendCaption: string;
+}
+
