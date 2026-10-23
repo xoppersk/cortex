@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { Button } from "../../../../../components/Button";
-import { getKnowledge } from "../../../../../lib/api";
+import { getDocumentInspector } from "../../../../../lib/api";
 function KnowledgeSubnav() {
   return (
     <nav className="subnav" aria-label="Knowledge">
@@ -130,15 +130,11 @@ export default async function PassageInspectorPage(props: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await props.params;
-  const knowledge = getKnowledge();
-  const { inspector } = knowledge;
-
-  // The design defines this inspector for the synthesis document only; any
-  // other document id is a genuine not-found rather than synthesis content
-  // presented under a different title.
-  if (id !== inspector.documentId) {
+  const found = await getDocumentInspector(id);
+  if (!found || !found.document) {
     notFound();
   }
+  const { inspector } = found;
 
   const passages = inspector.passages as Passage[];
   const selected = inspector.selectedPassage as SelectedPassage;
@@ -295,3 +291,4 @@ export default async function PassageInspectorPage(props: {
     </>
   );
 }
+
