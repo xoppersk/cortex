@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import type { AdminData } from "../../../lib/types";
+import { updateWorkspaceAction } from "../actions";
 import { cx } from "../../../lib/utils";
 
 type Settings = AdminData["workspaceSettings"];
@@ -108,6 +109,15 @@ export function WorkspaceForm({ settings }: { settings: Settings }) {
   function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBaseline(values);
+    // Persist the DB-backed fields (name, default model, retention). The
+    // spending-limit field maps to the token budget, which is managed from
+    // Usage/Billing, so it is not written here.
+    const retentionDays = values.keepConversations === "1 year" || values.keepConversations === "2 years" || values.keepConversations === "Forever" ? 365 : 90;
+    void updateWorkspaceAction({
+      name: values.name,
+      defaultModelId: values.model,
+      retentionDays: retentionDays as 30 | 90 | 365,
+    });
   }
 
   const ceilingChanged = values.ceiling !== baseline.ceiling;
@@ -369,3 +379,4 @@ export function WorkspaceForm({ settings }: { settings: Settings }) {
     </form>
   );
 }
+
