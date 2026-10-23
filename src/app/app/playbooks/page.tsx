@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ButtonLink } from "../../../components/Button";
+import { getPlaybooks } from "../../../lib/api";
 import { PlaybooksTabs } from "./playbooks-tabs";
 
 export const metadata: Metadata = { title: { absolute: "Cortex — Playbooks" } };
 
-export default function PlaybooksPage() {
+export default async function PlaybooksPage() {
+  const playbooks = await getPlaybooks();
   return (
     <>
       <header className="ph" style={{ alignItems: "flex-end" }}>
@@ -24,7 +26,7 @@ export default function PlaybooksPage() {
             Prompts that worked once, saved so the team can run them again with their own inputs.
           </p>
         </div>
-        <ButtonLink href="/app/playbooks/launch-brief/edit" variant="primary">
+        <ButtonLink href="/app/playbooks/new/edit" variant="primary">
           <svg
             viewBox="0 0 16 16"
             width="14"
@@ -41,7 +43,7 @@ export default function PlaybooksPage() {
       </header>
       <div className="ws-page">
         <Suspense fallback={<p className="caption">Loading playbooks…</p>}>
-          <PlaybooksTabs />
+          <PlaybooksTabs playbooks={playbooks} />
         </Suspense>
       </div>
     </>
