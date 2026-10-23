@@ -4,8 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import { IconSearch } from "../../../components/icons";
-import { getConversations } from "../../../lib/api";
-import type { Conversation } from "../../../lib/types";
+import type { Conversation, ConversationsData } from "../../../lib/types";
 import { formatCost } from "../../../lib/utils";
 
 const FILTERS = [
@@ -18,7 +17,6 @@ const FILTERS = [
 type FilterId = (typeof FILTERS)[number]["id"];
 
 const GROUPS: Conversation["group"][] = ["Today", "This week", "Earlier"];
-const DEFAULT_TERM = "interview";
 
 const AVATAR_CLASS: Record<string, string> = {
   "Sheku Koroma": "av-ink",
@@ -60,14 +58,13 @@ function Highlighted({ text, term }: { text: string; term: string }) {
   );
 }
 
-export function HistoryFilters() {
+export function HistoryFilters({ data }: { data: ConversationsData }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const data = getConversations();
 
   const filter = (searchParams.get("filter") as FilterId | null) ?? "all";
   const queryParam = searchParams.get("q");
-  const term = queryParam ?? DEFAULT_TERM;
+  const term = queryParam ?? "";
   const sortAsc = searchParams.get("sort") === "asc";
   const includeArchived = searchParams.get("archived") === "1";
 
@@ -271,3 +268,4 @@ export function HistoryFilters() {
     </>
   );
 }
+
