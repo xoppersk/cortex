@@ -109,8 +109,8 @@ function SummaryLede({ summary, passedPhrase }: { summary: string; passedPhrase:
   );
 }
 
-export default function EvaluationsPage() {
-  const evaluations = getEvaluations();
+export default async function EvaluationsPage() {
+  const evaluations = await getEvaluations();
   const { set, runs, otherSets } = evaluations;
   const failures = evaluations.failures as FailureExtra[];
   const passedPhrase = `${runs[0]?.passed} of ${set.questions}`;
