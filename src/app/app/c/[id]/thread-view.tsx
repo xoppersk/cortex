@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { sendMessageAction } from "../../actions";
 import { ButtonLink } from "../../../../components/Button";
 import { Composer } from "../../../../components/Composer";
 import { CopyButton } from "../../../../components/CopyButton";
@@ -19,9 +21,9 @@ import { formatCost } from "../../../../lib/utils";
 export type ThreadState = "normal" | "sources-down" | "limit" | "viewer";
 
 /* The fixture calls passage 118 "chunk 118"; the design system names it a
- * passage (screens: "Catalog 02 · Oct 2 · passage 118"). Display-only fix. */
+ * passage (screens: "Catalog 02 \u00b7 Oct 2 \u00b7 passage 118"). Display-only fix. */
 function displayNote(note: MarginNoteData): MarginNoteData {
-  return { ...note, meta: note.meta.replace("· chunk ", "· passage ") };
+  return { ...note, meta: note.meta.replace("\u00b7 chunk ", "\u00b7 passage ") };
 }
 
 /* Screen copy is final (Main.html): the pull quote reads "playbooks, with
@@ -74,7 +76,7 @@ function Block({ block, broken = false }: { block: ThreadBlock; broken?: boolean
   if (block.type === "pullQuote") {
     const attribution = (block.attribution ?? "")
       .replace("Not sourced; it ", "")
-      .replace(". ", " · ")
+      .replace(". ", " \u00b7 ")
       .replace(/\.$/, "");
     return (
       <figure className="ws-pullquote">
@@ -135,9 +137,9 @@ function Provenance({ turn }: { turn: ThreadTurn }) {
         <b>
           {cited.size} of {cited.size} claims cited
         </b>
-        <span className="provenance-sep">·</span>
+        <span className="provenance-sep">{"\u00b7"}</span>
         <span className="provenance-meta">
-          {footer.tokens} · {footer.duration} · {formatCost(footer.cost)}
+          {footer.tokens}{" "}{"\u00b7"}{" "}{footer.duration}{" "}{"\u00b7"}{" "}{formatCost(footer.cost)}
         </span>
       </span>
       <span style={{ display: "flex", gap: 6 }}>
@@ -155,7 +157,7 @@ function Provenance({ turn }: { turn: ThreadTurn }) {
 
 /**
  * The streaming turn: the paragraph is shown as far as it has streamed
- * (to cite 7) with a live cost ticker. Stop ends the stream (HANDOVER §10):
+ * (to cite 7) with a live cost ticker. Stop ends the stream (HANDOVER \u00a710):
  * the Writing line and caret go away and the answer rests as written.
  */
 function StreamingLine({ turn, stopped, onStop }: { turn: ThreadTurn; stopped: boolean; onStop: () => void }) {
@@ -175,7 +177,7 @@ function StreamingLine({ turn, stopped, onStop }: { turn: ThreadTurn; stopped: b
   return (
     <div className="ws-streamline">
       <span className="dot" aria-hidden="true" />
-      {turn.answer.streaming?.label ?? "Writing"} ·{" "}
+      {turn.answer.streaming?.label ?? "Writing"}{"\u00b7"}{" "}
       <span className="mono">{formatCost(cost)}</span> so far
       <button type="button" className="btn" onClick={onStop}>
         Stop
@@ -319,7 +321,6 @@ function SourcesDownView({ thread }: { thread: ThreadData }) {
             viewBox="0 0 16 16"
             width="18"
             height="18"
-            fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
             strokeLinecap="round"
@@ -573,8 +574,9 @@ export function BlockedView({ thread }: { thread: ThreadData }) {
 
 /* ------------------------------------------------------------- W-02 main */
 
-export function ThreadView({ thread, state }: { thread: ThreadData; state: ThreadState }) {
-  if (state === "sources-down") return <SourcesDownView thread={thread} />;
+export function ThreadView({ thread, state, conversationId }: { thread: ThreadData; state: ThreadState; conversationId?: string }) {
+  const router = useRouter();
+  if (state === "sources-down" && thread.turns.length > 0) return <SourcesDownView thread={thread} />;
   if (state === "limit") return <LimitView thread={thread} />;
   if (state === "viewer") return <BlockedView thread={thread} />;
 
@@ -582,24 +584,24 @@ export function ThreadView({ thread, state }: { thread: ThreadData; state: Threa
    * header comes from the thread fixture itself — title, 32 sources, and
    * the MJ/OC share avatars — never from the URL's conversation record. */
   const title = thread.header.title;
-  const sources = 32;
-  const sharedNames = ["Maya Jordan", "Owen Clarke"];
+  const sources = new Set(thread.notes.map((note) => note.documentTitle)).size;
+  const sharedNames: string[] = [];
 
   return (
     <>
       <header className="ph">
         <div className="ws-ph-stack">
           <span className="sub">
-            Conversations <span className="sep">/</span> Go-to-market
+            Conversations <span className="sep">/</span> {thread.header.project}
           </span>
           <h1>{title}</h1>
         </div>
         <div className="ws-ph-actions">
           <span className="chip">
             <IconDatabase style={{ width: 13, height: 13 }} />
-            {sources} sources · this month
+            {sources} sources
           </span>
-          <span className="chip">Cortex 4</span>
+          <span className="chip">{thread.composer.model}</span>
           {sharedNames.length > 0 ? (
             <span className="av-stack" style={{ marginLeft: 4 }} aria-label={`Shared with ${sharedNames.join(" and ")}`}>
               {sharedNames.map((name) => (
@@ -612,7 +614,7 @@ export function ThreadView({ thread, state }: { thread: ThreadData; state: Threa
           <button type="button" className="btn">
             Fork
           </button>
-          <ButtonLink href={`/app/playbooks/${"launch-brief"}/edit`} variant="secondary">
+          <ButtonLink href="/app/playbooks" variant="secondary">
             Save as playbook
           </ButtonLink>
           <button type="button" className="btn dk">
@@ -627,16 +629,12 @@ export function ThreadView({ thread, state }: { thread: ThreadData; state: Threa
             <TurnArticle key={turn.id} turn={turn} />
           ))}
           <Composer
+            onSend={conversationId ? (value) => { void sendMessageAction({ conversationId, content: value }).then(() => router.refresh()); } : undefined}
             sourcesLabel={thread.composer.sources}
             playbookLabel={thread.composer.playbook}
             model={thread.composer.model}
-            costSentence={
-              <>
-                ≈ <span className="mono">$0.012</span> · <span className="mono">$0.030</span> left
-                of $0.08
-              </>
-            }
-            placeholder="Ask a follow-up…"
+            costSentence={thread.composer.costSentence}
+            placeholder="Ask a follow-up\u2026"
             label="Ask a follow-up"
             singleLine
             showModel={false}
