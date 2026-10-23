@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Suspense } from "react";
+
+import statesJson from "../../../data/states.json";
 import { LegalFooter } from "../../components/SiteHeader";
-import { getStates } from "../../lib/api";
 import { SignupForm } from "./SignupForm";
 
 export const metadata: Metadata = { title: { absolute: "Cortex — Start a trial" } };
-
-type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 /* Bold lead-ins for the trial facts, verbatim prefixes of the fixture strings (design S-02). */
 const factLeads = ["14 days", "$20 of model use", "Up to 3 people"];
@@ -68,18 +66,13 @@ const perkIcons = [
 
 /*
  * S-02 Signup, per screens/Signup.html (v2): header (brand + sign-in note)
- * → centred row: the .sheet.lift form card (flex 1 1 380px, max 460px)
- * beside the "In the trial" .sheet aside (flex 1 1 300px, max 360px,
- * margin-top 24px) with icon perks and the closing inset note →
- * LegalFooter.
+ * → centred row: the .sheet.lift form card beside the "In the trial"
+ * .sheet aside with icon perks and the closing inset note → LegalFooter.
+ * The form itself (SignupForm) is wired to real Supabase sign-up; the
+ * design's fake personal-email error state is gone.
  */
-async function SignupInner({ searchParams }: { searchParams: SearchParams }) {
-  const params = await searchParams;
-  const { auth, signup } = getStates();
-  // The design screen is the personal-email error state, so it is the
-  // default render; ?state=clean opts out (the old ?state=error is the same).
-  const errorState = params.state !== "clean";
-
+export default function SignupPage() {
+  const { auth } = statesJson;
   const facts = auth.trialFacts.slice(0, 3);
   const closingFact = auth.trialFacts[3];
 
@@ -96,13 +89,7 @@ async function SignupInner({ searchParams }: { searchParams: SearchParams }) {
       </header>
 
       <div className="sys-main">
-        <SignupForm
-          signupError={auth.signupError}
-          initialErrorState={errorState}
-          errorName={signup.errorName}
-          errorEmail={signup.errorEmail}
-          stepLabel={signup.stepLabel}
-        />
+        <SignupForm />
 
         <aside aria-label="What the trial includes" className="sheet sys-trial-aside">
           <h2 className="lbl sys-trial-title">In the trial</h2>
@@ -131,13 +118,5 @@ async function SignupInner({ searchParams }: { searchParams: SearchParams }) {
 
       <LegalFooter />
     </div>
-  );
-}
-
-export default function SignupPage({ searchParams }: { searchParams: SearchParams }) {
-  return (
-    <Suspense fallback={null}>
-      <SignupInner searchParams={searchParams} />
-    </Suspense>
   );
 }
