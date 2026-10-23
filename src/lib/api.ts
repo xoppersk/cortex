@@ -83,7 +83,7 @@ function groupFor(iso: string | null | undefined): "Today" | "This week" | "Earl
 function cycleBounds(now = new Date()): { start: Date; end: Date; label: string; daysLeft: number } {
   const start = new Date(now.getFullYear(), now.getMonth(), 1);
   const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  const label = `${start.toLocaleDateString("en-US", { month: "long", day: "numeric" })} \u2013 ${new Date(end.getTime() - 86400000).toLocaleDateString("en-US", { month: "long", day: "numeric" })}`;
+  const label = `${start.toLocaleDateString("en-US", { month: "long", day: "numeric" })} – ${new Date(end.getTime() - 86400000).toLocaleDateString("en-US", { month: "long", day: "numeric" })}`;
   return { start, end, label, daysLeft: Math.max(0, Math.ceil((end.getTime() - now.getTime()) / 86400000)) };
 }
 function money(n: number): number {
@@ -317,6 +317,171 @@ async function conversationAggregates(teamId: string, convIds: string[]): Promis
     .in("conversation_id", convIds)
     .eq("role", "assistant");
   const docsByConv = new Map<string, Set<string>>();
+  for (const r of (msgs as Row[] | null) ?? []) {
+    const cites = Array.isArray(r.citations) ? (r.citations as Row[]) : [];
+    const set = docsByConv.get(String(r.conversation_id)) ?? new Set<string>();
+    for (const c of cites) if (c.document_id) set.add(String(c.document_id));
+    docsByConv.set(String(r.conversation_id), set);
+  }
+  for (const [id, set] of docsByConv) sourcesByConv.set(id, set.size);
+  return { costByConv, sourcesByConv };
+}
+
+async function lastSnippets(convIds: string[]): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  if (convIds.length === 0) return map;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("messages")
+    .select("conversation_id, content, created_at")
+    .in("conversation_id", convIds)
+    .order("created_at", { ascending: false });
+  for (const r of (data as Row[] | null) ?? []) {
+    const id = String(r.conversation_id);
+    if (!map.has(id)) map.set(id, String(r.content ?? "").replace(/\s+/g, " ").slice(0, 140));
+  }
+  return map;
+}
+
+export async function getConversations(): Promise<ConversationsData> {
+  const ctx = await resolveContext();
+  if (!ctx) return { projects: [], sharedWithYou: 0, conversations: [] };
+  const supabase = await createClient();
+  const teamId = ctx.activeTeam.id;
+  const { data } = await supabase
+    .from("conversations")
+    .select("*")
+    .eq("team_id", teamId)
+    .is("deleted_at", null)
+    .order("pinned", { ascending: false })
+    .order("last_message_at", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false });
+  const rows = (data as Row[] | null) ?? [];
+  const ids = rows.map((r) => String(r.id));
+  const [{ costByConv, sourcesByConv }, snippets, names] = await Promise.all([
+    conversationAggregates(teamId, ids),
+    lastSnippets(ids),
+    profileNames([...new Set(rows.map((r) => String(r.user_id)))]),
+  ]);
+  const myName = ctx.profile.displayName ?? "You";
+  const conversations: ConversationsData["conversations"] = rows.map((r) => {
+    const id = String(r.id);
+    const ownerName = names.get(String(r.user_id)) ?? myName;
+    const title = String(r.title ?? "New conversation");
+    const snippet = snippets.get(id) ?? "";
+    const people = [ownerName];
+    return {
+      id,
+      title,
+      project: String(r.folder ?? "Unfiled"),
+      startedBy: String(r.user_id) === ctx.user.id ? "me" : String(r.user_id),
+      shared: false,
+      pinned: Boolean(r.pinned),
+      sources: sourcesByConv.get(id) ?? 0,
+      people,
+      cost: money(costByConv.get(id) ?? 0),
+      edited: fmtTime(r.last_message_at ?? r.updated_at ?? r.created_at),
+      group: groupFor(r.last_message_at ?? r.created_at),
+      snippet,
+      searchText: `${title} ${snippet} ${people.join(" ")}`,
+    };
+  });
+  const projectCounts = new Map<string, number>();
+  for (const c of conversations) projectCounts.set(c.project, (projectCounts.get(c.project) ?? 0) + 1);
+  return {
+    projects: [...projectCounts.entries()].map(([name, count]) => ({ name, count })),
+    sharedWithYou: 0,
+    conversations,
+  };
+}
+
+export async function getConversation(id: string) {
+  const data = await getConversations();
+  return data.conversations.find((c) => c.id === id);
+}
+
+/* ---------------------------------------------------------------- thread */
+
+// Designed state-variant copy (states.json: thread sources-down / limit /
+// blocked). These are UI states, not data — the copy lives here as local
+// constants now that the fixture import is gone.
+const THREAD_VARIANTS = {
+  streamContinuation: "",
+  sourcesDown: {
+    meta: "Sources unavailable",
+    banner: "The knowledge service is unreachable, so this answer cannot show its passages right now. Reading and citations come back on their own.",
+    question: "What did we decide about evidence retention?",
+    footerLine: "Answers pause while sources are down; nothing is lost.",
+    marginNoteTitle: "Sources unavailable",
+    marginNoteStatus: "Unreachable",
+    marginNoteText: "Cited passages cannot be opened while the knowledge service is down.",
+    composerNote: "Asking is paused while sources are unreachable.",
+  },
+  limitState: {
+    title: "Spending limit reached",
+    speaker: "",
+    time: "",
+    question: "",
+    partialSegments: [{ text: "This workspace has reached its spending limit for the cycle." }],
+    headline: "Answers pause at the limit.",
+    body: "Reading, sharing and citations keep working. An admin can raise the limit or wait for the cycle to reset.",
+    adminHeading: "Admin options",
+    actions: [
+      { label: "Raise the limit", detail: "Takes effect immediately and is written to the audit log." },
+      { label: "Wait for the reset", detail: "Answers resume when the new cycle starts." },
+    ],
+    usageLinkLabel: "See usage",
+    editorsNote: "Only admins can change the limit.",
+    composerNote: "New answers are paused until the limit changes.",
+  },
+  blocked: {
+    meta: "Read-only access",
+    heading: "You can read this conversation, but you cannot add to it.",
+    segments: [{ text: "Your role in this workspace is read-only for this conversation." }],
+    noticeHeading: "Read-only",
+    noticeBody: "Ask an admin to change your role if you need to contribute.",
+  },
+} satisfies Pick<ThreadData, "streamContinuation" | "sourcesDown" | "limitState" | "blocked">;
+
+function emptyThread(id = ""): ThreadData {
+  return {
+    id,
+    header: { title: "New conversation", meta: "", project: "Unfiled", edited: "" },
+    turns: [],
+    notes: [],
+    composer: { sources: "", playbook: "No playbook", model: "Cortex Flash", costSentence: "", placeholder: "Ask a follow-up" },
+    ...THREAD_VARIANTS,
+  };
+}
+
+export async function getThread(conversationId?: string): Promise<ThreadData> {
+  const ctx = await resolveContext();
+  if (!ctx) return emptyThread(conversationId ?? "");
+  const supabase = await createClient();
+  const teamId = ctx.activeTeam.id;
+
+  let conv: Row | null = null;
+  if (conversationId) {
+    const { data } = await supabase.from("conversations").select("*").eq("id", conversationId).eq("team_id", teamId).is("deleted_at", null).maybeSingle();
+    conv = (data as Row | null) ?? null;
+    if (!conv) return emptyThread(conversationId);
+  } else {
+    const { data } = await supabase.from("conversations").select("*").eq("team_id", teamId).is("deleted_at", null).order("last_message_at", { ascending: false, nullsFirst: false }).limit(1).maybeSingle();
+    conv = (data as Row | null) ?? null;
+    if (!conv) return emptyThread("");
+  }
+  const convId = String(conv.id);
+  const { data: msgRows } = await supabase
+    .from("messages")
+    .select("*")
+    .eq("conversation_id", convId)
+    .order("created_at", { ascending: true });
+  const messages = (msgRows as Row[] | null) ?? [];
+
+  // Citation document titles.
+  const docIds = new Set<string>();
+  for (const m of messages) {
+    for (const c of Array.isArray(m.citations) ? (m.citations as Row[]) : []) {
       if (c.document_id) docIds.add(String(c.document_id));
     }
   }
@@ -559,7 +724,6 @@ export async function getKnowledge(): Promise<KnowledgeData> {
   const collections: KnowledgeData["collections"] = kbs.map((kb) => {
     const kbDocs = docs.filter((d) => String(d.kb_id) === String(kb.id));
     const passages = kbDocs.reduce((t, d) => t + Number(d.chunk_count ?? 0), 0);
-  
     const newest = kbDocs.map((d) => String(d.updated_at ?? "")).sort().at(-1);
     const failed = kbDocs.some((d) => d.status === "failed");
     const indexing = kbDocs.some((d) => d.status === "queued" || d.status === "processing");
@@ -635,7 +799,7 @@ export async function getKnowledge(): Promise<KnowledgeData> {
 
   const firstKb = kbs[0];
   const totalDocs = documents.length;
-    const totalPassages = collections.reduce((t, c) => t + c.passages, 0);
+  const totalPassages = collections.reduce((t, c) => t + c.passages, 0);
   return {
     summary: `${collections.length} knowledge base${collections.length === 1 ? "" : "s"} \u00b7 ${totalDocs} documents \u00b7 ${totalPassages.toLocaleString()} passages your answers can cite.`,
     collections,
