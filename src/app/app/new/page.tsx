@@ -1,32 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IconBook, IconChat } from "../../../components/icons";
-import { getConversations, getKnowledge, getPlaybooks, getThread, getWorkspaceData } from "../../../lib/api";
+import { getConversations, getKnowledge, getPlaybooks, getWorkspaceData } from "../../../lib/api";
 import { formatNumber } from "../../../lib/utils";
-import { BlockedView } from "../c/[id]/thread-view";
 import { ConfigSentence, QuestionForm } from "./new-chat-form";
 
 export const metadata: Metadata = { title: { absolute: "Cortex — New chat" } };
 
-export default async function NewConversationPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const params = await searchParams;
-  if (params.state === "viewer") {
-    return <BlockedView thread={getThread()} />;
-  }
-
-  const { workspace, models } = getWorkspaceData();
-  const playbooks = getPlaybooks();
-  const conversations = getConversations();
-  const knowledge = getKnowledge();
+export default async function NewConversationPage() {
+  const { workspace, models } = await getWorkspaceData();
+  const playbooks = await getPlaybooks();
+  const conversations = await getConversations();
+  const knowledge = await getKnowledge();
 
   const ceiling = `$${workspace.perAnswerCeiling.toFixed(2)}`;
-  const canSee = knowledge.collections.filter((c) =>
-    ["positioning-research", "customer-interviews"].includes(c.id),
-  );
+  const canSee = knowledge.collections.slice(0, 2);
   const indexing = knowledge.collections.find((c) => c.status.type === "indexing");
   const pickerCollections = [
     ...canSee,
@@ -35,30 +23,36 @@ export default async function NewConversationPage({
   const pickUp = conversations.conversations.slice(0, 3);
 
   const playbookCards = [
-    {
-      id: playbooks.featured.id,
-      name: playbooks.featured.name,
-      description: "Audience, promise, proof and risks for a launch, cited.",
-      meta: "6 inputs · Team",
-      outline: false,
-      value: "Used today",
-    },
-    {
-      id: playbooks.team[0]!.id,
-      name: playbooks.team[0]!.name,
-      description: playbooks.team[0]!.description ?? "",
-      meta: `${playbooks.team[0]!.inputsLabel ?? ""} · Team`,
-      outline: false,
-      value: playbooks.team[0]!.updated,
-    },
-    {
-      id: playbooks.private[0]!.id,
-      name: playbooks.private[0]!.name,
-      description: playbooks.private[0]!.description ?? "",
-      meta: `${playbooks.private[0]!.inputsLabel ?? ""} · Private`,
-      outline: true,
-      value: playbooks.private[0]!.updated,
-    },
+    ...(playbooks.featured.id
+      ? [{
+          id: playbooks.featured.id,
+          name: playbooks.featured.name,
+          description: playbooks.featured.description ?? "",
+          meta: `${playbooks.featured.inputs} · Team`,
+          outline: false,
+          value: playbooks.featured.updated,
+        }]
+      : []),
+    ...(playbooks.team[0]
+      ? [{
+          id: playbooks.team[0].id,
+          name: playbooks.team[0].name,
+          description: playbooks.team[0].description ?? "",
+          meta: `${playbooks.team[0].inputsLabel ?? ""} · Team`,
+          outline: false,
+          value: playbooks.team[0].updated,
+        }]
+      : []),
+    ...(playbooks.private[0]
+      ? [{
+          id: playbooks.private[0].id,
+          name: playbooks.private[0].name,
+          description: playbooks.private[0].description ?? "",
+          meta: `${playbooks.private[0].inputsLabel ?? ""} · Private`,
+          outline: true,
+          value: playbooks.private[0].updated,
+        }]
+      : []),
   ];
 
   return (
@@ -70,7 +64,7 @@ export default async function NewConversationPage({
           <span className="here">New conversation</span>
         </span>
         <span className="ws-ph-actions">
-          <span className="chip">Cortex 4</span>
+          <span className="chip">{workspace.defaultModel}</span>
           <span className="chip">
             <svg
               className="ic"
@@ -108,11 +102,11 @@ export default async function NewConversationPage({
               <h2 id="pb" className="lbl">
                 Start from a playbook
               </h2>
-              <Link href="/app/playbooks">All 7 playbooks</Link>
+              <Link href="/app/playbooks">All playbooks</Link>
             </div>
             <div className="ws-pbc-grid">
               {playbookCards.map((card) => (
-                <Link key={card.id} href={`/app/c/launch-narrative?playbook=${card.id}`} className="ws-pbc">
+                <Link key={card.id} href={`/app/playbooks/${card.id}/edit`} className="ws-pbc">
                   <span className="ws-pbc-top">
                     <IconBook />
                     <span>{card.value}</span>
