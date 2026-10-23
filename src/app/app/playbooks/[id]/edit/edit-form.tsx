@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import type { PlaybooksData } from "../../../../../lib/types";
+import { createPlaybookAction, updatePlaybookAction } from "../../actions";
 import type { ReactNode } from "react";
-import { getPlaybooks } from "../../../../../lib/api";
 import { withDottedInputs } from "../../playbooks-tabs";
 
 type SourceExtra = { label: string; state: "checked" | "unchecked" | "disabled"; bold?: string };
@@ -38,8 +40,21 @@ function SectionHeading({
   );
 }
 
-export function EditPlaybookForm({ playbookName }: { playbookName: string }) {
-  const edit = getPlaybooks().edit;
+export function EditPlaybookForm({
+  playbookId,
+  playbookName,
+  edit,
+  isNew = false,
+}: {
+  playbookId: string;
+  playbookName: string;
+  edit: PlaybooksData["edit"];
+  isNew?: boolean;
+}) {
+  const router = useRouter();
+  const [name, setName] = useState(playbookName);
+  const [instructions, setInstructions] = useState(edit.instructions);
+  const [saveNote, setSaveNote] = useState<string | null>(null);
   const sources = edit.sources as SourceExtra[];
 
   const [examples, setExamples] = useState<string[]>(edit.inputs.map((input) => input.example));
@@ -104,19 +119,49 @@ export function EditPlaybookForm({ playbookName }: { playbookName: string }) {
             </Link>
             <span className="sep">/</span> Editing
           </span>
-          <h1>{playbookName}</h1>
+          {isNew ? (
+            <input className="inp" style={{ fontSize: 20, fontWeight: 600 }} value={name} onChange={(event) => setName(event.target.value)} aria-label="Playbook name" />
+          ) : (
+            <h1>{playbookName}</h1>
+          )}
         </div>
         <div className="ws-ph-actions">
           <span className="ws-saved-note">
             <i aria-hidden="true" />
-            {edit.savedNote} · {edit.liveVersion} is live
+            {edit.savedNote}{" "}{"\u00b7"}{" "}{edit.liveVersion} is live
           </span>
           <button type="button" className="btn gh" onClick={discard}>
             Discard changes
           </button>
-          <button type="button" className="btn dk">
-            Publish {edit.version} to team
+          <button
+            type="button"
+            className="btn dk"
+            onClick={async () => {
+              if (isNew) {
+                const result = await createPlaybookAction({
+                  name: name.trim() || "Untitled playbook",
+                  description: "",
+                  category: "General",
+                  promptBody: instructions,
+                  visibility: sharing === "team" ? "team" : "personal",
+                });
+                if (result.ok) router.push(`/app/playbooks/${result.id}/edit`);
+                else setSaveNote(result.error);
+              } else {
+                const result = await updatePlaybookAction(playbookId, {
+                  promptBody: instructions,
+                  visibility: sharing === "team" ? "team" : "personal",
+                });
+                setSaveNote(result.ok ? "Saved \u2014 a new version was recorded." : result.error);
+                if (result.ok) router.refresh();
+              }
+            }}
+          >
+            {isNew ? "Create playbook" : `Publish ${edit.version} to team`}
           </button>
+          {saveNote ? (
+            <span role="status" style={{ fontSize: 12.5, color: "var(--ink-2)" }}>{saveNote}</span>
+          ) : null}
         </div>
       </header>
 
@@ -131,9 +176,15 @@ export function EditPlaybookForm({ playbookName }: { playbookName: string }) {
             <label htmlFor="ins" className="sr-only">
               Instructions
             </label>
-            <div id="ins" className="ws-ins-box">
-              {withDottedInputs(edit.instructions)}
-            </div>
+            <textarea
+              id="ins"
+              className="ws-ins-box"
+              style={{ width: "100%", minHeight: 140, font: "inherit" }}
+              value={instructions}
+              onChange={(event) => setInstructions(event.target.value)}
+              aria-label="Playbook instructions"
+            />
+            <p style={{ margin: 0 }}>{withDottedInputs(instructions)}</p>
             <span className="ws-ins-hint">
               Type <span className="kbd">[</span> to insert an input. {edit.inputs.length} inputs
               used.
