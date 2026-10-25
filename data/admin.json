@@ -246,7 +246,7 @@
    "heading": "Next invoice, so far",
    "lines": [
     {
-     "label": "5 seats × $30",
+     "label": "5 seats × $15",
      "detail": "October 9 – November 8",
      "amount": "$150.00"
     },
@@ -275,7 +275,7 @@
   },
   "plan": {
    "heading": "Plan",
-   "body": "Team · $30 per seat per month, model use at cost up to your limit. Enterprise adds single sign-on, custom retention and audit export. Priced per contract.",
+   "body": "Team · $15 per seat per month, model use at cost up to your limit. Enterprise adds single sign-on, custom retention and audit export. Priced per contract.",
    "actionLabel": "Talk to sales",
    "bodySegments": [
     {
@@ -283,7 +283,7 @@
      "strong": true
     },
     {
-     "text": " · $30 per seat per month, model use at cost up to your limit. "
+     "text": " · $15 per seat per month, model use at cost up to your limit. "
     },
     {
      "text": "Enterprise",
