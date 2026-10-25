@@ -292,7 +292,7 @@ export default async function LandingPage() {
               <IconArrowRight style={{ width: 15, height: 15, color: "var(--ink)" }} />
             </Link>
             <span className="pub-cta-note">
-              $30 per seat after the trial · <Link href="/pricing">pricing</Link>
+              $15 per seat after the trial · <Link href="/pricing">pricing</Link>
             </span>
           </div>
         </div>
