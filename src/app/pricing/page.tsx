@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: { absolute: "Cortex — Pricing" } };
 
 /*
  * P-02 Pricing — Premium v2 (screens/Pricing.html). Plan sheets, the worked
- * monthly example ($150 + $40 + $4 = $194), the comparison table and the
+ * monthly example ($75 + $40 + $4 = $119), the comparison table and the
  * FAQ in <details>, copy transcribed verbatim from the screen.
  */
 
@@ -104,7 +104,7 @@ export default function PricingPage() {
             <span className="tag dk">Most teams</span>
           </div>
           <p className="pub-price">
-            <b>$30</b> per seat a month, plus model use at cost
+            <b>$15</b> per seat a month, plus model use at cost
           </p>
           <PlanList
             items={[
@@ -152,8 +152,8 @@ export default function PricingPage() {
           </div>
           <div className="pub-frag">
             <div className="pub-rc">
-              <span>5 seats × $30</span>
-              <span>$150</span>
+              <span>5 seats × $15</span>
+              <span>$75</span>
             </div>
             <div className="pub-rc">
               <span>
@@ -169,7 +169,7 @@ export default function PricingPage() {
             </div>
             <div className="pub-rc pub-rc-total">
               <span>About</span>
-              <span>$194 a month</span>
+              <span>$119 a month</span>
             </div>
           </div>
         </section>
