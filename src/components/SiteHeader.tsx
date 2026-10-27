@@ -61,14 +61,14 @@ export function SiteFooter() {
         <a href="#">Security</a>
         <a href="#">Privacy</a>
       </nav>
-      <span>© 2026 [Company]</span>
+      <span>© 2026 Sevyn Labs · <a href="tel:+12762702729">(276) 270-2729</a></span>
     </footer>
   );
 }
 
 /*
  * LegalFooter (brief §7): one line on auth and standalone screens
- * (Login, Signup, Invite, Upgrade, 404) — © 2026 [Company] left;
+ * (Login, Signup, Invite, Upgrade, 404) — © 2026 Sevyn Labs and the company phone left;
  * Privacy / Terms / Security / Status / Help right; 1px top border in the
  * ring colour #E4E4E0 (var(--ring-line)), as the screens compute it. The
  * © line renders in --ink-3; the links render in --ink-2, per the screens.
@@ -104,7 +104,7 @@ export function LegalFooter({
         ...style,
       }}
     >
-      <span>© 2026 [Company]</span>
+      <span>© 2026 Sevyn Labs · <a href="tel:+12762702729">(276) 270-2729</a></span>
       <nav aria-label="Legal" style={{ display: "flex", flexWrap: "wrap", gap: 18 }}>
         {items.map((item) =>
           item.href.startsWith("/") ? (
